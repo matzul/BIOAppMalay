@@ -1,0 +1,1154 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="css/loading.css" rel="stylesheet" type="text/css">
+
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">-->
+
+    <link rel="stylesheet" href="normalize/normalize.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">-->
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />-->
+
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css" />-->
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap.min.css">-->
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/skins/_all-skins.min.css" />-->
+
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            border: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myBPList" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table id="tbBPList" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="display:none;">bpid</th>
+                                <th style="display:none;">bpdesc</th>
+                                <th style="display:none;">bpaddress</th>
+                                <th style="display:none;">bptelno</th>
+                                <th>Senarai Pembekal</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myItemList" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table id="tbItemList" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="display:none;">itemno</th>
+                                <th style="display:none;">itemcat</th>
+                                <th style="display:none;">itemtype</th>
+                                <th style="display:none;">ordertype</th>
+                                <th>Senarai Item/ Produk</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myLineItem" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Kemaskini Item Pesanan
+                </div>
+                <div class="modal-body">
+                    <table id="tbLineItem" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item/ Produk</th>
+                                <th style="width: 30px"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>
+                                    <span id="lblLineItemNo" name="lblLineItemNo"></span><br/><span id="lblLineItemDesc" name="lblLineItemDesc"></span>
+                                    <div class="form-group">
+                                        <label for="txtPrice">Harga: </label>
+                                        <input id="txtPrice" name="txtPrice" type="text" value="1" class="form-control" style="width: 100px" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="txtDiscount">Diskaun: </label>
+                                        <input id="txtDiscount" name="txtDiscount" type="text" value="0" class="form-control" style="width: 100px" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="selTaxCode">Tax Code: </label>
+                                        <select id="selTaxCode" name="selTaxCode" class="form-control" style="width: 100px"></select>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input id="txtLineNo" name="txtLineNo" type="hidden" value="1" />
+                                    <input id="txtLineItemNo" name="txtLineItemNo" type="hidden" value="1" />
+                                    <input id="txtLineItemQty" name="txtLineItemQty" type="text" value="1" style="width: 40px" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-warning pull-left" onclick="deletelineitem();">Hapus</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="editlineitem();">Kemaskini</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    BELIAN
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><a href="#" onclick="openlist();"><i class="fa fa-list"></i> Senarai</a></li>
+                    <li class="breadcrumb-item active">Pesanan <span id="comp" name="comp"></span></li>
+                </ol>
+                <div id="searchblock" name="searchblock" class="menu-info" style="display:none;">
+                    <input type="text" id="searchbpiddesc" name="searchbpiddesc" class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-bottom:5px;" placeholder="Id Pembekal..." />
+                    <!--<div id="searchbpiddesc-container" style="position: relative; float: left; width: 100%; margin: 10px;"></div>-->
+                    <a href="#" onclick="searchbp();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Carian</a>
+                    <a href="#" onclick="resetsearching();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Reset</a>
+                </div>
+                <div id="foundblock" name="foundblock" class="menu-info">
+                    <input type="text" id="foundlabelbpid" name="foundlabelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Id Pembekal:" />
+                    <input type="text" id="foundbpid" name="foundbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" value="" />
+                    <input type="text" id="foundlabelbpdesc" name="foundlabelbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Nama Pembekal:" />
+                    <input type="text" id="foundbpdesc" name="foundbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" value="" />
+                    <input type="text" id="foundlabelbpaddress" name="foundlabelbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Alamat:" />
+                    <input type="text" id="foundbpaddress" name="foundbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="foundlabelbpcontact" name="foundlabelbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pegawai:" />
+                    <input type="text" id="foundbpcontact" name="foundbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="foundlabelordertype" name="foundlabelordertype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;height:28px;" placeholder="Jenis Transaksi:" />
+                    <select id="foundordertype" name="foundordertype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-bottom:5px;height:28px;">
+                        <option value="NORMAL">NORMAL</option>
+                        <option value="PROMOTION">PROMOSI</option>
+                        <option value="AGENT">AGENT</option>
+                        <option value="STOCKIST">STOCKIST</option>
+                    </select>
+                    <a href="#" onclick="createorder();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Teruskan</a>
+                    <a href="#" onclick="resetfound();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Reset</a>
+                </div>
+                <div id="recordblock" name="recordblock" class="menu-info" style="margin-bottom:5px;display:none;">
+                    <input type="text" id="recordlabelorderno" name="recordlabelorderno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="No. Pesanan:" />
+                    <input type="text" id="recordorderno" name="recordorderno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelorderdate" name="recordlabelorderdate" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Tarikh Pesanan:" />
+                    <input type="text" id="recordorderdate" name="recordorderdate" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelordertype" name="recordlabelordertype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Jenis Transaksi:" />
+                    <input type="text" id="recordordertype" name="recordordertype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelbpid" name="recordlabelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pembekal:" />
+                    <input type="text" id="recordbpid" name="recordbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;display:none;" placeholder="" />
+                    <input type="text" id="recordbpdesc" name="recordbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelbpaddress" name="recordlabelbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Alamat:" />
+                    <input type="text" id="recordbpaddress" name="recordbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelbpcontact" name="recordlabelbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pegawai:" />
+                    <input type="text" id="recordbpcontact" name="recordbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelorderremarks" name="recordlabelorderremarks" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Catatan:" />
+                    <input type="text" id="recordorderremarks" name="recordorderremarks" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordorderstatus" name="recordorderstatus" class="product_price form-control" readonly="readonly" value="NEW" style="text-align:left;" />
+                </div>
+                <div class="box">
+                    <div id="additemblock" name="additemblock" class="box-header" style="display:none;">
+                        <button type="button" class="btn btn-sm" onclick="addnewitem();"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+
+                        <table id="itemlist" class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th style="display:none;">Comp</th>
+                                    <th style="display:none;">OrderNo</th>
+                                    <th style="display:none;">LineNo</th>
+                                    <th style="display:none;">ItemNo</th>
+                                    <th style="display:none;">Desc</th>
+                                    <th>No. Item / Produk</th>
+                                    <th>Qty</th>
+                                    <th>Harga</th>
+                                    <th style="display:none;">Price</th>
+                                    <th style="display:none;">Discount</th>
+                                    <th style="display:none;">TaxCode</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+                <div class="menu-info">
+                    <a id="btnReceipt" name="btnReceipt" href="#" class="btn btn-default btn-flat" onclick="openreceipt();" style="margin-bottom:5px;">Terimaan</a>
+                    <a id="btnCancel" name="btnCancel" href="#" class="btn btn-default btn-flat" onclick="cancelorder();" style="margin-bottom:5px;display:none;">Batal</a>
+                    <a id="btnBack" name="btnBack" href="#" onclick="openlist();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Kembali</a>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="list" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">menu</i>
+                Senarai
+            </div>
+        </div>
+        <div id="order" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">shopping_basket</i>
+                Belian
+            </div>
+        </div>
+        <div id="report" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">receipt</i>
+                Laporan
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "list") {
+                    window.location.href = "BIOAppMobile_PurchaseList.html?userid=" + userid;
+                }
+                else if (this.id == "order") {
+                    window.location.href = "BIOAppMobile_PurchasePage.html?userid=" + userid;
+                }
+                else if (this.id == "report") {
+                    window.location.href = "BIOAppMobile_PurchaseList.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var comp;
+        var orderno;
+        var ordercat = "PURCHASE_ORDER";
+
+        var oTable;
+        var bpTable;
+        var searchBPArray;
+        var successcreationorder = false;
+        var successadditem = false;
+        var successedititem = false;
+        var successdeleteitem = false;
+        var successcancelorder = false;
+        var itemTable;
+
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+            comp = getParameterByName('comp');
+            orderno = getParameterByName('orderno');
+
+            if (comp && comp.length) 
+            {
+                if (orderno && orderno.length) 
+                {
+                }
+                else
+                {
+                    var parameters_getMobile_UserProfile = ["userid", userid];
+                    PageMethod("getMobile_UserProfile", parameters_getMobile_UserProfile, succeededAjaxFn_getMobile_UserProfile, failedAjaxFn_getMobile_UserProfile, false);
+                }
+            }
+            else
+            {
+                var parameters_getMobile_UserProfile = ["userid", userid];
+                PageMethod("getMobile_UserProfile", parameters_getMobile_UserProfile, succeededAjaxFn_getMobile_UserProfile, failedAjaxFn_getMobile_UserProfile, false);
+            }
+
+            $('#comp').text('[' + comp + ']');
+
+            var parameters_getMobile_TaxCodeList = ["comp", comp];
+            PageMethod("getMobile_TaxCodeList", parameters_getMobile_TaxCodeList, succeededAjaxFn_getMobile_TaxCodeList, failedAjaxFn_getMobile_TaxCodeList, false);
+
+            oTable = $('#itemlist').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    },
+                    {
+                        "targets": [9],
+                        "visible": false
+                    },
+                    {
+                        "targets": [10],
+                        "visible": false
+                    },
+                    {
+                        "targets": [11],
+                        "visible": false
+                    }
+
+                ]
+            });
+
+            bpTable = $('#tbBPList').DataTable({
+                'paging': true,
+                'pageLength': 3,
+                'lengthChange': false,
+                'searching': true,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    }
+                ]
+            });
+
+            itemTable = $('#tbItemList').DataTable({
+                'paging': true,
+                'pageLength': 3,
+                'lengthChange': false,
+                'searching': true,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    }
+                ]
+            });
+
+            if (userid && userid.length) {
+                if (comp && comp.length) {
+                    if (orderno && orderno.length) {
+                        $('#searchblock').hide();
+                        $('#foundblock').hide();
+                        $('#recordblock').show();
+
+                        var parameters_getMobile_PurchaseDetails = ["comp", comp, "orderno", orderno];
+                        PageMethod("getMobile_PurchaseDetails", parameters_getMobile_PurchaseDetails, succeededAjaxFn_getMobile_PurchaseDetails, failedAjaxFn_getMobile_PurchaseDetails, false);
+
+                        var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+                        PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+                    } else {
+                        $('#searchblock').show();
+                        $('#foundblock').hide();
+                        $('#recordblock').hide();
+                        $('#additemblock').hide();
+                    }
+                } else {
+                    $('#searchblock').show();
+                    $('#foundblock').hide();
+                    $('#recordblock').hide();
+                    $('#additemblock').hide();
+                    alert('Internal system error1!');
+                }
+            } else {
+                $('#searchblock').show();
+                $('#foundblock').hide();
+                $('#recordblock').hide();
+                $('#additemblock').hide();
+                alert('Internal system error2!');
+            }
+
+            $('#itemlist tbody').on('click', 'tr', function () {
+                var data = oTable.row(this).data();
+                //alert('You clicked on ' + data[1] + ':' + data[2]);
+                if ($('#recordorderstatus').val() != 'CONFIRMED' && $('#recordorderstatus').val() != 'CANCELLED') {
+                    viewlineitem(data[3], data[4], data[5], data[7], data[9], data[10], data[11]);
+                }
+            });
+
+            $('#tbBPList tbody').on('click', 'tr', function () {
+                var data = bpTable.row(this).data();
+                openbpdetails(data[1], data[2], data[3], data[4]);
+            });
+
+            $('#tbItemList tbody').on('click', 'tr', function () {
+                var data = itemTable.row(this).data();
+                additemdetails(data[1], data[2], data[3], data[4]);
+            });
+
+            /*
+            var parameters_getMobile_BPListAutocomplete = ["bpid", "", "bpdesc", "", "bpreference", "", "bpcat", ""];
+            PageMethod("getMobile_BPListAutocomplete", parameters_getMobile_BPListAutocomplete, succeededAjaxFn_getMobile_BPListAutocomplete, failedAjaxFn_getMobile_BPListAutocomplete, false);
+            */
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_UserProfile = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_UserProfile: " + textStatus);
+
+            result_getMobile_UserProfile = JSON.parse(data.d);
+
+            comp = result_getMobile_UserProfile.GetSetcomp;
+            $('#comp').text('[' + comp + ']');
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_UserProfile = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_UserProfile: " + textStatus);
+            //$('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_TaxCodeList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_TaxCodeList: " + textStatus);
+
+            var select = document.getElementById("selTaxCode" + data[3]);
+            for (var option in select) {
+                select.remove(option);
+            }
+            document.getElementById("selTaxCode").add(new Option("-Select-", ""));
+
+            result_getMobile_TaxCodeList = JSON.parse(data.d);
+            $.each(result_getMobile_TaxCodeList, function (i, result) {
+                document.getElementById("selTaxCode").add(new Option(result.GetSettaxcode, result.GetSettaxcode));
+            });
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_TaxCodeList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_TaxCodeList: " + textStatus);
+            //$('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_PurchaseDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PurchaseDetails: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_PurchaseDetails = JSON.parse(data.d);
+            $('#recordorderno').val(result_getMobile_PurchaseDetails.GetSetorderno);
+            $('#recordorderdate').val(result_getMobile_PurchaseDetails.GetSetorderdate);
+            $('#recordordertype').val(result_getMobile_PurchaseDetails.GetSetordertype);
+            $('#recordbpid').val(result_getMobile_PurchaseDetails.GetSetbpid);
+            $('#recordbpdesc').val(result_getMobile_PurchaseDetails.GetSetbpdesc);
+            $('#recordbpaddress').val(result_getMobile_PurchaseDetails.GetSetbpaddress);
+            $('#recordbpcontact').val(result_getMobile_PurchaseDetails.GetSetbpcontact);
+            $('#recordorderremarks').val(result_getMobile_PurchaseDetails.GetSetorderremarks);
+            $('#recordorderstatus').val(result_getMobile_PurchaseDetails.GetSetorderstatus);
+            if ($('#recordorderstatus').val() == 'NEW' || $('#recordorderstatus').val() == 'INPROGRESS') {
+                $('#additemblock').show();
+                $('#btnCancel').show();
+            } else {
+                $('#additemblock').hide();
+                $('#btnCancel').hide();
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PurchaseDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PurchaseDetails: " + textStatus);
+        }
+
+        succeededAjaxFn_getMobile_PurchaseItems = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PurchaseItems: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_PurchaseItems = JSON.parse(data.d);
+            $.each(result_getMobile_PurchaseItems, function (i, result) {
+                //console.log("succeededAjaxFn_getMobile_PurchaseItems: " + result.GetSetcomp + ":" + result.GetSetorderno);
+                //$('<tr><td></td><td><input type="text" id="itemno" name="itemno" class="form-control" placeholder="" /></td><td><input type="text" id="qty" name="qty" class="form-control" placeholder="" /></td><td><button type="button" class="btn btn-sm" onclick="additem();"><i class="fa fa-save"></i></button></td></tr>').appendTo('#orderlist');
+                oTable.row.add([
+                    i + 1,
+                    result.GetSetcomp,
+                    result.GetSetorderno,
+                    result.GetSetlineno,
+                    result.GetSetitemno,
+                    result.GetSetitemdesc,
+                    result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>Harga Item: RM' + result.GetSetunitprice + '/' + result.GetSetitemtype + '<br/>Diskaun: RM' + result.GetSetdiscamount + '/' + result.GetSetitemtype + '<br/>TAX: RM' + result.GetSettaxamount,
+                    result.GetSetquantity,
+                    formatMoney(result.GetSettotalprice),
+                    formatMoney(result.GetSetunitprice,2,".",""),
+                    formatMoney(result.GetSetdiscamount,2,".",""),
+                    result.GetSettaxcode
+            ]).draw(false);
+            });
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PurchaseItems = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PurchaseItems: " + textStatus);
+        }
+
+        /*
+        var bpotherArray = $.map(bpother, function (value, key) {
+            return {
+                value: value,
+                data: key
+            };
+        });
+
+        succeededAjaxFn_getMobile_BPListAutocomplete = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_BPListAutocomplete: " + textStatus);
+
+            result_getMobile_BPListAutocomplete = JSON.parse(data.d);
+
+            searchBPArray = $.map(result_getMobile_BPListAutocomplete, function (value, key) {
+                return {
+                    value: value,
+                    data: key
+                };
+            });
+
+            // initialize autocomplete with custom appendTo
+            $('#searchbpiddesc').autocomplete({
+                lookup: searchBPArray,
+                appendTo: '#searchbpiddesc-container',
+                onSelect: function (suggestion) {
+                    alert(suggestion.data);
+                }
+            });
+
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_BPListAutocomplete = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_BPListAutocomplete: " + textStatus);
+        }
+        */
+
+        function searchbp() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_BPList = ["comp", comp, "bpid", $('#searchbpiddesc').val(), "bpdesc", "", "bpcat", "", "solidbp", "Y"];
+            PageMethod("getMobile_BPList", parameters_getMobile_BPList, succeededAjaxFn_getMobile_BPList, failedAjaxFn_getMobile_BPList, false);
+
+        }
+
+        succeededAjaxFn_getMobile_BPList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_BPList: " + textStatus);
+            $('#myDIV').modal('hide');
+
+            //$('#myBPList').modal({ backdrop: "static" });
+            $('#myBPList').modal('show');
+            bpTable.clear().draw();
+
+            result_getMobile_BPListAutocomplete = JSON.parse(data.d);
+            $.each(result_getMobile_BPListAutocomplete, function (i, result) {
+                //$('<tr><td>' + result.GetSetbpid + '</td><td>' + result.GetSetbpdesc + '</td><td>' + result.GetSetbpaddress + '</td><td>' + result.GetSetbpcontact + '</td></tr>').appendTo('#tbBPList');
+                bpTable.row.add([
+                    i + 1,
+                    result.GetSetbpid,
+                    result.GetSetbpdesc,
+                    result.GetSetbpaddress,
+                    result.GetSetbpcontact,
+                    result.GetSetbpid + '<br/>' + result.GetSetbpdesc + '<br/>' + result.GetSetbpaddress
+                ]).draw(false);
+            });
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_BPList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_BPList: " + textStatus);
+            $('#myDIV').modal('hide');
+        }
+
+        function resetsearching() {
+            $('#searchbpiddesc').val('');
+        }
+
+        function openbpdetails(bpid, bpdesc, bpaddress, bpcontact) {
+            $('#searchblock').hide();
+            $('#foundblock').show();
+
+            $('#foundbpid').val(bpid);
+            $('#foundbpdesc').val(bpdesc);
+            $('#foundbpaddress').val(bpaddress);
+            $('#foundbpcontact').val(bpcontact);
+
+            $('#myBPList').modal('hide');
+        }
+
+        function resetfound() {
+            $('#searchblock').show();
+            $('#foundblock').hide();
+
+            resetsearching();
+            $('#foundbpid').val('');
+            $('#foundbpdesc').val('');
+            $('#foundbpaddress').val('');
+            $('#foundbpcontact').val('');
+        }
+
+        function createorder() {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_createMobile_PurchaseOrder = ["comp", comp, "bpid", $('#foundbpid').val(), "ordercat", ordercat, "ordertype", $('#foundordertype').val(), "userid", userid];
+            PageMethod("createMobile_PurchaseOrder", parameters_createMobile_PurchaseOrder, succeededAjaxFn_createMobile_PurchaseOrder, failedAjaxFn_createMobile_PurchaseOrder, false);
+
+            if (successcreationorder) {
+                $('#searchblock').hide();
+                $('#foundblock').hide();
+
+                resetsearching();
+                $('#foundbpid').val('');
+                $('#foundbpdesc').val('');
+                $('#foundbpaddress').val('');
+                $('#foundbpcontact').val('');
+
+                $('#recordblock').show();
+                $('#additemblock').show();
+
+                var parameters_getMobile_PurchaseDetails = ["comp", comp, "orderno", orderno];
+                PageMethod("getMobile_PurchaseDetails", parameters_getMobile_PurchaseDetails, succeededAjaxFn_getMobile_PurchaseDetails, failedAjaxFn_getMobile_PurchaseDetails, false);
+
+                var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+                PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+            } else {
+                alert('Internal System Error!');
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_createMobile_PurchaseOrder = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_createMobile_PurchaseOrder: " + textStatus);
+
+            result_createMobile_PurchaseOrder = JSON.parse(data.d);
+            if (result_createMobile_PurchaseOrder.status == "Y") {
+                successcreationorder = true;
+                orderno = result_createMobile_PurchaseOrder.message;
+            }
+            else {
+                successcreationorder = false;
+                orderno = "";
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_createMobile_PurchaseOrder = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_createMobile_PurchaseOrder: " + textStatus);
+            successcreationorder = false;
+            orderno = "";
+        }
+
+        function addnewitem() {
+            //$('<tr><td></td><td><input type="text" id="itemno" name="itemno" class="form-control" placeholder="" /></td><td><input type="text" id="qty" name="qty" class="form-control" placeholder="" /></td><td><button type="button" class="btn btn-sm" onclick="additem();"><i class="fa fa-save"></i></button></td></tr>').appendTo('#itemlist');
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_ItemList = ["comp", comp, "itemno", "", "ordercat", ordercat, "ordertype", $('#recordordertype').val()];
+            PageMethod("getMobile_ItemList", parameters_getMobile_ItemList, succeededAjaxFn_getMobile_ItemList, failedAjaxFn_getMobile_ItemList, false);
+
+        }
+
+        succeededAjaxFn_getMobile_ItemList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ItemList: " + textStatus);
+            $('#myDIV').modal('hide');
+
+            //$('#myItemList').modal({ backdrop: "static" });
+            $('#myItemList').modal('show');
+            itemTable.clear().draw();
+
+            result_getMobile_ItemList = JSON.parse(data.d);
+            $.each(result_getMobile_ItemList, function (i, result) {
+                itemTable.row.add([
+                    i + 1,
+                    result.GetSetitemno,
+                    result.GetSetitemtype,
+                    result.GetSetitemcat,
+                    result.GetSetordertype,
+                    result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>' + result.GetSetordertype + '<br/>Harga Item: RM' + result.GetSetpurchaseprice + "/" + result.GetSetitemtype + '<br/>Diskaun: RM' + result.GetSetdiscamount + "/" + result.GetSetitemtype + '<br/>TAX: ' + result.GetSettaxrate + "%"
+                ]).draw(false);
+            });
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_ItemList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ItemList: " + textStatus);
+            $('#myDIV').modal('hide');
+        }
+
+        function additemdetails(itemno, itemcat, itemtype, ordertype) {
+            $('#myItemList').modal('hide');            
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_addMobile_PurchaseItemOrder = ["comp", comp, "orderno", orderno, "ordercat", ordercat, "itemno", itemno, "itemcat", itemcat, "itemtype", itemtype, "ordertype", $('#foundordertype').val()];
+            PageMethod("addMobile_PurchaseItemOrder", parameters_addMobile_PurchaseItemOrder, succeededAjaxFn_addMobile_PurchaseItemOrder, failedAjaxFn_addMobile_PurchaseItemOrder, false);
+
+            if (successadditem) {
+
+                var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+                PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+            } else {
+                alert('Internal System Error!');
+            }
+
+            $('#myDIV').modal('hide');
+
+        }
+
+        succeededAjaxFn_addMobile_PurchaseItemOrder = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_PurchaseItemOrder: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successadditem = true;
+            }
+            else {
+                successadditem = false;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_PurchaseItemOrder = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_PurchaseItemOrder: " + textStatus);
+            successadditem = false;
+        }
+
+        function openlist() {
+            window.location.href = "BIOAppMobile_PurchaseList.html?userid=" + userid;
+        }
+
+        function viewlineitem(lineno, itemno, itemdesc, qty, price, discount, taxcode) {
+            $('#myLineItem').modal('show');
+            $('#lblLineItemNo').text(itemno);
+            $('#lblLineItemDesc').text(itemdesc);
+
+            $('#txtLineNo').val(lineno);
+            $('#txtLineItemNo').val(itemno);
+            $('#txtLineItemQty').val(qty);
+            $('#txtPrice').val(price);
+            $('#txtDiscount').val(discount);
+            $('#selTaxCode').val(taxcode);
+        }
+
+        function editlineitem() {
+            $('#myLineItem').modal('hide');
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_editMobile_PurchaseItemOrder = ["comp", comp, "orderno", orderno, "ordercat", ordercat, "ordertype", $('#foundordertype').val(), "lineno", $('#txtLineNo').val(), "itemno", $('#txtLineItemNo').val(), "qty", $('#txtLineItemQty').val(), "price", $('#txtPrice').val(), "discount", $('#txtDiscount').val(), "taxcode", $('#selTaxCode').val()];
+            PageMethod("editMobile_PurchaseItemOrder", parameters_editMobile_PurchaseItemOrder, succeededAjaxFn_editMobile_PurchaseItemOrder, failedAjaxFn_editMobile_PurchaseItemOrder, false);
+
+            if (successedititem) {
+
+                var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+                PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+            } else {
+                alert('Internal System Error!');
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_editMobile_PurchaseItemOrder = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_editMobile_PurchaseItemOrder: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successedititem = true;
+            }
+            else {
+                successedititem = false;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_editMobile_PurchaseItemOrder = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_editMobile_PurchaseItemOrder: " + textStatus);
+            successedititem = false;
+        }
+
+        function deletelineitem() {
+            $('#myLineItem').modal('hide');
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_deleteMobile_PurchaseItemOrder = ["comp", comp, "orderno", orderno, "lineno", $('#txtLineNo').val(), "itemno", $('#txtLineItemNo').val()];
+            PageMethod("deleteMobile_PurchaseItemOrder", parameters_deleteMobile_PurchaseItemOrder, succeededAjaxFn_deleteMobile_PurchaseItemOrder, failedAjaxFn_deleteMobile_PurchaseItemOrder, false);
+
+            if (successdeleteitem) {
+
+                var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+                PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+            } else {
+                alert('Internal System Error!');
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_deleteMobile_PurchaseItemOrder = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_deleteMobile_PurchaseItemOrder: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successdeleteitem = true;
+            }
+            else {
+                successdeleteitem = false;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_deleteMobile_PurchaseItemOrder = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_deleteMobile_PurchaseItemOrder: " + textStatus);
+            successdeleteitem = false;
+        }
+
+        function cancelorder() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_updateMobile_PurchaseOrderStatus = ["comp", comp, "orderno", orderno, "status", "CANCELLED", "userid", userid];
+            PageMethod("updateMobile_PurchaseOrderStatus", parameters_updateMobile_PurchaseOrderStatus, succeededAjaxFn_updateMobile_PurchaseOrderStatus, failedAjaxFn_updateMobile_PurchaseOrderStatus, false);
+
+            if (successcancelorder) {
+                window.location.href = "BIOAppMobile_PurchasePage.html?userid=" + userid + "&comp=" + comp + "&orderno=" + orderno;
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_updateMobile_PurchaseOrderStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_PurchaseOrderStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successcancelorder = true;
+            }
+            else {
+                successcancelorder = false;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_PurchaseOrderStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_PurchaseOrderStatus: " + textStatus);
+            successcancelorder = false;
+        }
+
+        function openreceipt() {
+            window.location.href = "BIOAppMobile_ReceiptPage.html?userid=" + userid + "&comp=" + comp + "&orderno=" + orderno;
+        }
+
+        function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+            try {
+                decimalCount = Math.abs(decimalCount);
+                decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+                const negativeSign = amount < 0 ? "-" : "";
+
+                let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+                let j = (i.length > 3) ? i.length % 3 : 0;
+
+                return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    </script>
+</body>
+</html>

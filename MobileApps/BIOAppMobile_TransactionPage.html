@@ -1,0 +1,461 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="normalize/normalize.css">
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            border: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    INVENTORI
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><a href="#" onclick="openlist();"><i class="fa fa-list"></i> Senarai</a></li>
+                    <li class="breadcrumb-item"><a href="#" onclick="openstock();">Item/ Produk</a></li>
+                    <li class="breadcrumb-item active">Transaksi Stok<span id="comp" name="comp"></span></li>
+                </ol>
+                <div class="menu-info" style="margin-bottom:5px;">
+                    
+                    <input type="text" id="recordlabelitemno" name="recordlabelitemno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="No. Item:" />
+                    <input type="text" id="recorditemno" name="recorditemno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" value="" />
+                    <input type="text" id="recordlabelitemdesc" name="recordlabelitemdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Keterangan:" />
+                    <input type="text" id="recorditemdesc" name="recorditemdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" value="" />
+                    <input type="text" id="recordlabelitemcat" name="recordlabelitemcat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Kategori:" />
+                    <input type="text" id="recorditemcat" name="recorditemcat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelqtysoh" name="recordlabelqtysoh" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Qty SOH:" />
+                    <input type="text" id="recordqtysoh" name="recordqtysoh" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelcostsoh" name="recordlabelcostsoh" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Kos SOH:" />
+                    <input type="text" id="recordcostsoh" name="recordcostsoh" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelqtyavailable" name="recordlabelqtyavailable" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Qty Tersedia:" />
+                    <input type="text" id="recordqtyavailable" name="recordqtyavailable" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordqtystatus" name="recordqtystatus" class="product_price form-control" readonly="readonly" value="" style="text-align:left;" />
+                    
+                </div>
+                <div id="tabsTrans" class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                    </ul>
+                    <div class="tab-content">
+                        <div class="active tab-pane" id="transitem">
+
+                            <div class="">
+                                <div class="pull-left">
+                                    <input type="text" id="translocation" name="translocation" class="product_price form-control" readonly="readonly" value="" style="text-align:left;" />
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-sm" onclick=""><i class="fa fa-print"></i></button>
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="no-padding">
+
+                                    <table id="translist" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Tarikh/ Transaksi</th>
+                                                <th>Qty Trans</th>
+                                                <th>Qty Baki</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                            <!-- /.box -->
+
+                        </div><!-- /.tab-pane-->
+                    </div><!-- /.tab-content-->
+                </div>
+                <div class="menu-info">
+                    <a id="btnBack" name="btnBack" href="#" onclick="openstock();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Kembali</a>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="stock_list" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">format_list_bulleted</i>
+                Inventori
+            </div>
+        </div>
+        <div id="stock_adjustment" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">repeat</i>
+                Perlarasan
+            </div>
+        </div>
+        <div id="stock_statement" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">domain</i>
+                Penyata Stok
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "stock_list") {
+                    window.location.href = "BIOAppMobile_InventoryList.html?userid=" + userid;
+                }
+                else if (this.id == "stock_adjustment") {
+                    window.location.href = "BIOAppMobile_InventoryList.html?userid=" + userid;
+                }
+                else if (this.id == "stock_statement") {
+                    window.location.href = "BIOAppMobile_InventoryList.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+
+    <script>
+        var userid;
+        var comp;
+        var itemno;
+        var itemlocation;
+        var datesoh;
+
+        var oTable;
+
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+            comp = getParameterByName('comp');
+            itemno = getParameterByName('itemno');
+            itemlocation = getParameterByName('itemlocation');
+            datesoh = getParameterByName('datesoh');
+
+            $('#comp').text('[' + comp + ']');
+
+            oTable = $('#translist').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true
+            });
+
+            if (comp && comp.length) {
+                if (itemno && itemno.length) {
+
+                    var parameters_getMobile_StockDetails = ["comp", comp, "itemno", itemno];
+                    PageMethod("getMobile_StockDetails", parameters_getMobile_StockDetails, succeededAjaxFn_getMobile_StockDetails, failedAjaxFn_getMobile_StockDetails, false);
+
+                    var parameters_getMobile_StockTransactionList = ["comp", comp, "itemno", itemno, "itemlocation", itemlocation, "datesoh", datesoh];
+                    PageMethod("getMobile_StockTransactionList", parameters_getMobile_StockTransactionList, succeededAjaxFn_getMobile_StockTransactionList, failedAjaxFn_getMobile_StockTransactionList, false);
+
+                } else {
+                    alert('Internal system error1!');
+                }
+            } else {
+                alert('Internal system error2!');
+            }
+
+            $('#myDIV').modal('hide');
+        });
+
+        succeededAjaxFn_getMobile_StockDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_StockDetails: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_StockDetails = JSON.parse(data.d);
+            $('#recorditemno').val(result_getMobile_StockDetails.GetSetitemno);
+            $('#recorditemdesc').val(result_getMobile_StockDetails.GetSetitemdesc);
+            $('#recorditemcat').val(result_getMobile_StockDetails.GetSetitemcat);
+            $('#recordqtysoh').val(result_getMobile_StockDetails.GetSetqtysoh);
+            $('#recordcostsoh').val(formatMoney(result_getMobile_StockDetails.GetSetcostsoh));
+            $('#recordqtyavailable').val(result_getMobile_StockDetails.GetSetqtyavailable);
+            if ($('#recordqtyavailable').val() == "0") {
+                $('#recordqtystatus').val("OUT OF STOCK");
+            } else {
+                $('#recordqtystatus').val("STOCK AVAILABLE");
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_StockDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_StockDetails: " + textStatus);
+        }
+
+        succeededAjaxFn_getMobile_StockTransactionList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_StockTransactionList: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_StockTransactionList = JSON.parse(data.d);
+            $.each(result_getMobile_StockTransactionList, function (i, result) {
+
+                oTable.row.add([
+                    i + 1,
+                    result.GetSettransdate + '<br/>' + result.GetSettranstype + '<br/>' + result.GetSettransno,
+                    result.GetSettransqty + '<br/>RM ' + formatMoney(result.GetSettransprice * result.GetSettransqty),
+                    result.GetSetqtysoh + '<br/>RM ' + formatMoney(result.GetSetcostsoh)
+                ]).draw(false);
+            });
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_StockTransactionList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_StockTransactionList: " + textStatus);
+        }
+
+        function openlist() {
+            window.location.href = "BIOAppMobile_InventoryList.html?userid=" + userid;
+        }
+
+        function openstock() {
+            window.location.href = "BIOAppMobile_InventoryPage.html?userid=" + userid + "&comp=" + comp + "&itemno=" + itemno;
+        }
+        
+        function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+            try {
+                decimalCount = Math.abs(decimalCount);
+                decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+                const negativeSign = amount < 0 ? "-" : "";
+
+                let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+                let j = (i.length > 3) ? i.length % 3 : 0;
+
+                return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+            } catch (e) {
+                console.log(e)
+            }
+        }
+        
+    </script>
+</body>
+</html>

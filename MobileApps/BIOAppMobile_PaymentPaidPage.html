@@ -1,0 +1,828 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="normalize/normalize.css">
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            bexpenses: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    BIL BELANJA
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><a href="#" onclick="openlist();"><i class="fa fa-list"></i> Senarai</a></li>
+                    <li class="breadcrumb-item"><a href="#" onclick="openexpenses();">Bil Belanja</a></li>
+                    <li class="breadcrumb-item active">Bayaran Belanja <span id="comp" name="comp"></span></li>
+                </ol>
+                <div class="menu-info" style="margin-bottom:5px;">
+                    <input type="text" id="labelexpensesno" name="labelexpensesno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="No. Bil:" />
+                    <input type="text" id="recordexpensesno" name="recordexpensesno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelexpensescat" name="labelexpensescat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Kategori:" />
+                    <input type="text" id="recordexpensescat" name="recordexpensescat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelexpensestype" name="labelexpensestype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Jenis:" />
+                    <input type="text" id="recordexpensestype" name="recordexpensestype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelbpid" name="labelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pelanggan:" />
+                    <input type="hidden" id="recordbpid" name="recordbpid" />
+                    <input type="hidden" id="recordstatus" name="recordstatus" />
+                    <input type="text" id="recordbpdesc" name="recordbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                </div>
+                <div id="tabsPayPaid" class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                    </ul>
+                    <div class="tab-content">
+                        <div class="active tab-pane" id="paypaiditem">
+
+                            <div class="">
+                                <div class="pull-left">
+                                    <input type="text" id="paypaidstatus" name="paypaidstatus" class="product_price form-control" readonly="readonly" value="" style="text-align:left;" />
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-sm" onclick=""><i class="fa fa-print"></i></button>
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="no-padding">
+
+                                    <table id="expenseslist" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th style="display:none;">Comp</th>
+                                                <th style="display:none;">PayPaidNo</th>
+                                                <th style="display:none;">LineNo</th>
+                                                <th style="display:none;">ExpensesNo</th>
+                                                <th style="display:none;">ExpensesDate</th>
+                                                <th>No. Bil / Tarikh</th>
+                                                <th style="display:none;">Jumlah</th>
+                                                <th>Bayaran</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                            <!-- /.box -->
+
+                        </div><!-- /.tab-pane-->
+                    </div><!-- /.tab-content-->
+                </div>
+                <div class="menu-info">
+                    <a id="btnProcess" name="btnProcess" href="#" class="btn btn-default btn-flat" onclick="processpaypaid();" style="margin-bottom:5px;">Proses</a>
+                    <a id="btnBack" name="btnBack" href="#" onclick="openexpenses();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Kembali</a>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="list" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">menu</i>
+                Senarai
+            </div>
+        </div>
+        <div id="expenses" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">credit_card</i>
+                Bil
+            </div>
+        </div>
+        <div id="report" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">receipt</i>
+                Laporan
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "list") {
+                    window.location.href = "BIOAppMobile_ExpensesList.html?userid=" + userid;
+                }
+                else if (this.id == "expenses") {
+                    window.location.href = "BIOAppMobile_ExpensesPage.html?userid=" + userid;
+                }
+                else if (this.id == "report") {
+                    window.location.href = "BIOAppMobile_ExpensesList.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var comp;
+        var expensesno;
+        var pendpaypaid = 0;
+        var savepaypaid = false;
+        var paypaidno = "";
+        var errormessage = "";
+
+        var oTable;
+
+
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+            comp = getParameterByName('comp');
+            expensesno = getParameterByName('expensesno');
+
+            $('#comp').text('[' + comp + ']');
+
+            oTable = $('#expenseslist').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    },
+                    {
+                        "targets": [7],
+                        "visible": false
+                    }
+                ]
+            });
+
+            if (comp && comp.length) {
+                if (expensesno && expensesno.length) {
+
+                    var parameters_getMobile_ExpensesDetails = ["comp", comp, "expensesno", expensesno];
+                    PageMethod("getMobile_ExpensesDetails", parameters_getMobile_ExpensesDetails, succeededAjaxFn_getMobile_ExpensesDetails, failedAjaxFn_getMobile_ExpensesDetails, false);
+
+                    var parameters_getMobile_ExpensesPayPaidList = ["comp", comp, "expensesno", expensesno];
+                    PageMethod("getMobile_ExpensesPayPaidList", parameters_getMobile_ExpensesPayPaidList, succeededAjaxFn_getMobile_ExpensesPayPaidList, failedAjaxFn_getMobile_ExpensesPayPaidList, false);
+
+                } else {
+
+                }
+            } else {
+                alert('Internal system error!');
+            }
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_ExpensesDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ExpensesDetails: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_ExpensesDetails = JSON.parse(data.d);
+            $('#recordexpensesno').val(result_getMobile_ExpensesDetails.GetSetexpensesno);
+            $('#recordexpensescat').val(result_getMobile_ExpensesDetails.GetSetexpensescat);
+            $('#recordexpensestype').val(result_getMobile_ExpensesDetails.GetSetexpensestype);
+            $('#recordbpid').val(result_getMobile_ExpensesDetails.GetSetbpid);
+            $('#recordstatus').val(result_getMobile_ExpensesDetails.GetSetexpensesstatus);
+            $('#recordbpdesc').val(result_getMobile_ExpensesDetails.GetSetbpdesc);
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_ExpensesDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ExpensesDetails: " + textStatus);
+        }
+
+        succeededAjaxFn_getMobile_ExpensesPayPaidList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ExpensesPayPaidList: " + textStatus);
+
+            checkPendingPayPaidItem();
+
+            result_getMobile_ExpensesPayPaidList = JSON.parse(data.d);
+            if (result_getMobile_ExpensesPayPaidList.countpaypaid > 0) {
+                $.each(result_getMobile_ExpensesPayPaidList.arraypaypaidno, function (i, result) {
+                    var num_tabs = $('div#tabsPayPaid ul li').length + 1;
+
+                    $('div#tabsPayPaid ul').append(
+                        '<li ' + (i == 0 ? 'class="active"' : '') +'><a href="#paypaiditem" data-toggle="tab" onclick="getPayPaidItem(\'' + result +'\');">' + result + '</a></li>'
+                    );
+                    if (i == 0) {
+                        var parameters_getMobile_ExpensesPayPaidItem = ["comp", comp, "expensesno", expensesno, "paypaidno", result];
+                        PageMethod("getMobile_ExpensesPayPaidItem", parameters_getMobile_ExpensesPayPaidItem, succeededAjaxFn_getMobile_ExpensesPayPaidItem, failedAjaxFn_getMobile_ExpensesPayPaidItem, false);
+
+                        $('#btnProcess').hide();
+                    }
+                });
+
+                //check if pending paypaid item exist or not?
+                if (pendpaypaid != 0) {
+
+                    var num_tabs = $('div#tabsPayPaid ul li').length + 1;
+
+                    $('div#tabsPayPaid ul').append(
+                        '<li><a href="#paypaiditem" data-toggle="tab" onclick="getPendingPayPaidItem();">BARU</a></li>'
+                    );
+                }
+            }
+            else
+            {
+                var num_tabs = $('div#tabsPayPaid ul li').length + 1;
+
+                $('div#tabsPayPaid ul').append(
+                    '<li class="active"><a href="#paypaiditem" data-toggle="tab" onclick="getNewPayPaidItem();">BARU</a></li>'
+                );
+
+                var parameters_getMobile_ExpensesHeaderList = ["comp", comp, "expensesno", expensesno];
+                PageMethod("getMobile_ExpensesHeaderList", parameters_getMobile_ExpensesHeaderList, succeededAjaxFn_getMobile_ExpensesHeaderList, failedAjaxFn_getMobile_ExpensesHeaderList, false);
+
+                if (pendpaypaid != 0) {
+                    $('#btnProcess').show();
+                }
+                else
+                {
+                    $('#btnProcess').hide();
+                }
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_ExpensesPayPaidList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ExpensesPayPaidList: " + textStatus);
+            $('#btnProcess').hide();
+        }
+
+        function getPayPaidItem(paypaidno) {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_ExpensesPayPaidItem = ["comp", comp, "expensesno", expensesno, "paypaidno", paypaidno];
+            PageMethod("getMobile_ExpensesPayPaidItem", parameters_getMobile_ExpensesPayPaidItem, succeededAjaxFn_getMobile_ExpensesPayPaidItem, failedAjaxFn_getMobile_ExpensesPayPaidItem, false);
+
+            $('#btnProcess').hide();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_ExpensesPayPaidItem = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ExpensesPayPaidItem: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_ExpensesPayPaidItem = JSON.parse(data.d);
+            $.each(result_getMobile_ExpensesPayPaidItem, function (i, result) {
+
+                $('#paypaidstatus').val(result.GetSetstatus);
+                oTable.row.add([
+                    i+1,
+                    result.GetSetcomp,
+                    result.GetSetpaypaidno,
+                    result.GetSetlineno,
+                    result.GetSetexpensesno,
+                    result.GetSetexpensesdate,
+                    result.GetSetexpensesno + '<br/>' + result.GetSetexpensesdate + '<br/>Jumlah: RM' + result.GetSetexpensesprice,
+                    result.GetSetexpensesprice,
+                    result.GetSetpaypaidprice + '<br/>' + result.GetSetpaytype + '<br/>' + result.GetSetpayrefno
+                ]).draw(false);
+            });
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_ExpensesPayPaidItem = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ExpensesPayPaidItem: " + textStatus);
+        }
+
+        function checkPendingPayPaidItem() {
+            var parameters_check_PendingPayPaidList = ["comp", comp, "bpid", $('#recordbpid').val(), "expensesno", expensesno];
+            PageMethod("getMobile_PendingPayPaidList", parameters_check_PendingPayPaidList, succeededAjaxFn_check_PendingPayPaidList, failedAjaxFn_check_PendingPayPaidList, false);
+        }
+
+        succeededAjaxFn_check_PendingPayPaidList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_check_PendingPayPaidList: " + textStatus);
+            oTable.clear().draw();
+
+            result = JSON.parse(data.d);
+            if ($('#recordstatus').val() != 'CANCELLED') {
+                pendpaypaid = result.countpendpaypaid;
+            } else {
+                pendpaypaid = 0;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_check_PendingPayPaidList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_check_PendingPayPaidList: " + textStatus);
+            pendpaypaid = 0;
+        }
+
+        function getPendingPayPaidItem() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_PendingPayPaidList = ["comp", comp, "bpid", $('#recordbpid').val(), "expensesno", expensesno];
+            PageMethod("getMobile_PendingPayPaidList", parameters_getMobile_PendingPayPaidList, succeededAjaxFn_getMobile_PendingPayPaidList, failedAjaxFn_getMobile_PendingPayPaidList, false);
+
+            $('#btnProcess').show();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_PendingPayPaidList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PendingPayPaidList: " + textStatus);
+            oTable.clear().draw();
+
+            result_getMobile_PendingPayPaidList = JSON.parse(data.d);
+            pendpaypaid = 0;
+            $.each(result_getMobile_PendingPayPaidList.arraypendpaypaidno, function (i, result) {
+                pendpaypaid = pendpaypaid + 1;
+                var pendingamount = result.GetSettotalamount - result.GetSetpaypaidamount;
+                oTable.row.add([
+                    i+1,
+                    result.GetSetcomp,
+                    result.GetSetpaypaidno,
+                    result.GetSetlineno,
+                    result.GetSetexpensesno,
+                    result.GetSetexpensesdate,
+                    result.GetSetexpensesno + '<br/>' + result.GetSetexpensesdate + '<br/>Expenses Type: ' + result.GetSetexpensestype + '<br/>Jumlah: RM' + pendingamount,
+                    pendingamount,
+                    '<input id="amount_paypaid_' + pendpaypaid + '" name="amount_paypaid_' + pendpaypaid + '" type="text" value="' + pendingamount + '" class="form-control"/><select id="type_paypaid_' + pendpaypaid + '" name="type_paypaid_' + pendpaypaid + '" class="form-control" style="width: 100px"><option value="CASH" selected>TUNAI</option><option value="BANKING">BANK (EFT/I-Banking/Kad)</option></select><input id="refno_paypaid_' + pendpaypaid + '" name="refno_paypaid_' + pendpaypaid + '" type="text" class="form-control"/>'
+                ]).draw(false);
+            });
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PendingPayPaidList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PendingPayPaidList: " + textStatus);
+        }
+
+        function getNewPayPaidItem() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_ExpensesHeaderList = ["comp", comp, "expensesno", expensesno];
+            PageMethod("getMobile_ExpensesHeaderList", parameters_getMobile_ExpensesHeaderList, succeededAjaxFn_getMobile_ExpensesHeaderList, failedAjaxFn_getMobile_ExpensesHeaderList, false);
+
+            $('#btnProcess').show();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_ExpensesHeaderList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ExpensesHeaderList: " + textStatus);
+            oTable.clear().draw();
+
+            result_getMobile_ExpensesHeaderList = JSON.parse(data.d);
+            if ($('#recordstatus').val() != 'CANCELLED') {
+                pendpaypaid = 0;
+                $.each(result_getMobile_ExpensesHeaderList, function (i, result) {
+                    pendpaypaid = pendpaypaid + 1;
+                    oTable.row.add([
+                        i+1,
+                        result.GetSetcomp,
+                        result.GetSetpaypaidno,
+                        result.GetSetlineno,
+                        result.GetSetexpensesno,
+                        result.GetSetexpensesdate,
+                        result.GetSetexpensesno + '<br/>' + result.GetSetexpensesdate + '<br/>' + result.GetSetexpensescat + '<br/>' + result.GetSetexpensestype + '<br/>Jumlah: RM' + result.GetSettotalamount,
+                        result.GetSettotalamount,
+                        '<input id="amount_paypaid_' + pendpaypaid + '" name="amount_paypaid_' + pendpaypaid + '" type="text" value="' + result.GetSettotalamount + '" class="form-control"/><select id="type_paypaid_' + pendpaypaid + '" name="type_paypaid_' + pendpaypaid + '" class="form-control" style="width: 100px"><option value="CASH" selected>TUNAI</option><option value="BANKING">BANK (EFT/I-Banking/Kad)</option></select><input id="refno_paypaid_' + pendpaypaid + '" name="refno_paypaid_' + pendpaypaid + '" type="text" class="form-control"/>'
+                    ]).draw(false);
+
+                });
+
+            } else {
+                pendpaypaid = 0;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_ExpensesHeaderList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ExpensesHeaderList: " + textStatus);
+            pendpaypaid = 0;
+        }
+
+        function processpaypaid() {
+            $('#myDIV').modal({ backdrop: "static" });
+            var proceedprocess = false;
+
+            if (pendpaypaid > 0) {
+                var y = 1;
+                oTable.rows().every(function (i, element) {
+                    var data = this.data();
+                    if ($('#amount_paypaid_' + y).val() != "0") {
+                        proceedprocess = true;
+                    }
+                    y = y + 1;
+                });
+                if (proceedprocess) {
+                    //confirm receive expenses 1st
+                    var parameters_updateMobile_ExpensesHeaderStatus = ["comp", comp, "expensesno", expensesno, "status", "CONFIRMED", "userid", userid];
+                    PageMethod("updateMobile_ExpensesHeaderStatus", parameters_updateMobile_ExpensesHeaderStatus, succeededAjaxFn_updateMobile_ExpensesHeaderStatus, failedAjaxFn_updateMobile_ExpensesHeaderStatus, false);
+
+                    if (savepaypaid) {
+                        //create paypaid expenses
+                        var parameters_createMobile_PayPaidExpenses = ["comp", comp, "expensesno", expensesno, "userid", userid];
+                        PageMethod("createMobile_PayPaidExpenses", parameters_createMobile_PayPaidExpenses, succeededAjaxFn_createMobile_PayPaidExpenses, failedAjaxFn_createMobile_PayPaidExpenses, false);
+
+                        if (savepaypaid && paypaidno != "") {
+                            //add line item for paypaid expenses
+                            var x = 1;
+                            oTable.rows().every(function (i, element) {
+                                var data = this.data();
+                                //alert(data[1] + ":" + data[3] + ":" + data[4] + ":" + data[5] + ":" + $('#qty_paypaid_' + i).val() + ":" + $('#location_paypaid' + i).val());
+                                if ($('#amount_paypaid_' + x).val() != "0") {
+                                    var parameters_addMobile_PayPaidItemExpenses = ["comp", comp, "paypaidno", paypaidno, "paypaidlineno", x, "expensesno", data[4], "expensesdate", data[5], "expensesprice", data[7], "paytype", $('#type_paypaid_' + x).val(), "payrefno", $('#refno_paypaid_' + x).val(), "paypaidprice", $('#amount_paypaid_' + x).val(), "payremarks", ""];
+                                    PageMethod("addMobile_PayPaidItemExpenses", parameters_addMobile_PayPaidItemExpenses, succeededAjaxFn_addMobile_PayPaidItemExpenses, failedAjaxFn_addMobile_PayPaidItemExpenses, false);
+                                }
+                                x = x + 1;
+                            });
+
+                            //confirm paypaid expenses
+                            var parameters_updateMobile_PayPaidExpensesStatus = ["comp", comp, "paypaidno", paypaidno, "status", "CONFIRMED", "userid", userid];
+                            PageMethod("updateMobile_PayPaidExpensesStatus", parameters_updateMobile_PayPaidExpensesStatus, succeededAjaxFn_updateMobile_PayPaidExpensesStatus, failedAjaxFn_updateMobile_PayPaidExpensesStatus, false);
+
+                            if (savepaypaid) {
+                                window.location.href = "BIOAppMobile_PaymentPaidPage.html?userid=" + userid + "&comp=" + comp + "&expensesno=" + expensesno;
+                            }
+                            else
+                            {
+                                alert(errormessage);
+                            }
+                        }
+                    }
+
+                    if (savepaypaid == false) {
+                        alert(errormessage);
+                    }
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_updateMobile_ExpensesHeaderStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_ExpensesHeaderStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepaypaid = true;
+                errormessage = "";
+            }
+            else {
+                savepaypaid = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_ExpensesHeaderStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_ExpensesHeaderStatus: " + textStatus);
+            savepaypaid = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        succeededAjaxFn_createMobile_PayPaidExpenses = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_createMobile_PayPaidExpenses: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepaypaid = true;
+                paypaidno = result.message;
+            } else {
+                savepaypaid = false;
+                paypaidno = "";
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_createMobile_PayPaidExpenses = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_createMobile_PayPaidExpenses: " + textStatus);
+            savepaypaid = false;
+            paypaidno = "";
+        }
+
+
+        succeededAjaxFn_addMobile_PayPaidItemExpenses = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_PayPaidItemExpenses: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepaypaid = true;
+                errormessage = "";
+            }
+            else {
+                savepaypaid = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_PayPaidItemExpenses = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_PayPaidItemExpenses: " + textStatus);
+            savepaypaid = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        succeededAjaxFn_updateMobile_PayPaidExpensesStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_PayPaidExpensesStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepaypaid = true;
+                errormessage = "";
+            }
+            else {
+                savepaypaid = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_PayPaidExpensesStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_PayPaidExpensesStatus: " + textStatus);
+            savepaypaid = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function openlist() {
+            window.location.href = "BIOAppMobile_ExpensesList.html?userid=" + userid;
+        }
+
+        function openexpenses() {
+            window.location.href = "BIOAppMobile_ExpensesPage.html?userid=" + userid + "&comp=" + comp + "&expensesno=" + expensesno;
+        }
+
+        function setSelectedIndexByName(s, v) {
+            for (var i = 0; i < s.options.length; i++) {
+                if (s.options[i].text == v) {
+                    s.options[i].selected = true;
+                    return;
+                }
+            }
+        }
+
+        function setSelectedIndexByValue(s, valsearch) {
+            // Loop through all the items in drop down list
+            for (i = 0; i < s.options.length; i++) {
+                if (s.options[i].value == valsearch) {
+                    // Item is found. Set its property and exit
+                    s.options[i].selected = true;
+                    break;
+                }
+            }
+            return;
+        }
+
+        function setSelectedIndexByIndex(s, i) {
+            s.options[i - 1].selected = true;
+            return;
+        }
+
+        function setQtyToPayPaid(qtyexpenses, qtyavailable) {
+            if (qtyavailable > qtyexpenses) {
+                return qtyexpenses;
+            } else {
+                return qtyavailable;
+            }
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1149 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="css/loading.css" rel="stylesheet" type="text/css">
+    <link href="css/calendar.css" type="text/css" rel="stylesheet" />
+
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">-->
+
+    <link rel="stylesheet" href="normalize/normalize.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">-->
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />-->
+    <!-- Ionicons -->
+    <!--<link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />-->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.0/css/ionicons.min.css" rel="stylesheet" />
+    <!--<link href="https://adminlte.io/themes/AdminLTE/bower_components/Ionicons/css/ionicons.min.css" rel="stylesheet" />-->
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css" />-->
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap.min.css">-->
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/skins/_all-skins.min.css" />-->
+
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script language="JavaScript" src="js/calendar.js" type="text/javascript"></script>
+    <script language="JavaScript" src="js/calendar-en.js" type="text/javascript"></script>
+    <script language="JavaScript" src="js/calendar-setup.js" type="text/javascript"></script>
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .box-header > .box-tools {
+            top: 10px;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            border: 2px dashed #E0E0E0
+        }
+
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade modal-update-dashboard" id="myUpdDashboardDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Pilih Tahun & Bulan Untuk Dikemaskini
+                </div>
+                <div class="modal-body">
+                    <div id="form2" class="form-horizontal form-label-left">
+
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Tahun<span class="required">*</span></label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <select id="actualyear" name="actualyear" class="select2_single form-control" tabindex="-1" style="width:100%;" required="required">
+                                    <option>-Tahun-</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Bulan<span class="required">*</span></label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <select id="actualmonth" name="actualmonth" class="select2_single form-control" tabindex="-1" style="width:100%;" required="required">
+                                    <option>-Bulan-</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="updatedashboard();">Kemaskini</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    DASHBOARD
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><i class="fa fa-list"></i> Dashboard</li>
+                    <li class="breadcrumb-item active">Utama <span id="comp" name="comp"></span></li>
+                </ol>
+                <div class="menu-info">
+                    <a href="#" class="btn btn-default btn-flat" data-toggle="modal" data-target=".modal-update-dashboard" style="margin-bottom:5px;">Kemaskini Dashboard</a>
+                </div>
+                <div class="menu-info" style="margin-bottom:45px;">
+                    <select id="selectyear" name="selectyear" class="form-control select2 col-lg-4 col-md-4 col-sm-4 col-xs-4" style="width: 33%;">
+                        <option value="" selected="selected">-Tahun-</option>
+                    </select>
+                    <select id="selectmonth" name="selectmonth" class="form-control select2 col-lg-4 col-md-4 col-sm-4 col-xs-4" style="width: 34%;">
+                        <option value="" selected="selected">-Bulan-</option>
+                    </select>
+                    <select id="selectday" name="selectday" class="form-control select2 col-lg-4 col-md-4 col-sm-4 col-xs-4" style="width: 33%;">
+                        <option value="" selected="selected">-Hari-</option>
+                    </select>
+                </div>
+                <!-- top tiles -->
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <!-- small box -->
+                        <div class="small-box bg-green">
+                            <div class="inner">
+                                <h4>RM<span id="lblRevenueAmnt" name="lblRevenueAmnt"></span></h4>
+                                <p></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-stats-bars"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">PENDAPATAN <i class="fa fa-sign-in"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <!-- small box -->
+                        <div class="small-box bg-yellow">
+                            <div class="inner">
+                                <h4>RM<span id="lblStockOutAmnt" name="lblStockOutAmnt"></span></h4>
+                                <p></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-person-add"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">KOS JUALAN <i class="fa fa-arrow-circle-right"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <!-- small box -->
+                        <div class="small-box bg-red">
+                            <div class="inner">
+                                <h4>RM<span id="lblExpensesAmnt" name="lblExpensesAmnt"></span></h4>
+                                <p></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-pie-graph"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">PERBELANJAAN <i class="fa fa-sign-out"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <!-- small box -->
+                        <div class="small-box bg-aqua">
+                            <div class="inner">
+                                <h4>RM<span id="lblProfitLossAmnt" name="lblProfitLossAmnt"></span></h4>
+                                <p></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-bag"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">UNTUNG/RUGI <i class="fa fa-area-chart"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /top tiles -->
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title" style="font-weight:unset;">Pendapatan, Kos Jualan & Perbelanjaan</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body" style="overflow: auto; position: relative;">
+                        <div class="chart-container" style="position: relative; width:200vw">
+                            <canvas id="statementChart"></canvas>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title" style="font-weight:unset;">Kategori Jualan</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <table class="table-responsive" style="width:100%">
+                            <tr>
+                                <td style="width: 37%;">
+                                    <canvas id="salesCanvas" height="100" width="100" style="margin: 15px 10px 10px 0;"></canvas>
+                                </td>
+                                <td>
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th></th>
+                                                <th style="text-align:left">Kategori</th>
+                                                <th style="text-align:right">Jualan (RM)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td><i class="fa fa-square salesorder"></i></td>
+                                                <td style="text-align:left">Pesanan Jualan</td>
+                                                <td style="text-align:right"><span id="lblOrderSalesAmount" name="lblOrderSalesAmount">0</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa fa-square others"></i></td>
+                                                <td style="text-align:left">Lain-lain</td>
+                                                <td style="text-align:right"><span id="lblOtherSalesAmount" name="lblOtherSalesAmount">0</span></td>
+                                            </tr>
+                                            <tr>
+                                                <th scope="row"></th>
+                                                <th style="text-align:left">TOTAL</th>
+                                                <td style="text-align:right"><span id="lblTotalSalesAmount" name="lblTotalSalesAmount">0</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+                <div class="box">
+                    <div class="box-header">                        
+                        <h3 class="box-title" style="font-weight:unset;">Transaksi Jualan</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div id="mainb" style="height:350px;"></div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="home" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">home</i>
+                Utama
+            </div>
+        </div>
+        <div id="finance" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">attach_money</i>
+                Aliran Wang
+            </div>
+        </div>
+        <div id="stock" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">domain</i>
+                Stok
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "home") {
+                    window.location.href = "BIOAppMobile_Dashboard_Home.html?userid=" + userid;
+                }
+                if (this.id == "finance") {
+                    window.location.href = "BIOAppMobile_Dashboard_Finance.html?userid=" + userid;
+                }
+                if (this.id == "stock") {
+                    window.location.href = "BIOAppMobile_Dashboard_Stock.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var reqyear;
+        var comp;
+        var successupdate = false;
+
+        var revenueplan = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var revenueactual = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var expensesplan = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var expensesactual = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var stockout = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var salesactual = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var totalordersalesamount, totalothersalesamount = 0;
+
+        var today = new Date();
+        var updyear = today.getFullYear();
+        var updmonth = today.getMonth() + 1;
+        if (updmonth < 10) {
+            updmonth = '0' + updmonth;
+        } 
+
+        //On document ready
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+
+            reqyear = getParameterByName('reqyear');
+            
+            var parameters_getMobile_UserProfile = ["userid", userid];
+            PageMethod("getMobile_UserProfile", parameters_getMobile_UserProfile, succeededAjaxFn_getMobile_UserProfile, failedAjaxFn_getMobile_UserProfile, false);
+
+            if (comp && comp.length) {
+
+                var parameters_getMobile_YearMonthList = ["comp", comp];
+                PageMethod("getMobile_YearMonthList", parameters_getMobile_YearMonthList, succeededAjaxFn_getMobile_YearMonthList, failedAjaxFn_getMobile_YearMonthList, false);
+
+                if(updyear && updyear.length > 0 && updmonth && updmonth.length > 0){
+                    
+                    var parameters_updateMobile_ReportFYRYearMonth = ["comp", comp, "financeyear", "", "financemonth", "", "actualyear", updyear, "actualmonth", updmonth];
+                    PageMethod("updateMobile_ReportGenFYRYearMonth", parameters_updateMobile_ReportFYRYearMonth, succeededAjaxFn_updateMobile_ReportFYRYearMonth, failedAjaxFn_updateMobile_ReportFYRYearMonth, false);
+
+                    if (successupdate) {
+                    
+                        var parameters_getMobile_ReportGenTransRevenuePLAN = ["comp", comp, "fyr", updyear, "type", "REVENUE_PLAN", "tablename", "dashboard_revenue"];
+                        PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransRevenuePLAN, succeededAjaxFn_getMobile_ReportGenTransRevenuePLAN, failedAjaxFn_getMobile_ReportGenTransRevenuePLAN, false);
+                    
+                        var parameters_getMobile_ReportGenTransRevenueACTUAL = ["comp", comp, "fyr", updyear, "type", "REVENUE_ACTUAL", "tablename", "dashboard_revenue"];
+                        PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransRevenueACTUAL, succeededAjaxFn_getMobile_ReportGenTransRevenueACTUAL, failedAjaxFn_getMobile_ReportGenTransRevenueACTUAL, false);
+
+                        var parameters_getMobile_ReportGenTransExpensesPLAN = ["comp", comp, "fyr", updyear, "type", "EXPENSES_PLAN", "tablename", "dashboard_expenses"];
+                        PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransExpensesPLAN, succeededAjaxFn_getMobile_ReportGenTransExpensesPLAN, failedAjaxFn_getMobile_ReportGenTransExpensesPLAN, false);
+                    
+                        var parameters_getMobile_ReportGenTransExpensesACTUAL = ["comp", comp, "fyr", updyear, "type", "EXPENSES_ACTUAL", "tablename", "dashboard_expenses"];
+                        PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransExpensesACTUAL, succeededAjaxFn_getMobile_ReportGenTransExpensesACTUAL, failedAjaxFn_getMobile_ReportGenTransExpensesACTUAL, false);
+                   
+                        var parameters_getMobile_ReportStockTransAmntOUT = ["comp", comp, "fyr", updyear, "type", "STOCK_OUT", "tablename", "dashboard_stockout"];
+                        PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransAmntOUT, succeededAjaxFn_getMobile_ReportStockTransAmntOUT, failedAjaxFn_getMobile_ReportStockTransAmntOUT, false);
+
+                        var parameters_getMobile_ReportGenTransSalesACTUAL = ["comp", comp, "fyr", updyear, "type", "SALES_ACTUAL", "tablename", "dashboard_sales"];
+                        PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransSalesACTUAL, succeededAjaxFn_getMobile_ReportGenTransSalesACTUAL, failedAjaxFn_getMobile_ReportGenTransSalesACTUAL, false);
+
+                        populateStatementChart();
+                        populateSalesCanvas();
+                        populateSalesChart();
+                    }
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_UserProfile = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_UserProfile: " + textStatus);
+
+            result_getMobile_UserProfile = JSON.parse(data.d);
+
+            comp = result_getMobile_UserProfile.GetSetcomp;
+            $('#comp').text('[' + comp + ']');
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_UserProfile = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_UserProfile: " + textStatus);
+            //$('#myDIV').modal('hide');
+        }
+
+        //BEGIN: getMobile_YearMonthList
+        succeededAjaxFn_getMobile_YearMonthList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_YearMonthList: " + textStatus);
+
+            result_getMobile_YearMonthList = JSON.parse(data.d);
+            updyear = result_getMobile_YearMonthList.currentyear;
+            updmonth = result_getMobile_YearMonthList.currentmonth;
+            
+            if(reqyear && reqyear.length > 0){
+                updyear = reqyear;
+            }
+
+            var select1 = document.getElementById("actualyear");
+            for (var option in select1) {
+                select1.remove(option);
+            }
+            var select2 = document.getElementById("selectyear");
+            for (var option in select2) {
+                select2.remove(option);
+            }
+
+            $.each(result_getMobile_YearMonthList.arrayyear, function (i, res) {
+                select1.append(new Option(res.yearval, res.yearid));
+                select2.append(new Option(res.yearval, res.yearid));
+            });
+            $('#actualyear').val(updyear).change()
+            $('#selectyear').val(updyear).change()
+
+            var select3 = document.getElementById("actualmonth");
+            for (var option in select3) {
+                select3.remove(option);
+            }
+            var select4 = document.getElementById("selectmonth");
+            for (var option in select4) {
+                select4.remove(option);
+            }
+
+            $.each(result_getMobile_YearMonthList.arraymonth, function (i, res) {
+                select3.append(new Option(res.monthval, res.monthid));
+                select4.append(new Option(res.monthval, res.monthid));
+            });
+            $('#actualmonth').val(updmonth).change()
+
+        }
+
+        failedAjaxFn_getMobile_YearMonthList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_YearMonthList: " + textStatus);
+            updyear = "";
+            updmonth = "";
+
+        }
+        //END: getMobile_YearMonthList
+
+        succeededAjaxFn_updateMobile_ReportFYRYearMonth = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_ReportFYRYearMonth: " + textStatus);
+
+            var result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successupdate = true;
+            }
+            else {
+                successupdate = false;
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_ReportFYRYearMonth = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_ReportFYRYearMonth: " + textStatus);
+            successupdate = false;
+        }
+
+        //BEGIN: getMobile_ReportGenTransRevenuePLAN
+        succeededAjaxFn_getMobile_ReportGenTransRevenuePLAN = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportGenTransRevenuePLAN: " + textStatus);
+
+            var result = JSON.parse(data.d);
+            revenueplan = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+
+        }
+
+        failedAjaxFn_getMobile_ReportGenTransRevenuePLAN = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportGenTransRevenuePLAN: " + textStatus);
+        }
+        //END: getMobile_ReportGenTransRevenuePLAN
+
+        //BEGIN: getMobile_ReportGenTransRevenueACTUAL
+        succeededAjaxFn_getMobile_ReportGenTransRevenueACTUAL = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportGenTransRevenueACTUAL: " + textStatus);
+            var result = JSON.parse(data.d);
+            revenueactual = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+
+        }
+
+        failedAjaxFn_getMobile_ReportGenTransRevenueACTUAL = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportGenTransRevenueACTUAL: " + textStatus);
+        }
+        //END: getMobile_ReportGenTransRevenueACTUAL
+
+        //BEGIN: getMobile_ReportGenTransExpensesPLAN
+        succeededAjaxFn_getMobile_ReportGenTransExpensesPLAN = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportGenTransExpensesPLAN: " + textStatus);
+
+            var result = JSON.parse(data.d);
+            expensesplan = [result.GetSetMON01*-1, result.GetSetMON02*-1, result.GetSetMON03*-1, result.GetSetMON04*-1, result.GetSetMON05*-1, result.GetSetMON06*-1, result.GetSetMON07*-1, result.GetSetMON08*-1, result.GetSetMON09*-1, result.GetSetMON10*-1, result.GetSetMON11*-1, result.GetSetMON12*-1];
+
+        }
+
+        failedAjaxFn_getMobile_ReportGenTransExpensesPLAN = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportGenTransExpensesPLAN: " + textStatus);
+        }
+        //END: getMobile_ReportGenTransExpensesPLAN
+
+        //BEGIN: getMobile_ReportGenTransExpensesACTUAL
+        succeededAjaxFn_getMobile_ReportGenTransExpensesACTUAL = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportGenTransExpensesACTUAL: " + textStatus);
+            var result = JSON.parse(data.d);
+            expensesactual = [result.GetSetMON01*-1, result.GetSetMON02*-1, result.GetSetMON03*-1, result.GetSetMON04*-1, result.GetSetMON05*-1, result.GetSetMON06*-1, result.GetSetMON07*-1, result.GetSetMON08*-1, result.GetSetMON09*-1, result.GetSetMON10*-1, result.GetSetMON11*-1, result.GetSetMON12*-1];
+
+        }
+
+        failedAjaxFn_getMobile_ReportGenTransExpensesACTUAL = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportGenTransExpensesACTUAL: " + textStatus);
+        }
+        //END: getMobile_ReportGenTransExpensesACTUAL
+
+        //BEGIN: getMobile_ReportStockTransAmntOUT
+        succeededAjaxFn_getMobile_ReportStockTransAmntOUT = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportStockTransAmntOUT: " + textStatus);
+
+            result = JSON.parse(data.d);
+            stockout = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+
+        }
+
+        failedAjaxFn_getMobile_ReportStockTransAmntOUT = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportStockTransAmntOUT: " + textStatus);
+        }
+        //END: getMobile_ReportStockTransAmntOUT
+
+        //BEGIN: getMobile_ReportGenTransSalesACTUAL
+        succeededAjaxFn_getMobile_ReportGenTransSalesACTUAL = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportGenTransSalesACTUAL: " + textStatus);
+
+            result = JSON.parse(data.d);
+            salesactual = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+
+        }
+
+        failedAjaxFn_getMobile_ReportGenTransSalesACTUAL = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportGenTransSalesACTUAL: " + textStatus);
+        }
+        //END: getMobile_ReportGenTransSalesACTUAL
+
+        $('#selectyear').on('change', function () {
+            
+            if(updyear == $("#selectyear").val()){
+                var parameters_getMobile_GeneralReportSummary = ["comp", comp, "selectyear", $("#selectyear").val(), "selectmonth", $("#selectmonth").val(), "selectday", $("#selectday").val()];
+                PageMethod("getMobile_GeneralReportSummary", parameters_getMobile_GeneralReportSummary, succeededAjaxFn_getMobile_GeneralReportSummary, failedAjaxFn_getMobile_GeneralReportSummary, false);
+            }
+            else
+            {
+                window.location.href = "BIOAppMobile_Dashboard_Home.html?userid=" + userid + "&reqyear=" + $("#selectyear").val();
+            }
+        });
+        
+        $('#selectmonth').on('change', function () {
+            var parameters_getMobile_GeneralReportSummary = ["comp", comp, "selectyear", $("#selectyear").val(), "selectmonth", $("#selectmonth").val(), "selectday", $("#selectday").val()];
+            PageMethod("getMobile_GeneralReportSummary", parameters_getMobile_GeneralReportSummary, succeededAjaxFn_getMobile_GeneralReportSummary, failedAjaxFn_getMobile_GeneralReportSummary, false);
+        });
+
+        //BEGIN: getMobile_StockSummary
+        succeededAjaxFn_getMobile_GeneralReportSummary = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_GeneralReportSummary: " + textStatus);
+
+            result = JSON.parse(data.d);
+            
+            $('#lblRevenueAmnt').text(formatMoney(result.totalrevenueamount));
+            $('#lblExpensesAmnt').text(formatMoney(result.totalexpensesamount*-1));
+            $('#lblStockOutAmnt').text(formatMoney(result.totalsubtractionstockamount));
+            $('#lblProfitLossAmnt').text(formatMoney(result.totalrevenueamount+(result.totalexpensesamount*-1)+result.totalsubtractionstockamount));
+
+            $('#lblOrderSalesAmount').text(formatMoney(result.totalordersalesamount));
+            $('#lblOtherSalesAmount').text(formatMoney(result.totalothersalesamount));
+            $('#lblTotalSalesAmount').text(formatMoney(result.totalordersalesamount+result.totalothersalesamount));
+            totalordersalesamount = result.totalordersalesamount;
+            totalothersalesamount = result.totalothersalesamount;
+
+        }
+
+        failedAjaxFn_getMobile_GeneralReportSummary = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_GeneralReportSummary: " + textStatus);
+        }
+        //END: getMobile_StockSummary
+
+        function updatedashboard() {
+
+            $('#myUpdDashboardDIV').modal('hide'); 
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            if (comp && comp.length) {
+
+                var parameters_updateMobile_ReportFYRYearMonth = ["comp", comp, "financeyear", "", "financemonth", "", "actualyear", $('#actualyear').val(), "actualmonth", $('#actualmonth').val()];
+                PageMethod("updateMobile_ReportGenFYRYearMonth", parameters_updateMobile_ReportFYRYearMonth, succeededAjaxFn_updateMobile_ReportFYRYearMonth, failedAjaxFn_updateMobile_ReportFYRYearMonth, false);
+
+                if (successupdate) {
+
+                    var parameters_getMobile_ReportGenTransRevenuePLAN = ["comp", comp, "fyr", updyear, "type", "REVENUE_PLAN", "tablename", "dashboard_revenue"];
+                    PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransRevenuePLAN, succeededAjaxFn_getMobile_ReportGenTransRevenuePLAN, failedAjaxFn_getMobile_ReportGenTransRevenuePLAN, false);
+                    
+                    var parameters_getMobile_ReportGenTransRevenueACTUAL = ["comp", comp, "fyr", updyear, "type", "REVENUE_ACTUAL", "tablename", "dashboard_revenue"];
+                    PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransRevenueACTUAL, succeededAjaxFn_getMobile_ReportGenTransRevenueACTUAL, failedAjaxFn_getMobile_ReportGenTransRevenueACTUAL, false);
+
+                    var parameters_getMobile_ReportGenTransExpensesPLAN = ["comp", comp, "fyr", updyear, "type", "EXPENSES_PLAN", "tablename", "dashboard_expenses"];
+                    PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransExpensesPLAN, succeededAjaxFn_getMobile_ReportGenTransExpensesPLAN, failedAjaxFn_getMobile_ReportGenTransExpensesPLAN, false);
+                    
+                    var parameters_getMobile_ReportGenTransExpensesACTUAL = ["comp", comp, "fyr", updyear, "type", "EXPENSES_ACTUAL", "tablename", "dashboard_expenses"];
+                    PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransExpensesACTUAL, succeededAjaxFn_getMobile_ReportGenTransExpensesACTUAL, failedAjaxFn_getMobile_ReportGenTransExpensesACTUAL, false);
+                   
+                    var parameters_getMobile_ReportStockTransAmntOUT = ["comp", comp, "fyr", updyear, "type", "STOCK_OUT", "tablename", "dashboard_stockout"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransAmntOUT, succeededAjaxFn_getMobile_ReportStockTransAmntOUT, failedAjaxFn_getMobile_ReportStockTransAmntOUT, false);
+
+                    var parameters_getMobile_ReportGenTransSalesACTUAL = ["comp", comp, "fyr", updyear, "type", "SALES_ACTUAL", "tablename", "dashboard_sales"];
+                    PageMethod("getMobile_ReportGenTrans", parameters_getMobile_ReportGenTransSalesACTUAL, succeededAjaxFn_getMobile_ReportGenTransSalesACTUAL, failedAjaxFn_getMobile_ReportGenTransSalesACTUAL, false);
+
+                    populateStatementChart();
+                    populateSalesCanvas();
+                    populateSalesChart();
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+            try {
+                decimalCount = Math.abs(decimalCount);
+                decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+                const negativeSign = amount < 0 ? "-" : "";
+
+                let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+                let j = (i.length > 3) ? i.length % 3 : 0;
+
+                return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+    </script>
+
+    <script src="js/Chart.custom.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <!-- Chart.js -->
+    <script>
+        Chart.defaults.global.legend = {
+            enabled: false
+        };
+
+        // Bar chart
+        var ctxRev = document.getElementById("statementChart");
+
+        function populateStatementChart() {
+
+            var mybarChart = new Chart(ctxRev, {
+                type: 'bar',
+                data: {
+                    labels: ["Jan", "Feb", "Mac", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    datasets: [
+                        {
+                        label: 'Pendapatan',
+                        backgroundColor: "#1ABB9C",
+                        data: revenueactual
+                        },
+                        {
+                        label: 'Kos Jualan',
+                        backgroundColor: "#FFA500",
+                        data: stockout
+                        },
+                        {
+                        label: 'Perbelanjaan',
+                        backgroundColor: "#FF6347",
+                        data: expensesactual
+                        }
+                    ]
+                },
+
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+    </script>
+    <!-- /Chart.js -->
+    <script>
+        var theme = {
+            color: [
+                '#26B99A', '#34495E', '#BDC3C7', '#3498DB',
+                '#9B59B6', '#8abb6f', '#759c6a', '#bfd3b7'
+            ],
+
+            title: {
+                itemGap: 8,
+                textStyle: {
+                    fontWeight: 'normal',
+                    color: '#408829'
+                }
+            },
+
+            dataRange: {
+                color: ['#1f610a', '#97b58d']
+            },
+
+            toolbox: {
+                color: ['#408829', '#408829', '#408829', '#408829']
+            },
+
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        color: '#408829',
+                        type: 'dashed'
+                    },
+                    crossStyle: {
+                        color: '#408829'
+                    },
+                    shadowStyle: {
+                        color: 'rgba(200,200,200,0.3)'
+                    }
+                }
+            },
+
+            dataZoom: {
+                dataBackgroundColor: '#eee',
+                fillerColor: 'rgba(64,136,41,0.2)',
+                handleColor: '#408829'
+            },
+            grid: {
+                borderWidth: 0
+            },
+
+            categoryAxis: {
+                axisLine: {
+                    lineStyle: {
+                        color: '#408829'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: ['#eee']
+                    }
+                }
+            },
+
+            valueAxis: {
+                axisLine: {
+                    lineStyle: {
+                        color: '#408829'
+                    }
+                },
+                splitArea: {
+                    show: true,
+                    areaStyle: {
+                        color: ['rgba(250,250,250,0.1)', 'rgba(200,200,200,0.1)']
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: ['#eee']
+                    }
+                }
+            },
+            timeline: {
+                lineStyle: {
+                    color: '#408829'
+                },
+                controlStyle: {
+                    normal: { color: '#408829' },
+                    emphasis: { color: '#408829' }
+                }
+            },
+
+            k: {
+                itemStyle: {
+                    normal: {
+                        color: '#68a54a',
+                        color0: '#a9cba2',
+                        lineStyle: {
+                            width: 1,
+                            color: '#408829',
+                            color0: '#86b379'
+                        }
+                    }
+                }
+            },
+            map: {
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            color: '#ddd'
+                        },
+                        label: {
+                            textStyle: {
+                                color: '#c12e34'
+                            }
+                        }
+                    },
+                    emphasis: {
+                        areaStyle: {
+                            color: '#99d2dd'
+                        },
+                        label: {
+                            textStyle: {
+                                color: '#c12e34'
+                            }
+                        }
+                    }
+                }
+            },
+            force: {
+                itemStyle: {
+                    normal: {
+                        linkStyle: {
+                            strokeColor: '#408829'
+                        }
+                    }
+                }
+            },
+            chord: {
+                padding: 4,
+                itemStyle: {
+                    normal: {
+                        lineStyle: {
+                            width: 1,
+                            color: 'rgba(128, 128, 128, 0.5)'
+                        },
+                        chordStyle: {
+                            lineStyle: {
+                                width: 1,
+                                color: 'rgba(128, 128, 128, 0.5)'
+                            }
+                        }
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 1,
+                            color: 'rgba(128, 128, 128, 0.5)'
+                        },
+                        chordStyle: {
+                            lineStyle: {
+                                width: 1,
+                                color: 'rgba(128, 128, 128, 0.5)'
+                            }
+                        }
+                    }
+                }
+            },
+            gauge: {
+                startAngle: 225,
+                endAngle: -45,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: [[0.2, '#86b379'], [0.8, '#68a54a'], [1, '#408829']],
+                        width: 8
+                    }
+                },
+                axisTick: {
+                    splitNumber: 10,
+                    length: 12,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                },
+                splitLine: {
+                    length: 18,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                pointer: {
+                    length: '90%',
+                    color: 'auto'
+                },
+                title: {
+                    textStyle: {
+                        color: '#333'
+                    }
+                },
+                detail: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                }
+            },
+            textStyle: {
+                fontFamily: 'Arial, Verdana, sans-serif'
+            }
+        };
+
+        var echartBar = echarts.init(document.getElementById('mainb'), theme);
+        
+        function populateSalesChart() {
+        
+            echartBar.setOption({
+                title: {
+                    text: 'Jumlah Jualan',
+                    subtext: ''
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['Sales']
+                },
+                toolbox: {
+                    show: false
+                },
+                calculable: false,
+                xAxis: [{
+                    type: 'category',
+                    data: ["Jan", "Feb", "Mac", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                }],
+                yAxis: [{
+                    type: 'value'
+                }],
+                series: [{
+                    name: 'Jualan (RM)',
+                    type: 'bar',
+                    data: salesactual,
+                
+                }]
+            });
+        }
+
+    </script>
+
+    <script>
+
+        var ctx = document.getElementById("salesCanvas");
+
+        function populateSalesCanvas() {
+            var data = {
+                labels: [
+                  "Sales Order",
+                  "Others"
+                ],
+                datasets: [{
+                    data: [totalordersalesamount, totalothersalesamount],
+                    backgroundColor: [
+                      "#5c5c5c",
+                      "#BDC3C7"
+                    ],
+                    hoverBackgroundColor: [
+                      "#888888",
+                      "#d0d8dd"
+                    ]
+
+                }]
+            };
+
+            var canvasDoughnut = new Chart(ctx, {
+                type: 'doughnut',
+                tooltipFillColor: "rgba(51, 51, 51, 0.55)",
+                data: data
+            });
+        }
+
+    </script>
+
+</body>
+</html>

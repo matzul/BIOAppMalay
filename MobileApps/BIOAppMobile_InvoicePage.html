@@ -1,0 +1,1730 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="css/loading.css" rel="stylesheet" type="text/css">
+
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">-->
+
+    <link rel="stylesheet" href="normalize/normalize.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">-->
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />-->
+
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css" />-->
+
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap.min.css">-->
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/skins/_all-skins.min.css" />-->
+
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            binvoice: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myShipmentList" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table id="tbShipmentList" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="display:none;">rowno</th>
+                                <th style="display:none;">bpid</th>
+                                <th>bpdesc</th>
+                                <th style="display:none;">shipmentno</th>
+                                <th style="display:none;">shipmentlineno</th>
+                                <th style="display:none;">orderno</th>
+                                <th style="display:none;">orderlineno</th>
+                                <th style="display:none;">itemno</th>
+                                <th>Senarai Penghantaran</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addshipmentitem();">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myBPList" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table id="tbBPList" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="display:none;">bpid</th>
+                                <th style="display:none;">bpdesc</th>
+                                <th style="display:none;">bpaddress</th>
+                                <th style="display:none;">bptelno</th>
+                                <th>Senarai Pelanggan</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myItemList" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table id="tbItemList" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="display:none;">rowno</th>
+                                <th style="display:none;">shipmentno</th>
+                                <th style="display:none;">shipment_lineno</th>
+                                <th style="display:none;">orderno</th>
+                                <th style="display:none;">order_lineno</th>
+                                <th style="display:none;">itemno</th>
+                                <th style="display:none;">itemdesc</th>
+                                <th style="display:none;">unitcost</th>
+                                <th style="display:none;">unitprice</th>
+                                <th style="display:none;">discamount</th>
+                                <th style="display:none;">quantity</th>
+                                <th style="display:none;">costprice</th>
+                                <th style="display:none;">invoiceprice</th>
+                                <th style="display:none;">taxcode</th>
+                                <th style="display:none;">taxrate</th>
+                                <th style="display:none;">taxamount</th>
+                                <th style="display:none;">totalinvoice</th>
+                                <th>Senarai Item/ Produk</th>
+                                <th>Qty</th>
+                                <th>Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addlineitem();">Tambah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myItemList2" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <table id="tbItemList2" class="table" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th style="display:none;">rowno</th>
+                                <th style="display:none;">itemno</th>
+                                <th style="display:none;">itemdesc</th>
+                                <th>Senarai Item/ Produk</th>
+                                <th style="display:none;">Qty/Harga</th>
+                                <th style="display:none;">Jumlah</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="myLineItem" role="dialog" style="width:100%;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Kemaskini Item Pesanan
+                </div>
+                <div class="modal-body">
+                    <table id="tbLineItem" class="table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Item/ Produk</th>
+                                <!--<th style="width: 30px">Jumlah</th>-->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td><span id="lblLineItemNo" name="lblLineItemNo"></span>
+                                    <input id="txtLineItemDesc" name="txtLineItemDesc" readonly="readonly" value="" class="form-control"/>
+                                    <input id="txtLineNo" name="txtLineNo" type="hidden" value="0" />
+                                    <input id="txtShipmentNo" name="txtShipmentNo" type="hidden" value="" />
+                                    <input id="txtShipmentLineNo" name="txtShipmentLineNo" type="hidden" value="0" />
+                                    <input id="txtLineItemNo" name="txtLineItemNo" type="hidden" value="" />
+                                    Harga: <br />
+                                    <input id="txtLineUnitPrice" name="txtLineUnitPrice" type="text" readonly="readonly" value="0" style="width:60px;" /><br />
+                                    Qty: <br/>
+                                    <input id="txtLineItemQty" name="txtLineItemQty" type="text" readonly="readonly" value="0" style="width:30px;" /><br />
+                                    TAX Code: <br />
+                                    <select id="selTaxCode" name="selTaxCode" readonly="readonly"  style="width:60px;">
+                                    </select>
+                               </td>
+                                <!--
+                                <td width="50px;">
+                                    <span id="lblLineTotalInvoice" name="lblLineTotalInvoice"></span>
+                                </td>
+                                -->
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-warning pull-left" onclick="deletelineitem();">Hapus</button>
+                    <button id="btnEditLineItem" name="btnEditLineItem" type="button" class="btn btn-sm btn-primary" onclick="editlineitem();">Kemaskini</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    INVOIS HASIL
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><a href="#" onclick="openlist();"><i class="fa fa-list"></i> Senarai</a></li>
+                    <li class="breadcrumb-item active">Invois Hasil <span id="comp" name="comp"></span></li>
+                </ol>
+                <div id="searchblock" name="searchblock" class="menu-info" style="display:none;">
+                    <select id="searchtype" name="searchtype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6 bg-gray" style="margin-bottom:5px;height:28px;">
+                        <option value="SHIPMENTNO" selected>No. Penghantaran</option>
+                        <option value="ORDERNO">No. Pesanan</option>
+                        <option value="BPID">No. Pelanggan</option>
+                        <option value="BPDESC">Nama Pelanggan</option>
+                    </select>
+                    <input type="text" id="searchitem" name="searchitem" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-bottom:5px;height:28px;" placeholder="Carian..." />
+                    <!--<div id="searchbpiddesc-container" style="position: relative; float: left; width: 100%; margin: 10px;"></div>-->
+                    <a href="#" onclick="searching();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Carian</a>
+                    <a href="#" onclick="resetsearching();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Reset</a>
+                </div>
+                <div id="foundblock" name="foundblock" class="menu-info">
+                    <input type="text" id="foundlabelbpid" name="foundlabelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Id Pelanggan:" />
+                    <input type="text" id="foundbpid" name="foundbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" value="" />
+                    <input type="text" id="foundlabelbpdesc" name="foundlabelbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Nama Pelanggan:" />
+                    <input type="text" id="foundbpdesc" name="foundbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" value="" />
+                    <input type="text" id="foundlabelbpaddress" name="foundlabelbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Alamat:" />
+                    <input type="text" id="foundbpaddress" name="foundbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="foundlabelbpcontact" name="foundlabelbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pegawai:" />
+                    <input type="text" id="foundbpcontact" name="foundbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="foundlabelinvoicecat" name="foundlabelinvoicecat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;height:28px;" placeholder="Kategori:" />
+                    <select id="foundinvoicecat" name="foundinvoicecat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-bottom:5px;height:28px;">
+                        <option value="SALES_INVOICE" selected>INVOIS JUALAN</option>
+                        <option value="RECEIPT_VOUCHER">VOUCHER TERIMAAN</option>
+                        <!--<option value="JOURNAL_VOUCHER">VOUCHER PERLARASAN</option>-->
+                    </select>
+                    <input type="text" id="foundlabelinvoicetype" name="foundlabelinvoicetype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;height:28px;" placeholder="Jenis:" />
+                    <select id="foundinvoicetype" name="foundinvoicetype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" style="margin-bottom:5px;height:28px;">
+                        <option value="NOT_APPLICABLE" selected>TIDAK BERKENAAN</option>
+                        <option value="FINANCIAL_ACQUISITION">PEROLEHAN KEWANGAN</option>
+                        <!--
+                        <option value="BANK_DEPOSIT">DEPOSIT BANK</option>
+                        <option value="CASH_WITHDRAWAL">PENGELUARAN TUNAI</option>
+                        -->
+                        <option value="OTHER_INCOME">PEROLEHAN LAIN-LAIN</option>
+                    </select>
+                    <a href="#" onclick="createinvoice();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Teruskan</a>
+                    <a href="#" onclick="resetfound();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Reset</a>
+                </div>
+                <div id="recordblock" name="recordblock" class="menu-info" style="margin-bottom:5px;display:none;">
+                    <input type="text" id="recordlabelinvoiceno" name="recordlabelinvoiceno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="No. Invois:" />
+                    <input type="text" id="recordinvoiceno" name="recordinvoiceno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelinvoicedate" name="recordlabelinvoicedate" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Tarikh Invois:" />
+                    <input type="text" id="recordinvoicedate" name="recordinvoicedate" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelinvoicecat" name="recordlabelinvoicecat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Kategori:" />
+                    <input type="text" id="recordinvoicecat" name="recordinvoicecat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelinvoicetype" name="recordlabelinvoicetype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Jenis:" />
+                    <input type="text" id="recordinvoicetype" name="recordinvoicetype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelbpid" name="recordlabelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pelanggan:" />
+                    <input type="text" id="recordbpid" name="recordbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;display:none;" placeholder="" />
+                    <input type="text" id="recordbpdesc" name="recordbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelbpaddress" name="recordlabelbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Alamat:" />
+                    <input type="text" id="recordbpaddress" name="recordbpaddress" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelbpcontact" name="recordlabelbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pegawai:" />
+                    <input type="text" id="recordbpcontact" name="recordbpcontact" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordlabelinvoiceremarks" name="recordlabelinvoiceremarks" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Catatan:" />
+                    <input type="text" id="recordinvoiceremarks" name="recordinvoiceremarks" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="recordinvoicestatus" name="recordinvoicestatus" class="product_price form-control" readonly="readonly" value="NEW" style="text-align:left;" />
+                </div>
+                <div class="box">
+                    <div id="additemblock" name="additemblock" class="box-header" style="display:none;">
+                        <button type="button" class="btn btn-sm" onclick="addnewitem();"><i class="fa fa-plus"></i></button>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body no-padding">
+
+                        <table id="itemlist" class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th style="display:none;">Comp</th>
+                                    <th style="display:none;">InvoiceNo</th>
+                                    <th style="display:none;">LineNo</th>
+                                    <th style="display:none;">ShipmentNo</th>
+                                    <th style="display:none;">ShipmentLineNo</th>
+                                    <th style="display:none;">ItemNo</th>
+                                    <th style="display:none;">Desc</th>
+                                    <th>No. Item / Produk</th>
+                                    <th>Qty</th>
+                                    <th style="display:none;">UnitPrice</th>
+                                    <th>Harga</th>
+                                    <th style="display:none;">TaxCode</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+                <div class="menu-info">
+                    <a id="btnPaymentReceipt" name="btnPaymentReceipt" href="#" class="btn btn-default btn-flat" onclick="openpaymentreceipt();" style="margin-bottom:5px;">Bayaran Terima</a>
+                    <a id="btnCancel" name="btnCancel" href="#" class="btn btn-default btn-flat" onclick="cancelinvoice();" style="margin-bottom:5px;display:none;">Batal</a>
+                    <a id="btnBack" name="btnBack" href="#" onclick="openlist();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Kembali</a>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="list" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">menu</i>
+                Senarai
+            </div>
+        </div>
+        <div id="invoice" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">local_atm</i>
+                Invois
+            </div>
+        </div>
+        <div id="report" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">receipt</i>
+                Laporan
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "list") {
+                    window.location.href = "BIOAppMobile_InvoiceList.html?userid=" + userid;
+                }
+                else if (this.id == "invoice") {
+                    window.location.href = "BIOAppMobile_InvoicePage.html?userid=" + userid;
+                }
+                else if (this.id == "report") {
+                    window.location.href = "BIOAppMobile_InvoiceList.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var comp;
+        var bpid = "";
+        var invoiceno = "";
+
+        var oTable;
+        var bpTable;
+        var shipmentTable;
+        var searchBPArray;
+        var successcreationinvoice = false;
+        var successadditem = false;
+        var successedititem = false;
+        var successdeleteitem = false;
+        var successcancelinvoice = false;
+        var errormessage = "";
+        var itemTable;
+        var itemTable2;
+
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+            comp = getParameterByName('comp');
+            invoiceno = getParameterByName('invoiceno');
+
+            if (comp && comp.length) 
+            {
+                if (invoiceno && invoiceno.length) 
+                {
+                }
+                else
+                {
+                    var parameters_getMobile_UserProfile = ["userid", userid];
+                    PageMethod("getMobile_UserProfile", parameters_getMobile_UserProfile, succeededAjaxFn_getMobile_UserProfile, failedAjaxFn_getMobile_UserProfile, false);
+                }
+            }
+            else
+            {
+                var parameters_getMobile_UserProfile = ["userid", userid];
+                PageMethod("getMobile_UserProfile", parameters_getMobile_UserProfile, succeededAjaxFn_getMobile_UserProfile, failedAjaxFn_getMobile_UserProfile, false);
+            }
+
+            $('#comp').text('[' + comp + ']');
+
+            var parameters_getMobile_TaxCodeList = ["comp", comp];
+            PageMethod("getMobile_TaxCodeList", parameters_getMobile_TaxCodeList, succeededAjaxFn_getMobile_TaxCodeList, failedAjaxFn_getMobile_TaxCodeList, false);
+
+            oTable = $('#itemlist').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    },
+                    {
+                        "targets": [6],
+                        "visible": false
+                    },
+                    {
+                        "targets": [7],
+                        "visible": false
+                    },
+                    {
+                        "targets": [10],
+                        "visible": false
+                    },
+                    {
+                        "targets": [12],
+                        "visible": false
+                    }
+
+                ]
+            });
+
+            bpTable = $('#tbBPList').DataTable({
+                'paging': true,
+                'pageLength': 3,
+                'lengthChange': false,
+                'searching': true,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    }
+                ]
+            });
+            
+            shipmentTable = $('#tbShipmentList').DataTable({
+                'scrollY': '50vh',
+                'scrollCollapse': true,
+                'paging': false,
+                'lengthChange': false,
+                'searching': true,
+                'ordering': false,
+                'info': false,
+                'autoWidth': true,
+                /*
+                'initComplete': function () {
+                    this.api().column(2).every( function () {
+                        var column = this;
+                        var select = jQuery('<select id="filterbp" name="filterbp"><option value="">-Select-</option></select>')
+                        .appendTo( jQuery(column.header()).empty() )
+                        .on('change', function () {
+                            var val = jQuery.fn.dataTable.util.escapeRegex(
+                                jQuery(this).val()
+                            );
+                            column.search( val ? '^'+val+'$' : '', true, false ).draw();
+                        });
+                    });
+                },   
+                */
+                'columnDefs': [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    },
+                    {
+                        "targets": [6],
+                        "visible": false
+                    },
+                    {
+                        "targets": [7],
+                        "visible": false
+                    },
+                    {
+                        "targets": [8],
+                        "visible": false
+                    }
+                ]
+            });            
+
+            itemTable = $('#tbItemList').DataTable({
+                'scrollY': '50vh',
+                'scrollCollapse': true,
+                'paging': false,
+                'lengthChange': false,
+                'searching': true,
+                'ordering': false,
+                'info': false,
+                'autoWidth': false,
+                'columnDefs': [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [6],
+                        "visible": false
+                    },
+                    {
+                        "targets": [7],
+                        "visible": false
+                    },
+                    {
+                        "targets": [8],
+                        "visible": false
+                    },
+                    {
+                        "targets": [9],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [10],
+                        "visible": false
+                    },
+                    {
+                        "targets": [11],
+                        "visible": false
+                    },
+                    {
+                        "targets": [12],
+                        "visible": false
+                    },
+                    {
+                        "targets": [13],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [14],
+                        "visible": false
+                    },
+                    {
+                        "targets": [15],
+                        "visible": false
+                    },
+                    {
+                        "targets": [16],
+                        "visible": false
+                    },
+                    {
+                        "targets": [17],
+                        "visible": false
+                    }
+
+                ]
+            });
+
+            itemTable2 = $('#tbItemList2').DataTable({
+                'paging': true,
+                'pageLength': 3,
+                'lengthChange': false,
+                'searching': true,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    },
+                    {
+                        "targets": [6],
+                        "visible": false
+                    }
+                ]
+            });
+
+            if (userid && userid.length) {
+                if (comp && comp.length) {
+                    if (invoiceno && invoiceno.length) {
+                        $('#searchblock').hide();
+                        $('#foundblock').hide();
+                        $('#recordblock').show();
+
+                        var parameters_getMobile_InvoiceDetails = ["comp", comp, "invoiceno", invoiceno];
+                        PageMethod("getMobile_InvoiceDetails", parameters_getMobile_InvoiceDetails, succeededAjaxFn_getMobile_InvoiceDetails, failedAjaxFn_getMobile_InvoiceDetails, false);
+
+                        var parameters_getMobile_InvoiceItems = ["comp", comp, "invoiceno", invoiceno];
+                        PageMethod("getMobile_InvoiceItems", parameters_getMobile_InvoiceItems, succeededAjaxFn_getMobile_InvoiceItems, failedAjaxFn_getMobile_InvoiceItems, false);
+
+                    } else {
+                        $('#searchblock').show();
+                        $('#foundblock').hide();
+                        $('#recordblock').hide();
+                        $('#additemblock').hide();
+                    }
+                } else {
+                    $('#searchblock').show();
+                    $('#foundblock').hide();
+                    $('#recordblock').hide();
+                    $('#additemblock').hide();
+                    alert('Internal system error!');
+                }
+            } else {
+                $('#searchblock').show();
+                $('#foundblock').hide();
+                $('#recordblock').hide();
+                $('#additemblock').hide();
+                alert('Internal system error!');
+            }
+
+            $('#itemlist tbody').on('click', 'tr', function () {
+                var data = oTable.row(this).data();
+                //alert('You clicked on ' + data[1] + ':' + data[2]);
+                if ($('#recordinvoicestatus').val() != 'CONFIRMED' && $('#recordinvoicestatus').val() != 'CANCELLED') {
+                    viewlineitem(data[3], data[4], data[5], data[6], data[7], data[9], data[10], data[11], data[12]);
+                }
+            });
+
+            $('#tbBPList tbody').on('click', 'tr', function () {
+                var data = bpTable.row(this).data();
+                openbpdetails(data[1], data[2], data[3], data[4]);
+            });
+
+            /*
+            $('#tbItemList tbody').on('click', 'tr', function () {
+                var data = itemTable.row(this).data();
+                additemdetails(data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15], data[16]);
+            });
+            */
+
+            $('#tbItemList2 tbody').on('click', 'tr', function () {
+                var data = itemTable2.row(this).data();
+                additemdetails(data[1], "", 0, "", 0, data[2], data[3], 0, 0, 0, 0, 0, 0, "N/A", 0, 0, 0);
+            });
+
+            /*
+            var parameters_getMobile_BPListAutocomplete = ["bpid", "", "bpdesc", "", "bpreference", "", "bpcat", ""];
+            PageMethod("getMobile_BPListAutocomplete", parameters_getMobile_BPListAutocomplete, succeededAjaxFn_getMobile_BPListAutocomplete, failedAjaxFn_getMobile_BPListAutocomplete, false);
+            */
+
+            $('#myShipmentList').on('shown', function() {
+                //$("#txtname").focus();
+                setTimeout(function(){ 
+                    shipmentTable.columns.adjust();
+                    /*
+                    var select = document.getElementById("filterbp");
+                    for (var option in select) {
+                        select.remove(option);
+                    }
+                    */
+                    shipmentTable.column(3).every( function () {
+                        var column = this;
+                        var select = jQuery('<select id="filterbp" name="filterbp" style="width: 100px;"></select>')
+                        .appendTo( jQuery(column.header()).empty() )
+                        .on('change', function () {
+                            var val = jQuery.fn.dataTable.util.escapeRegex(
+                                jQuery(this).val()
+                            );
+                            column.search( val ? '^'+val+'$' : '', true, false ).draw();
+                        });
+                        column.data().unique().sort().each( function ( d, j ) {
+                            select.append(new Option(d, d));
+                        });
+                    });
+                    /*
+                    shipmentTable.rows().every(function (i, element) {
+                        var data = this.data();
+                        document.getElementById("filterbp").add(new Option(data[2], data[2]));
+                    });
+                    */
+                    $('#filterbp').trigger('change');
+
+                }, 1000);
+            });
+
+            $('#myItemList').on('shown', function() {
+                setTimeout(function(){ 
+                    itemTable.columns.adjust();
+                }, 1000);
+            });
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_UserProfile = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_UserProfile: " + textStatus);
+
+            result_getMobile_UserProfile = JSON.parse(data.d);
+
+            comp = result_getMobile_UserProfile.GetSetcomp;
+            $('#comp').text('[' + comp + ']');
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_UserProfile = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_UserProfile: " + textStatus);
+            //$('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_TaxCodeList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_TaxCodeList: " + textStatus);
+
+            var select = document.getElementById("selTaxCode" + data[3]);
+            for (var option in select) {
+                select.remove(option);
+            }
+            document.getElementById("selTaxCode").add(new Option("-Select-", ""));
+
+            result_getMobile_TaxCodeList = JSON.parse(data.d);
+            $.each(result_getMobile_TaxCodeList, function (i, result) {
+                document.getElementById("selTaxCode").add(new Option(result.GetSettaxcode, result.GetSettaxcode));
+            });
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_TaxCodeList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_TaxCodeList: " + textStatus);
+            //$('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_InvoiceDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_InvoiceDetails: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_InvoiceDetails = JSON.parse(data.d);
+            $('#recordinvoiceno').val(result_getMobile_InvoiceDetails.GetSetinvoiceno);
+            $('#recordinvoicedate').val(result_getMobile_InvoiceDetails.GetSetinvoicedate);
+            $('#recordinvoicecat').val(result_getMobile_InvoiceDetails.GetSetinvoicecat);
+            $('#recordinvoicetype').val(result_getMobile_InvoiceDetails.GetSetinvoicetype);
+            $('#recordbpid').val(result_getMobile_InvoiceDetails.GetSetbpid);
+            $('#recordbpdesc').val(result_getMobile_InvoiceDetails.GetSetbpdesc);
+            $('#recordbpaddress').val(result_getMobile_InvoiceDetails.GetSetbpaddress);
+            $('#recordbpcontact').val(result_getMobile_InvoiceDetails.GetSetbpcontact);
+            $('#recordinvoiceremarks').val(result_getMobile_InvoiceDetails.GetSetremarks);
+            $('#recordinvoicestatus').val(result_getMobile_InvoiceDetails.GetSetstatus);
+            if ($('#recordinvoicestatus').val() == 'NEW' || $('#recordinvoicestatus').val() == 'INPROGRESS') {
+                $('#additemblock').show();
+                $('#btnCancel').show();
+            } else {
+                $('#additemblock').hide();
+                $('#btnCancel').hide();
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_InvoiceDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_InvoiceDetails: " + textStatus);
+        }
+
+        succeededAjaxFn_getMobile_InvoiceItems = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_InvoiceItems: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_InvoiceItems = JSON.parse(data.d);
+            $.each(result_getMobile_InvoiceItems, function (i, result) {
+                //console.log("succeededAjaxFn_getMobile_InvoiceItems: " + result.GetSetcomp + ":" + result.GetSetinvoiceno);
+                //$('<tr><td></td><td><input type="text" id="itemno" name="itemno" class="form-control" placeholder="" /></td><td><input type="text" id="qty" name="qty" class="form-control" placeholder="" /></td><td><button type="button" class="btn btn-sm" onclick="additem();"><i class="fa fa-save"></i></button></td></tr>').appendTo('#invoicelist');
+                oTable.row.add([
+                    i + 1,
+                    result.GetSetcomp,
+                    result.GetSetinvoiceno,
+                    result.GetSetlineno,
+                    result.GetSetshipmentno,
+                    result.GetSetshipment_lineno,
+                    result.GetSetitemno,
+                    result.GetSetitemdesc,
+                    result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>Harga Item: RM' + result.GetSetunitprice + '/' + result.GetSetitemtype + '<br/>Diskaun: RM' + result.GetSetdiscamount + '/' + result.GetSetitemtype + '<br/>TAX: RM' + result.GetSettaxamount,
+                    result.GetSetquantity,
+                    result.GetSetunitprice,
+                    formatMoney(result.GetSettotalinvoice),
+                    result.GetSettaxcode
+                ]).draw(false);
+            });
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_InvoiceItems = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_InvoiceItems: " + textStatus);
+        }
+
+        /*
+        var bpotherArray = $.map(bpother, function (value, key) {
+            return {
+                value: value,
+                data: key
+            };
+        });
+
+        succeededAjaxFn_getMobile_BPListAutocomplete = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_BPListAutocomplete: " + textStatus);
+
+            result_getMobile_BPListAutocomplete = JSON.parse(data.d);
+
+            searchBPArray = $.map(result_getMobile_BPListAutocomplete, function (value, key) {
+                return {
+                    value: value,
+                    data: key
+                };
+            });
+
+            // initialize autocomplete with custom appendTo
+            $('#searchbpiddesc').autocomplete({
+                lookup: searchBPArray,
+                appendTo: '#searchbpiddesc-container',
+                onSelect: function (suggestion) {
+                    alert(suggestion.data);
+                }
+            });
+
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_BPListAutocomplete = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_BPListAutocomplete: " + textStatus);
+        }
+        */
+
+        function searching() {
+            $('#myDIV').modal({ backdrop: "static" });
+            if($('#searchtype').val() == "SHIPMENTNO")
+            {
+                var parameters_getMobile_ShipmentList = ["comp", comp, "bpid", "", "ordertype", "", "invoicecat", "SALES_INVOICE", "shipmentno", $('#searchitem').val(), "orderno", "", "itemno", ""];
+                PageMethod("getMobile_PendingInvoiceShipmentList", parameters_getMobile_ShipmentList, succeededAjaxFn_getMobile_ShipmentList, failedAjaxFn_getMobile_ShipmentList, false);
+            }
+            else if($('#searchtype').val() == "ORDERNO")
+            {
+                var parameters_getMobile_ShipmentList = ["comp", comp, "bpid", "", "ordertype", "", "invoicecat", "SALES_INVOICE", "shipmentno", "", "orderno", $('#searchitem').val(), "itemno", ""];
+                PageMethod("getMobile_PendingInvoiceShipmentList", parameters_getMobile_ShipmentList, succeededAjaxFn_getMobile_ShipmentList, failedAjaxFn_getMobile_ShipmentList, false);
+            }
+            else if($('#searchtype').val() == "BPID")
+            {
+                var parameters_getMobile_BPList = ["comp", comp, "bpid", $('#searchitem').val(), "bpdesc", "", "bpcat", "", "solidbp", "Y"];
+                PageMethod("getMobile_BPList", parameters_getMobile_BPList, succeededAjaxFn_getMobile_BPList, failedAjaxFn_getMobile_BPList, false);
+            }
+            else if($('#searchtype').val() == "BPDESC")
+            {
+                var parameters_getMobile_BPList = ["comp", comp, "bpid", "", "bpdesc", $('#searchitem').val(), "bpcat", "", "solidbp", "Y"];
+                PageMethod("getMobile_BPList", parameters_getMobile_BPList, succeededAjaxFn_getMobile_BPList, failedAjaxFn_getMobile_BPList, false);
+            }
+
+
+        }
+
+        succeededAjaxFn_getMobile_BPList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_BPList: " + textStatus);
+            $('#myDIV').modal('hide');
+
+            //$('#myBPList').modal({ backdrop: "static" });
+            $('#myBPList').modal('show');
+            bpTable.clear().draw();
+
+            result_getMobile_BPList = JSON.parse(data.d);
+            $.each(result_getMobile_BPList, function (i, result) {
+                //$('<tr><td>' + result.GetSetbpid + '</td><td>' + result.GetSetbpdesc + '</td><td>' + result.GetSetbpaddress + '</td><td>' + result.GetSetbpcontact + '</td></tr>').appendTo('#tbBPList');
+                bpTable.row.add([
+                    i + 1,
+                    result.GetSetbpid,
+                    result.GetSetbpdesc,
+                    result.GetSetbpaddress,
+                    result.GetSetbpcontact,
+                    result.GetSetbpid + '<br/>' + result.GetSetbpdesc + '<br/>' + result.GetSetbpaddress
+                ]).draw(false);
+            });
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_BPList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_BPList: " + textStatus);
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_ShipmentList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ShipmentList: " + textStatus);
+            $('#myDIV').modal('hide');
+
+            //$('#myBPList').modal({ backdrop: "static" });
+            $('#myShipmentList').modal('show').trigger('shown');
+            shipmentTable.clear().draw();
+
+            result_getMobile_ShipmentList = JSON.parse(data.d);
+            var rowno = 0;
+            $.each(result_getMobile_ShipmentList, function (i, result) {
+                rowno = i + 1;
+                shipmentTable.row.add([
+                    '<input id="addcheck_' + rowno + '" name="addcheck_' + rowno + '" type="checkbox" />',
+                    rowno,
+                    result.GetSetbpid,
+                    result.GetSetbpdesc,
+                    result.GetSetshipmentno,
+                    result.GetSetlineno,
+                    result.GetSetorderno,
+                    result.GetSetorder_lineno,
+                    result.GetSetitemno,
+                    result.GetSetshipmentno + '<br/>' + result.GetSetorderno + '<br/>' + result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>Harga: RM' + result.GetSetunitprice + "/" + result.GetSetitemtype + '<br/>Diskaun: RM' + result.GetSetdiscamount + "/" + result.GetSetitemtype + '<br/>Qty: ' + result.GetSetquantity + '<br/>Jumlah: RM' + result.GetSettotalinvoice
+                ]).draw(false);
+            });
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_ShipmentList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ShipmentList: " + textStatus);
+            $('#myDIV').modal('hide');
+        }
+
+        function resetsearching() {
+            $('#searchitem').val('');
+        }
+
+        function openbpdetails(bpid, bpdesc, bpaddress, bpcontact) {
+            $('#searchblock').hide();
+            $('#foundblock').show();
+
+            $('#foundbpid').val(bpid);
+            $('#foundbpdesc').val(bpdesc);
+            $('#foundbpaddress').val(bpaddress);
+            $('#foundbpcontact').val(bpcontact);
+
+            $('#myBPList').modal('hide');
+        }
+
+        function resetfound() {
+            $('#searchblock').show();
+            $('#foundblock').hide();
+
+            resetsearching();
+            $('#foundbpid').val('');
+            $('#foundbpdesc').val('');
+            $('#foundbpaddress').val('');
+            $('#foundbpcontact').val('');
+        }
+
+        function createinvoice() {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_createMobile_InvoiceInvoice = ["comp", comp, "bpid", $('#foundbpid').val(), "invoicecat", $('#foundinvoicecat').val(), "invoicetype", $('#foundinvoicetype').val(), "userid", userid];
+            PageMethod("createMobile_InvoiceInvoice", parameters_createMobile_InvoiceInvoice, succeededAjaxFn_createMobile_InvoiceInvoice, failedAjaxFn_createMobile_InvoiceInvoice, false);
+
+            if (successcreationinvoice) {
+                $('#searchblock').hide();
+                $('#foundblock').hide();
+
+                resetsearching();
+                $('#foundbpid').val('');
+                $('#foundbpdesc').val('');
+                $('#foundbpaddress').val('');
+                $('#foundbpcontact').val('');
+
+                $('#recordblock').show();
+                $('#additemblock').show();
+
+                var parameters_getMobile_InvoiceDetails = ["comp", comp, "invoiceno", invoiceno];
+                PageMethod("getMobile_InvoiceDetails", parameters_getMobile_InvoiceDetails, succeededAjaxFn_getMobile_InvoiceDetails, failedAjaxFn_getMobile_InvoiceDetails, false);
+
+                var parameters_getMobile_InvoiceItems = ["comp", comp, "invoiceno", invoiceno];
+                PageMethod("getMobile_InvoiceItems", parameters_getMobile_InvoiceItems, succeededAjaxFn_getMobile_InvoiceItems, failedAjaxFn_getMobile_InvoiceItems, false);
+
+            } else {
+                alert('Internal System Error!');
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_createMobile_InvoiceInvoice = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_createMobile_InvoiceInvoice: " + textStatus);
+
+            result_createMobile_InvoiceInvoice = JSON.parse(data.d);
+            if (result_createMobile_InvoiceInvoice.status == "Y") {
+                successcreationinvoice = true;
+                invoiceno = result_createMobile_InvoiceInvoice.message;
+            }
+            else {
+                successcreationinvoice = false;
+                invoiceno = "";
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_createMobile_InvoiceInvoice = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_createMobile_InvoiceInvoice: " + textStatus);
+            successcreationinvoice = false;
+            invoiceno = "";
+        }
+
+        function addnewitem() {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_PendingInvoiceList = ["comp", comp, "bpid", $('#recordbpid').val(), "invoicecat", $('#recordinvoicecat').val(), "invoicetype", $('#recordinvoicetype').val()];
+            PageMethod("getMobile_PendingInvoiceList", parameters_getMobile_PendingInvoiceList, succeededAjaxFn_getMobile_PendingInvoiceList, failedAjaxFn_getMobile_PendingInvoiceList, false);
+
+            //itemTable.columns.adjust();
+        }
+
+        succeededAjaxFn_getMobile_PendingInvoiceList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PendingInvoiceList: " + textStatus);
+            $('#myDIV').modal('hide');
+
+            if($('#recordinvoicecat').val() == "SALES_INVOICE")
+            {
+                //$('#myItemList').modal({ backdrop: "static" });
+                $('#myItemList').modal('show').trigger('shown');
+
+                itemTable.clear().draw();
+
+                result_getMobile_PendingInvoiceList = JSON.parse(data.d);
+                var rowno = 0;
+                $.each(result_getMobile_PendingInvoiceList, function (i, result) {
+                    rowno = i + 1;
+                    itemTable.row.add([
+                        '<input id="addcheck_' + rowno + '" name="addcheck_' + rowno + '" type="checkbox" />',
+                        rowno,
+                        result.GetSetshipmentno,
+                        result.GetSetlineno,
+                        result.GetSetorderno,
+                        result.GetSetorder_lineno,
+                        result.GetSetitemno,
+                        result.GetSetitemdesc,
+                        result.GetSetunitcost,
+                        result.GetSetunitprice,
+                        result.GetSetdiscamount,
+                        result.GetSetquantity,
+                        result.GetSetcostprice,
+                        result.GetSetinvoiceprice,
+                        result.GetSettaxcode,
+                        result.GetSettaxrate,
+                        result.GetSettaxamount,
+                        result.GetSettotalinvoice,
+                        result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>' + result.GetSetitemcat + '<br/>Harga Item: RM' + result.GetSetunitprice + "/" + result.GetSetitemtype + '<br/>Diskaun: RM' + result.GetSetdiscamount + "/" + result.GetSetitemtype + '<br/>TAX: ' + result.GetSettaxrate + "%" + '<br/>Shipment: ' + result.GetSetshipmentno + '<br/>Order: ' + result.GetSetorderno,
+                        result.GetSetquantity,
+                        result.GetSettotalinvoice
+                    ]).draw(false);
+
+                });
+                //$('#myItemList').modal('show').trigger('shown');
+
+            }
+            else if($('#recordinvoicecat').val() == "RECEIPT_VOUCHER")
+            {
+                $('#myItemList2').modal('show');
+                itemTable2.clear().draw();
+
+                result_getMobile_PendingInvoiceList = JSON.parse(data.d);
+                var rowno = 0;
+                $.each(result_getMobile_PendingInvoiceList, function (i, result) {
+                    rowno = i + 1;
+                    itemTable2.row.add([
+                        rowno,
+                        rowno,
+                        result.GetSetparamid,
+                        result.GetSetparamdesc,
+                        result.GetSetparamid + '<br/>' + result.GetSetparamdesc,
+                        0,
+                        0
+                    ]).draw(false);
+                });
+
+                /*
+                itemTable2.rows().every(function (x, element) {
+                    var data = this.data();
+                    var rowno = data[1];
+                    $('#addunitprice_' + rowno).change(function () {
+                        var invoiceprice = $('#addunitprice_' + rowno).val() * $('#addquantity_' + rowno).val();
+                        $('#addinvoiceprice_' + rowno).val(invoiceprice.toFixed(2));
+                        var totamnt = parseFloat($('#addinvoiceprice_' + rowno).val());
+                        $('#addtotalinvoice_' + rowno).val(totamnt.toFixed(2));
+                        alert($('#addtotalinvoice_' + rowno).val());
+                    });
+                    $('#addquantity_' + rowno).change(function () {
+                        var invoiceprice = $('#addunitprice_' + rowno).val() * $('#addquantity_' + rowno).val();
+                        $('#addinvoiceprice_' + rowno).val(invoiceprice.toFixed(2));
+                        var totamnt = parseFloat($('#addinvoiceprice_' + rowno).val());
+                        $('#addtotalinvoice_' + rowno).val(totamnt.toFixed(2));
+                    });
+                });
+                */
+                /*
+                $('#tbItemList2 tbody').on('click', 'tr', function () {
+                    var data = itemTable2.row(this).data();
+                    var rowno = data[1];
+                    $('#addunitprice_' + rowno).change(function () {
+                        var invoiceprice = $('#addunitprice_' + rowno).val() * $('#addquantity_' + rowno).val();
+                        $('#addinvoiceprice_' + rowno).val(invoiceprice.toFixed(2));
+                        var totamnt = parseFloat($('#addinvoiceprice_' + rowno).val());
+                        $('#addtotalinvoice_' + rowno).val(totamnt.toFixed(2));
+                    });
+                    $('#addquantity_' + rowno).change(function () {
+                        var invoiceprice = $('#addunitprice_' + rowno).val() * $('#addquantity_' + rowno).val();
+                        $('#addinvoiceprice_' + rowno).val(invoiceprice.toFixed(2));
+                        var totamnt = parseFloat($('#addinvoiceprice_' + rowno).val());
+                        $('#addtotalinvoice_' + rowno).val(totamnt.toFixed(2));
+                    });
+                });
+                */
+
+            }
+
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PendingInvoiceList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PendingInvoiceList: " + textStatus);
+            $('#myDIV').modal('hide');
+        }
+
+        function addlineitem(){
+            $('#myItemList').modal('hide');
+            $('#myDIV').modal({ backdrop: "static" });
+
+            itemTable.rows().every(function (x, element) {
+                var data = this.data();
+                var rowno = data[1];
+                if($('#addcheck_' + rowno).prop("checked") == true){
+                    additemdetails(data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15], data[16], data[17]);
+                }
+            });
+
+            $('#myDIV').modal('hide');
+        }
+
+        function additemdetails(rowno, shipmentno, shipment_lineno, orderno, order_lineno, itemno, itemdesc, unitcost, unitprice, discamount, quantity, costprice, invoiceprice, taxcode, taxrate, taxamount, totalinvoice) {
+            
+            if($('#recordinvoicecat').val() == "RECEIPT_VOUCHER")
+            {
+                $('#myItemList2').modal('hide');            
+                $('#myDIV').modal({ backdrop: "static" });
+            }   
+            
+            var parameters_addMobile_InvoiceItemDetails = ["comp", comp, "invoiceno", invoiceno, "shipmentno", shipmentno, "shipmentlineno", shipment_lineno, "orderno", orderno, "lineno", order_lineno, "itemno", itemno, "itemdesc", itemdesc, "unitcost", unitcost, "unitprice", unitprice, "discamount", discamount, "quantity", quantity, "costprice", costprice, "invoiceprice", invoiceprice, "taxcode", taxcode, "taxrate", taxrate, "taxamount", taxamount, "totalinvoice", totalinvoice];
+            PageMethod("addMobile_InvoiceItemDetails", parameters_addMobile_InvoiceItemDetails, succeededAjaxFn_addMobile_InvoiceItemDetails, failedAjaxFn_addMobile_InvoiceItemDetails, false);
+
+            if (successadditem) {
+
+                var parameters_getMobile_InvoiceItems = ["comp", comp, "invoiceno", invoiceno];
+                PageMethod("getMobile_InvoiceItems", parameters_getMobile_InvoiceItems, succeededAjaxFn_getMobile_InvoiceItems, failedAjaxFn_getMobile_InvoiceItems, false);
+
+            } else {
+                alert(errormessage);
+            }
+
+            if($('#recordinvoicecat').val() == "RECEIPT_VOUCHER")
+            {            
+                $('#myDIV').modal('hide');
+            }
+        }
+
+        succeededAjaxFn_addMobile_InvoiceItemDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_InvoiceItemDetails: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successadditem = true;
+                errormessage = "";
+            }
+            else {
+                successadditem = false;
+                errormessage = result.message;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_InvoiceItemDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_InvoiceItemDetails: " + textStatus);
+            successadditem = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function addshipmentitem(){
+            $('#myShipmentList').modal('hide');
+            $('#myDIV').modal({ backdrop: "static" });
+
+            successcreationinvoice = true;
+            successadditem = true;
+            var rowno = 1;
+            shipmentTable.rows().every(function (x, element) {
+                var data = this.data();                
+                if($('#addcheck_' + data[1]).prop("checked") == true && successcreationinvoice == true && successadditem == true){
+                    addshipmentitemdetails(rowno, data[2], data[4], data[5], data[6], data[7], data[8]);
+                    rowno = rowno + 1;
+                }
+            });
+
+            if(successcreationinvoice && successadditem){
+                window.location.href = "BIOAppMobile_InvoicePage.html?userid=" + userid + "&comp=" + comp + "&invoiceno=" + invoiceno;
+            }else{
+                alert(errormessage);
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        function addshipmentitemdetails(rowno, bpid, shipmentno, shipment_lineno, orderno, order_lineno, itemno) {
+            
+            if(rowno==1)
+            {
+                var parameters_addMobile_InvoiceShipmentItemHeader = ["comp", comp, "invoicecat", "SALES_INVOICE", "shipmentno", shipmentno, "shipmentlineno", shipment_lineno, "orderno", orderno, "orderlineno", order_lineno, "itemno", itemno, "userid", userid];
+                PageMethod("addMobile_InvoiceShipmentItemHeader", parameters_addMobile_InvoiceShipmentItemHeader, succeededAjaxFn_addMobile_InvoiceShipmentItemHeader, failedAjaxFn_addMobile_InvoiceShipmentItemHeader, false);
+            }
+            if (successcreationinvoice == true && invoiceno.length > 0) {
+
+                var parameters_addMobile_InvoiceShipmentItemDetails = ["comp", comp, "invoiceno", invoiceno, "invoicecat", "SALES_INVOICE", "shipmentno", shipmentno, "shipmentlineno", shipment_lineno, "orderno", orderno, "orderlineno", order_lineno, "itemno", itemno, "userid", userid];
+                PageMethod("addMobile_InvoiceShipmentItemDetails", parameters_addMobile_InvoiceShipmentItemDetails, succeededAjaxFn_addMobile_InvoiceShipmentItemDetails, failedAjaxFn_addMobile_InvoiceShipmentItemDetails, false);
+
+            } 
+
+        }
+
+        succeededAjaxFn_addMobile_InvoiceShipmentItemHeader = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_InvoiceShipmentItemHeader: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successcreationinvoice = true;
+                invoiceno = result.message;
+                errormessage = "";
+            }
+            else {
+                successcreationinvoice = false;
+                errormessage = result.message;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_InvoiceShipmentItemHeader = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_InvoiceShipmentItemHeader: " + textStatus);
+            successadditem = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        succeededAjaxFn_addMobile_InvoiceShipmentItemDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_InvoiceShipmentItemDetails: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successadditem = true;
+                errormessage = "";
+            }
+            else {
+                successadditem = false;
+                errormessage = result.message;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_InvoiceShipmentItemDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_InvoiceShipmentItemDetails: " + textStatus);
+            successadditem = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function openlist() {
+            window.location.href = "BIOAppMobile_InvoiceList.html?userid=" + userid;
+        }
+
+        function viewlineitem(lineno, shipmentno, shipmentlineno, itemno, itemdesc, qty, unitprice, totalinvoice, taxcode) {
+            $('#myLineItem').modal('show');
+            $('#lblLineItemNo').text(itemno);
+            //$('#lblLineTotalInvoice').text('RM' + totalinvoice);
+
+            $('#txtLineItemDesc').val(itemdesc);
+            $('#txtLineNo').val(lineno);
+            $('#txtLineShipmentNo').val(shipmentno);
+            $('#txtLineShipmentLineNo').val(shipmentlineno);
+            $('#txtLineItemNo').val(itemno);
+            $('#txtLineItemQty').val(qty);
+            $('#txtLineUnitPrice').val(unitprice);
+            $('#selTaxCode').val(taxcode);
+
+            if($('#recordinvoicecat').val() == "RECEIPT_VOUCHER")
+            {
+                $("#txtLineItemDesc").prop("readonly", false);
+                $("#txtLineItemQty").prop("readonly", false);
+                $("#txtLineUnitPrice").prop("readonly", false);
+                $("#selTaxCode").prop("disabled", false);
+                $("#btnEditLineItem").show();
+            }
+            else
+            {
+                $("#txtLineItemDesc").prop("readonly", true);
+                $("#txtLineItemQty").prop("readonly", true);
+                $("#txtLineUnitPrice").prop("readonly", true);
+                $("#selTaxCode").prop("disabled", false);
+                $("#btnEditLineItem").hide();
+            }
+        }
+
+        $("#txtLineItemQty").change(function(){
+            calculateTotalAmount();
+        });
+
+        $("#txtLineUnitPrice").change(function(){
+            calculateTotalAmount();
+        });
+
+        function calculateTotalAmount() {
+            var invoiceprice = $('#txtLineUnitPrice').val() * $('#txtLineItemQty').val();
+            //$('#lblLineTotalInvoice').text("RM" + invoiceprice.toFixed(2));
+        }
+
+        function editlineitem() {
+            $('#myLineItem').modal('hide');
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_editMobile_InvoiceItemInvoice = ["comp", comp, "invoiceno", invoiceno, "lineno", $('#txtLineNo').val(), "shipmentno", $('#txtShipmentNo').val(), "shipmentlineno", $('#txtShipmentLineNo').val(), "itemno", $('#txtLineItemNo').val(), "itemdesc", $('#txtLineItemDesc').val(), "qty", $('#txtLineItemQty').val(), "unitprice", $('#txtLineUnitPrice').val(), "taxcode", $('#selTaxCode').val()];
+            PageMethod("editMobile_InvoiceItemDetails", parameters_editMobile_InvoiceItemInvoice, succeededAjaxFn_editMobile_InvoiceItemInvoice, failedAjaxFn_editMobile_InvoiceItemInvoice, false);
+
+            if (successedititem) {
+
+                var parameters_getMobile_InvoiceItems = ["comp", comp, "invoiceno", invoiceno];
+                PageMethod("getMobile_InvoiceItems", parameters_getMobile_InvoiceItems, succeededAjaxFn_getMobile_InvoiceItems, failedAjaxFn_getMobile_InvoiceItems, false);
+
+            } else {
+                alert(errormessage);
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_editMobile_InvoiceItemInvoice = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_editMobile_InvoiceItemInvoice: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successedititem = true;
+                errormessage = "";
+            }
+            else {
+                successedititem = false;
+                errormessage = result.message;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_editMobile_InvoiceItemInvoice = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_editMobile_InvoiceItemInvoice: " + textStatus);
+            successedititem = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function deletelineitem() {
+            $('#myLineItem').modal('hide');
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_deleteMobile_InvoiceItemDetails = ["comp", comp, "invoiceno", invoiceno, "lineno", $('#txtLineNo').val(), "shipmentno", $('#txtShipmentNo').val(), "shipmentlineno", $('#txtShipmentLineNo').val(), "itemno", $('#txtLineItemNo').val()];
+            PageMethod("deleteMobile_InvoiceItemDetails", parameters_deleteMobile_InvoiceItemDetails, succeededAjaxFn_deleteMobile_InvoiceItemDetails, failedAjaxFn_deleteMobile_InvoiceItemDetails, false);
+
+            if (successdeleteitem) {
+
+                var parameters_getMobile_InvoiceItems = ["comp", comp, "invoiceno", invoiceno];
+                PageMethod("getMobile_InvoiceItems", parameters_getMobile_InvoiceItems, succeededAjaxFn_getMobile_InvoiceItems, failedAjaxFn_getMobile_InvoiceItems, false);
+
+            } else {
+                alert(errormessage);
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_deleteMobile_InvoiceItemDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_deleteMobile_InvoiceItemDetails: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successdeleteitem = true;
+                errormessage = "";
+            }
+            else {
+                successdeleteitem = false;
+                errormessage = result.message;
+            }
+        };
+
+        //notification for failed ajax transaction
+        failedAjaxFn_deleteMobile_InvoiceItemDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_deleteMobile_InvoiceItemDetails: " + textStatus);
+            successdeleteitem = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function cancelinvoice() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_updateMobile_InvoiceHeaderStatus = ["comp", comp, "invoiceno", invoiceno, "status", "CANCELLED", "userid", userid];
+            PageMethod("updateMobile_InvoiceHeaderStatus", parameters_updateMobile_InvoiceHeaderStatus, succeededAjaxFn_updateMobile_InvoiceHeaderStatus, failedAjaxFn_updateMobile_InvoiceHeaderStatus, false);
+
+            if (successcancelinvoice) {
+                window.location.href = "BIOAppMobile_InvoicePage.html?userid=" + userid + "&comp=" + comp + "&invoiceno=" + invoiceno;
+            }
+            else
+            {
+                alert(errormessage);
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_updateMobile_InvoiceHeaderStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_InvoiceHeaderStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successcancelinvoice = true;
+                errormessage = "";
+            }
+            else {
+                successcancelinvoice = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_InvoiceHeaderStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_InvoiceHeaderStatus: " + textStatus);
+            successcancelinvoice = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function openpaymentreceipt() {
+            window.location.href = "BIOAppMobile_PaymentReceiptPage.html?userid=" + userid + "&comp=" + comp + "&invoiceno=" + invoiceno;
+        }
+
+        function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+            try {
+                decimalCount = Math.abs(decimalCount);
+                decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+                const negativeSign = amount < 0 ? "-" : "";
+
+                let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+                let j = (i.length > 3) ? i.length % 3 : 0;
+
+                return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+            } catch (e) {
+                console.log(e)
+            }
+        }
+    </script>
+</body>
+</html>

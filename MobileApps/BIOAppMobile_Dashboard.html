@@ -1,0 +1,998 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="css/loading.css" rel="stylesheet" type="text/css">
+    <link href="css/calendar.css" type="text/css" rel="stylesheet" />
+
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">-->
+
+    <link rel="stylesheet" href="normalize/normalize.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">-->
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />-->
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/4.5.6/css/ionicons.min.css" />-->
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.19/css/dataTables.bootstrap.min.css">-->
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/skins/_all-skins.min.css" />-->
+
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <script language="JavaScript" src="js/calendar.js" type="text/javascript"></script>
+    <script language="JavaScript" src="js/calendar-en.js" type="text/javascript"></script>
+    <script language="JavaScript" src="js/calendar-setup.js" type="text/javascript"></script>
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .box-header > .box-tools {
+            top: 10px;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            border: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade modal-update-dashboard" id="myUpdDashboardDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    Pilih Tahun & Bulan Untuk Dikemaskini
+                </div>
+                <div class="modal-body">
+                    <div id="form2" class="form-horizontal form-label-left">
+
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Tahun<span class="required">*</span></label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <select id="actualyear" name="actualyear" class="select2_single form-control" tabindex="-1" style="width:100%;" required="required">
+                                    <option>-select-</option>
+                                    <option value="2016">2016</option>
+                                    <option value="2017">2017</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2019">2019</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12">Bulan<span class="required">*</span></label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <select id="actualmonth" name="actualmonth" class="select2_single form-control" tabindex="-1" style="width:100%;" required="required">
+                                    <option></option>
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="updatedashboard();">Kemaskini</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    DASHBOARD
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item active"><i class="fa fa-list"></i> Dashboard <span id="comp" name="comp"></span></li>
+                </ol>
+                <div class="menu-info">
+                    <a href="#" class="btn btn-default btn-flat" data-toggle="modal" data-target=".modal-update-dashboard" style="margin-bottom:5px;">Kemaskini Dashboard</a>
+                </div>
+                <!-- top tiles -->
+                <div class="row">
+                    <div class="col-lg-4 col-xs-4" style="padding-right:unset;">
+                        <!-- small box -->
+                        <div class="small-box bg-green">
+                            <div class="inner">
+                                <h3 style="font-size:26px;"><span id="lblStockInQty" name="lblStockInQty"></span></h3>
+
+                                <p>RM <span id="lblStockInAmnt" name="lblStockInAmnt"></span></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-bag"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">TERIMAAN <i class="fa fa-sign-in"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-4 col-xs-4" style="padding-left:7.5px;padding-right:7.5px;">
+                        <!-- small box -->
+                        <div class="small-box bg-yellow">
+                            <div class="inner">
+                                <h3 style="font-size:26px;"><span id="lblStockOutQty" name="lblStockOutQty"></span></h3>
+
+                                <p>RM <span id="lblStockOutAmnt" name="lblStockOutAmnt"></span></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-stats-bars"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">KELUARAN <i class="fa fa-sign-out"></i></a>
+                        </div>
+                    </div>
+                    <!-- ./col -->
+                    <div class="col-lg-4 col-xs-4" style="padding-left:unset;">
+                        <!-- small box -->
+                        <div class="small-box bg-aqua">
+                            <div class="inner">
+                                <h3 style="font-size:26px;"><span id="lblStockSOHQty" name="lblStockSOHQty"></span></h3>
+
+                                <p>RM <span id="lblStockSOHAmnt" name="lblStockSOHAmnt"></span></p>
+                            </div>
+                            <div class="icon">
+                                <i class="ion ion-stats-bars"></i>
+                            </div>
+                            <a href="#" class="small-box-footer">SEMASA <i class="fa fa-area-chart"></i></a>
+                        </div>
+                    </div>
+                </div>
+                <!-- /top tiles -->
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title" style="font-weight:unset;">Transaksi Stok Inventori</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <div class="box">
+                    <div class="box-header">                        
+                        <h3 class="box-title" style="font-weight:unset;">Kedudukan Stok Inventori</h3>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <div id="echart_line" style="height:580px;"></div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="home" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">home</i>
+                Utama
+            </div>
+        </div>
+        <div id="stock" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">domain</i>
+                Stok
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "home") {
+                    window.location.href = "BIOAppMobile_Dashboard.html?userid=" + userid;
+                }
+                if (this.id == "stock") {
+                    window.location.href = "BIOAppMobile_Dashboard.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var comp;
+        var successupdate = false;
+
+        var stocktransqtyin = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var stocktransamntin = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var stocktransqtyout = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        var stocktransamntout = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+        var today = new Date();
+        var updyear = today.getFullYear();
+        var updmonth = today.getMonth() + 1;
+        if (updmonth < 10) {
+            updmonth = '0' + updmonth;
+        } 
+
+        //On document ready
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+
+            var parameters_getMobile_UserProfile = ["userid", userid];
+            PageMethod("getMobile_UserProfile", parameters_getMobile_UserProfile, succeededAjaxFn_getMobile_UserProfile, failedAjaxFn_getMobile_UserProfile, false);
+
+            if (comp && comp.length) {
+
+                var parameters_updateMobile_ReportFYRYearMonth = ["comp", comp, "financeyear", "", "financemonth", "", "actualyear", updyear, "actualmonth", updmonth];
+                PageMethod("updateMobile_ReportFYRYearMonth", parameters_updateMobile_ReportFYRYearMonth, succeededAjaxFn_updateMobile_ReportFYRYearMonth, failedAjaxFn_updateMobile_ReportFYRYearMonth, false);
+
+                if (successupdate) {
+                    
+                    var parameters_getMobile_ReportStockTransQtyIN = ["comp", comp, "fyr", updyear, "type", "STOCK_IN_QTY", "tablename", "dashboard_stockin"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransQtyIN, succeededAjaxFn_getMobile_ReportStockTransQtyIN, failedAjaxFn_getMobile_ReportStockTransQtyIN, false);
+                    
+                    var parameters_getMobile_ReportStockTransAmntIN = ["comp", comp, "fyr", updyear, "type", "STOCK_IN", "tablename", "dashboard_stockin"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransAmntIN, succeededAjaxFn_getMobile_ReportStockTransAmntIN, failedAjaxFn_getMobile_ReportStockTransAmntIN, false);
+
+                    var parameters_getMobile_ReportStockTransQtyOUT = ["comp", comp, "fyr", updyear, "type", "STOCK_OUT_QTY", "tablename", "dashboard_stockout"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransQtyOUT, succeededAjaxFn_getMobile_ReportStockTransQtyOUT, failedAjaxFn_getMobile_ReportStockTransQtyOUT, false);
+                    
+                    var parameters_getMobile_ReportStockTransAmntOUT = ["comp", comp, "fyr", updyear, "type", "STOCK_OUT", "tablename", "dashboard_stockout"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransAmntOUT, succeededAjaxFn_getMobile_ReportStockTransAmntOUT, failedAjaxFn_getMobile_ReportStockTransAmntOUT, false);
+
+                    var parameters_getMobile_StockSummary = ["comp", comp, "itemno", "", "itemlocation", "", "datesoh", ""];
+                    PageMethod("getMobile_StockSummary", parameters_getMobile_StockSummary, succeededAjaxFn_getMobile_StockSummary, failedAjaxFn_getMobile_StockSummary, false);
+                    
+                    var parameters_getMobile_StockStateHeaderList = ["comp", comp, "stockstateno", "", "openingdate", "", "openingtype", "", "closingdate", "", "closingtype", "", "status", ""];
+                    PageMethod("getMobile_StockStateHeaderList", parameters_getMobile_StockStateHeaderList, succeededAjaxFn_getMobile_StockStateHeaderList, failedAjaxFn_getMobile_StockStateHeaderList, false);                    
+
+                    populateStockChart();
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_UserProfile = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_UserProfile: " + textStatus);
+
+            result_getMobile_UserProfile = JSON.parse(data.d);
+
+            comp = result_getMobile_UserProfile.GetSetcomp;
+            $('#comp').text('[' + comp + ']');
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_UserProfile = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_UserProfile: " + textStatus);
+            //$('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_updateMobile_ReportFYRYearMonth = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_ReportFYRYearMonth: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                successupdate = true;
+            }
+            else {
+                successupdate = false;
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_ReportFYRYearMonth = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_ReportFYRYearMonth: " + textStatus);
+            successupdate = false;
+        }
+
+        //BEGIN: getMobile_ReportStockTransQtyIN
+        succeededAjaxFn_getMobile_ReportStockTransQtyIN = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportStockTransQtyIN: " + textStatus);
+
+            result = JSON.parse(data.d);
+            $('#lblStockInQty').text(result.GetSetTODATE);
+            stocktransqtyin = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+            //stocktransqtyin = '[' + result.GetSetMON01 + ',' + result.GetSetMON02 + ',' + result.GetSetMON03 + ',' + result.GetSetMON04 + ',' + result.GetSetMON05 + ',' + result.GetSetMON06 + ',' + result.GetSetMON07 + ',' + result.GetSetMON08 + ',' + result.GetSetMON09 + ',' + result.GetSetMON10 + ',' + result.GetSetMON11 + ',' + result.GetSetMON12 + ']';
+
+        }
+
+        failedAjaxFn_getMobile_ReportStockTransQtyIN = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportStockTransQtyIN: " + textStatus);
+        }
+        //END: getMobile_ReportStockTransQtyIN
+
+        //BEGIN: getMobile_ReportStockTransAmntIN
+        succeededAjaxFn_getMobile_ReportStockTransAmntIN = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportStockTransAmntIN: " + textStatus);
+
+            result = JSON.parse(data.d);
+            $('#lblStockInAmnt').text(formatMoney(result.GetSetTODATE));
+            stocktransamntin = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+            //stocktransamntin = '[' + result.GetSetMON01 + ',' + result.GetSetMON02 + ',' + result.GetSetMON03 + ',' + result.GetSetMON04 + ',' + result.GetSetMON05 + ',' + result.GetSetMON06 + ',' + result.GetSetMON07 + ',' + result.GetSetMON08 + ',' + result.GetSetMON09 + ',' + result.GetSetMON10 + ',' + result.GetSetMON11 + ',' + result.GetSetMON12 + ']';
+
+        }
+
+        failedAjaxFn_getMobile_ReportStockTransAmntIN = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportStockTransAmntIN: " + textStatus);
+        }
+        //END: getMobile_ReportStockTransQtyIN
+
+        //BEGIN: getMobile_ReportStockTransQtyOUT
+        succeededAjaxFn_getMobile_ReportStockTransQtyOUT = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportStockTransQtyOUT: " + textStatus);
+
+            result = JSON.parse(data.d);
+            $('#lblStockOutQty').text(result.GetSetTODATE);
+            stocktransqtyout = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+            //stocktransqtyout = '[' + result.GetSetMON01 + ',' + result.GetSetMON02 + ',' + result.GetSetMON03 + ',' + result.GetSetMON04 + ',' + result.GetSetMON05 + ',' + result.GetSetMON06 + ',' + result.GetSetMON07 + ',' + result.GetSetMON08 + ',' + result.GetSetMON09 + ',' + result.GetSetMON10 + ',' + result.GetSetMON11 + ',' + result.GetSetMON12 + ']';
+
+        }
+
+        failedAjaxFn_getMobile_ReportStockTransQtyOUT = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportStockTransQtyOUT: " + textStatus);
+        }
+        //END: getMobile_ReportStockTransQtyOUT
+
+        //BEGIN: getMobile_ReportStockTransAmntOUT
+        succeededAjaxFn_getMobile_ReportStockTransAmntOUT = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_ReportStockTransAmntOUT: " + textStatus);
+
+            result = JSON.parse(data.d);
+            $('#lblStockOutAmnt').text(formatMoney(result.GetSetTODATE));
+            stocktransamntout = [result.GetSetMON01, result.GetSetMON02, result.GetSetMON03, result.GetSetMON04, result.GetSetMON05, result.GetSetMON06, result.GetSetMON07, result.GetSetMON08, result.GetSetMON09, result.GetSetMON10, result.GetSetMON11, result.GetSetMON12];
+            //stocktransamntout = '[' + result.GetSetMON01 + ',' + result.GetSetMON02 + ',' + result.GetSetMON03 + ',' + result.GetSetMON04 + ',' + result.GetSetMON05 + ',' + result.GetSetMON06 + ',' + result.GetSetMON07 + ',' + result.GetSetMON08 + ',' + result.GetSetMON09 + ',' + result.GetSetMON10 + ',' + result.GetSetMON11 + ',' + result.GetSetMON12 + ']';
+
+        }
+
+        failedAjaxFn_getMobile_ReportStockTransAmntOUT = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_ReportStockTransAmntOUT: " + textStatus);
+        }
+        //END: getMobile_ReportStockTransQtyOUT
+
+        //BEGIN: getMobile_StockSummary
+        succeededAjaxFn_getMobile_StockSummary = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_StockSummary: " + textStatus);
+
+            result = JSON.parse(data.d);
+            $('#lblStockSOHQty').text(result.GetSetqtysoh);
+            $('#lblStockSOHAmnt').text(formatMoney(result.GetSetcostsoh));
+
+        }
+
+        failedAjaxFn_getMobile_StockSummary = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_StockSummary: " + textStatus);
+        }
+        //END: getMobile_StockSummary
+
+        //BEGIN: getMobile_StockStateHeaderList
+        succeededAjaxFn_getMobile_StockStateHeaderList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_StockStateHeaderList: " + textStatus);
+
+            var dateclosing = [""];
+            var openingamnt = [0];
+            var closingamnt = [0];
+
+            getMobile_StockStateHeaderList = JSON.parse(data.d);
+            $.each(getMobile_StockStateHeaderList, function (i, result) {
+                dateclosing.push(result.GetSetclosingdate);
+                openingamnt.push(result.GetSetstockopeningamount);
+                closingamnt.push(result.GetSetstockclosingamount);
+            });
+
+            populateStockClosingChart(dateclosing, openingamnt, closingamnt);
+
+        }
+
+        failedAjaxFn_getMobile_StockStateHeaderList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_StockStateHeaderList: " + textStatus);
+        }
+        //END: getMobile_StockStateHeaderList
+
+        function updatedashboard() {
+
+            $('#myUpdDashboardDIV').modal('hide'); 
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            if (comp && comp.length) {
+
+                var parameters_updateMobile_ReportFYRYearMonth = ["comp", comp, "financeyear", "", "financemonth", "", "actualyear", $('#actualyear').val(), "actualmonth", $('#actualmonth').val()];
+                PageMethod("updateMobile_ReportFYRYearMonth", parameters_updateMobile_ReportFYRYearMonth, succeededAjaxFn_updateMobile_ReportFYRYearMonth, failedAjaxFn_updateMobile_ReportFYRYearMonth, false);
+
+                if (successupdate) {
+
+                    var parameters_getMobile_ReportStockTransQtyIN = ["comp", comp, "fyr", updyear, "type", "STOCK_IN_QTY", "tablename", "dashboard_stockin"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransQtyIN, succeededAjaxFn_getMobile_ReportStockTransQtyIN, failedAjaxFn_getMobile_ReportStockTransQtyIN, false);
+
+                    var parameters_getMobile_ReportStockTransAmntIN = ["comp", comp, "fyr", updyear, "type", "STOCK_IN", "tablename", "dashboard_stockin"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransAmntIN, succeededAjaxFn_getMobile_ReportStockTransAmntIN, failedAjaxFn_getMobile_ReportStockTransAmntIN, false);
+
+                    var parameters_getMobile_ReportStockTransQtyOUT = ["comp", comp, "fyr", updyear, "type", "STOCK_OUT_QTY", "tablename", "dashboard_stockout"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransQtyOUT, succeededAjaxFn_getMobile_ReportStockTransQtyOUT, failedAjaxFn_getMobile_ReportStockTransQtyOUT, false);
+
+                    var parameters_getMobile_ReportStockTransAmntOUT = ["comp", comp, "fyr", updyear, "type", "STOCK_OUT", "tablename", "dashboard_stockout"];
+                    PageMethod("getMobile_ReportStockTrans", parameters_getMobile_ReportStockTransAmntOUT, succeededAjaxFn_getMobile_ReportStockTransAmntOUT, failedAjaxFn_getMobile_ReportStockTransAmntOUT, false);
+
+                    var parameters_getMobile_StockSummary = ["comp", comp, "itemno", "", "itemlocation", "", "datesoh", ""];
+                    PageMethod("getMobile_StockSummary", parameters_getMobile_StockSummary, succeededAjaxFn_getMobile_StockSummary, failedAjaxFn_getMobile_StockSummary, false);
+                    
+                    var parameters_getMobile_StockStateHeaderList = ["comp", comp, "stockstateno", "", "openingdate", "", "openingtype", "", "closingdate", "", "closingtype", "", "status", ""];
+                    PageMethod("getMobile_StockStateHeaderList", parameters_getMobile_StockStateHeaderList, succeededAjaxFn_getMobile_StockStateHeaderList, failedAjaxFn_getMobile_StockStateHeaderList, false);
+                    
+                    populateStockChart();
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        function formatMoney(amount, decimalCount = 2, decimal = ".", thousands = ",") {
+            try {
+                decimalCount = Math.abs(decimalCount);
+                decimalCount = isNaN(decimalCount) ? 2 : decimalCount;
+
+                const negativeSign = amount < 0 ? "-" : "";
+
+                let i = parseInt(amount = Math.abs(Number(amount) || 0).toFixed(decimalCount)).toString();
+                let j = (i.length > 3) ? i.length % 3 : 0;
+
+                return negativeSign + (j ? i.substr(0, j) + thousands : '') + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + thousands) + (decimalCount ? decimal + Math.abs(amount - i).toFixed(decimalCount).slice(2) : "");
+            } catch (e) {
+                console.log(e)
+            }
+        }
+
+    </script>
+
+    <script src="js/Chart.custom.js"></script>
+    <script src="js/echarts.min.js"></script>
+    <!-- Chart.js -->
+    <script>
+        Chart.defaults.global.legend = {
+            enabled: false
+        };
+
+        // Bar chart
+        var ctxRev = document.getElementById("stockChart");
+
+        function populateStockChart() {
+
+            var mybarChart = new Chart(ctxRev, {
+                type: 'bar',
+                data: {
+                    labels: ["Jan", "Feb", "Mac", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+                    datasets: [{
+                        label: 'Terimaan',
+                        backgroundColor: "#3498DB",
+                        data: stocktransqtyin
+                    }, {
+                        label: 'Keluaran',
+                        backgroundColor: "#1ABB9C",
+                            data: stocktransqtyout
+                    }]
+                },
+
+                options: {
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+    </script>
+    <!-- /Chart.js -->
+    <!-- eChartLine -->
+    <script>
+
+        var theme = {
+            color: [
+                '#26B99A', '#34495E', '#BDC3C7', '#3498DB',
+                '#9B59B6', '#8abb6f', '#759c6a', '#bfd3b7'
+            ],
+
+            title: {
+                itemGap: 8,
+                textStyle: {
+                    fontWeight: 'normal',
+                    color: '#408829'
+                }
+            },
+
+            dataRange: {
+                color: ['#1f610a', '#97b58d']
+            },
+
+            toolbox: {
+                color: ['#408829', '#408829', '#408829', '#408829']
+            },
+
+            tooltip: {
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                axisPointer: {
+                    type: 'line',
+                    lineStyle: {
+                        color: '#408829',
+                        type: 'dashed'
+                    },
+                    crossStyle: {
+                        color: '#408829'
+                    },
+                    shadowStyle: {
+                        color: 'rgba(200,200,200,0.3)'
+                    }
+                }
+            },
+
+            dataZoom: {
+                dataBackgroundColor: '#eee',
+                fillerColor: 'rgba(64,136,41,0.2)',
+                handleColor: '#408829'
+            },
+            grid: {
+                borderWidth: 0
+            },
+
+            categoryAxis: {
+                axisLine: {
+                    lineStyle: {
+                        color: '#408829'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: ['#eee']
+                    }
+                }
+            },
+
+            valueAxis: {
+                axisLine: {
+                    lineStyle: {
+                        color: '#408829'
+                    }
+                },
+                splitArea: {
+                    show: true,
+                    areaStyle: {
+                        color: ['rgba(250,250,250,0.1)', 'rgba(200,200,200,0.1)']
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: ['#eee']
+                    }
+                }
+            },
+            timeline: {
+                lineStyle: {
+                    color: '#408829'
+                },
+                controlStyle: {
+                    normal: { color: '#408829' },
+                    emphasis: { color: '#408829' }
+                }
+            },
+
+            k: {
+                itemStyle: {
+                    normal: {
+                        color: '#68a54a',
+                        color0: '#a9cba2',
+                        lineStyle: {
+                            width: 1,
+                            color: '#408829',
+                            color0: '#86b379'
+                        }
+                    }
+                }
+            },
+            map: {
+                itemStyle: {
+                    normal: {
+                        areaStyle: {
+                            color: '#ddd'
+                        },
+                        label: {
+                            textStyle: {
+                                color: '#c12e34'
+                            }
+                        }
+                    },
+                    emphasis: {
+                        areaStyle: {
+                            color: '#99d2dd'
+                        },
+                        label: {
+                            textStyle: {
+                                color: '#c12e34'
+                            }
+                        }
+                    }
+                }
+            },
+            force: {
+                itemStyle: {
+                    normal: {
+                        linkStyle: {
+                            strokeColor: '#408829'
+                        }
+                    }
+                }
+            },
+            chord: {
+                padding: 4,
+                itemStyle: {
+                    normal: {
+                        lineStyle: {
+                            width: 1,
+                            color: 'rgba(128, 128, 128, 0.5)'
+                        },
+                        chordStyle: {
+                            lineStyle: {
+                                width: 1,
+                                color: 'rgba(128, 128, 128, 0.5)'
+                            }
+                        }
+                    },
+                    emphasis: {
+                        lineStyle: {
+                            width: 1,
+                            color: 'rgba(128, 128, 128, 0.5)'
+                        },
+                        chordStyle: {
+                            lineStyle: {
+                                width: 1,
+                                color: 'rgba(128, 128, 128, 0.5)'
+                            }
+                        }
+                    }
+                }
+            },
+            gauge: {
+                startAngle: 225,
+                endAngle: -45,
+                axisLine: {
+                    show: true,
+                    lineStyle: {
+                        color: [[0.2, '#86b379'], [0.8, '#68a54a'], [1, '#408829']],
+                        width: 8
+                    }
+                },
+                axisTick: {
+                    splitNumber: 10,
+                    length: 12,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                axisLabel: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                },
+                splitLine: {
+                    length: 18,
+                    lineStyle: {
+                        color: 'auto'
+                    }
+                },
+                pointer: {
+                    length: '90%',
+                    color: 'auto'
+                },
+                title: {
+                    textStyle: {
+                        color: '#333'
+                    }
+                },
+                detail: {
+                    textStyle: {
+                        color: 'auto'
+                    }
+                }
+            },
+            textStyle: {
+                fontFamily: 'Arial, Verdana, sans-serif'
+            }
+        };
+
+        var echartLine = echarts.init(document.getElementById('echart_line'), theme);
+
+        function populateStockClosingChart(dateclosing, openingamnt, closingamnt) {
+
+            echartLine.setOption({
+                title: {
+                    text: 'Kedudukan Stok & Inventori',
+                    subtext: 'BY CLOSING DATE'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    x: 220,
+                    y: 40,
+                    data: ['Stock Opening Amount (RM)', 'Stock Closing Amount (RM)']
+                },
+                toolbox: {
+                    show: true,
+                    feature: {
+                        magicType: {
+                            show: true,
+                            title: {
+                                line: 'Line',
+                                bar: 'Bar'
+                            },
+                            type: ['line', 'bar']
+                        },
+                        restore: {
+                            show: true,
+                            title: "Restore"
+                        },
+                        saveAsImage: {
+                            show: true,
+                            title: "Save Image"
+                        }
+                    }
+                },
+                calculable: true,
+                xAxis: [{
+                    type: 'category',
+                    boundaryGap: false,
+                    data: dateclosing
+                }],
+                yAxis: [{
+                    type: 'value'
+                }],
+                series: [{
+                    name: 'Stock Opening Amount (RM)',
+                    type: 'line',
+                    smooth: true,
+                    itemStyle: {
+                        normal: {
+                            areaStyle: {
+                                type: 'default'
+                            }
+                        }
+                    },
+                    data: openingamnt
+                }, {
+                        name: 'Stock Closing Amount (RM)',
+                    type: 'line',
+                    smooth: true,
+                    itemStyle: {
+                        normal: {
+                            areaStyle: {
+                                type: 'default'
+                            }
+                        }
+                    },
+                        data: closingamnt
+                }]
+            });
+        }
+
+    </script>
+    <!-- /eChartLine -->
+
+</body>
+</html>

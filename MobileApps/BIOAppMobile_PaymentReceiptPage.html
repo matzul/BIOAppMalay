@@ -1,0 +1,828 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="normalize/normalize.css">
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            binvoice: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    INVOIS HASIL
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><a href="#" onclick="openlist();"><i class="fa fa-list"></i> Senarai</a></li>
+                    <li class="breadcrumb-item"><a href="#" onclick="openinvoice();">Invois Hasil</a></li>
+                    <li class="breadcrumb-item active">Bayaran Terima <span id="comp" name="comp"></span></li>
+                </ol>
+                <div class="menu-info" style="margin-bottom:5px;">
+                    <input type="text" id="labelinvoiceno" name="labelinvoiceno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="No. Invois:" />
+                    <input type="text" id="recordinvoiceno" name="recordinvoiceno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelinvoicecat" name="labelinvoicecat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Kategori:" />
+                    <input type="text" id="recordinvoicecat" name="recordinvoicecat" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelinvoicetype" name="labelinvoicetype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Jenis:" />
+                    <input type="text" id="recordinvoicetype" name="recordinvoicetype" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelbpid" name="labelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pelanggan:" />
+                    <input type="hidden" id="recordbpid" name="recordbpid" />
+                    <input type="hidden" id="recordstatus" name="recordstatus" />
+                    <input type="text" id="recordbpdesc" name="recordbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                </div>
+                <div id="tabsPayRcpt" class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                    </ul>
+                    <div class="tab-content">
+                        <div class="active tab-pane" id="payrcptitem">
+
+                            <div class="">
+                                <div class="pull-left">
+                                    <input type="text" id="payrcptstatus" name="payrcptstatus" class="product_price form-control" readonly="readonly" value="" style="text-align:left;" />
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-sm" onclick=""><i class="fa fa-print"></i></button>
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="no-padding">
+
+                                    <table id="invoicelist" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th style="display:none;">Comp</th>
+                                                <th style="display:none;">PayRcptNo</th>
+                                                <th style="display:none;">LineNo</th>
+                                                <th style="display:none;">InvoiceNo</th>
+                                                <th style="display:none;">InvoiceDate</th>
+                                                <th>No. Invois / Tarikh</th>
+                                                <th style="display:none;">Jumlah</th>
+                                                <th>Bayaran</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                            <!-- /.box -->
+
+                        </div><!-- /.tab-pane-->
+                    </div><!-- /.tab-content-->
+                </div>
+                <div class="menu-info">
+                    <a id="btnProcess" name="btnProcess" href="#" class="btn btn-default btn-flat" onclick="processpayrcpt();" style="margin-bottom:5px;">Proses</a>
+                    <a id="btnBack" name="btnBack" href="#" onclick="openinvoice();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Kembali</a>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="list" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">menu</i>
+                Senarai
+            </div>
+        </div>
+        <div id="invoice" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">local_atm</i>
+                Invois
+            </div>
+        </div>
+        <div id="report" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">receipt</i>
+                Laporan
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "list") {
+                    window.location.href = "BIOAppMobile_InvoiceList.html?userid=" + userid;
+                }
+                else if (this.id == "invoice") {
+                    window.location.href = "BIOAppMobile_InvoicePage.html?userid=" + userid;
+                }
+                else if (this.id == "report") {
+                    window.location.href = "BIOAppMobile_InvoiceList.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var comp;
+        var invoiceno;
+        var pendpayrcpt = 0;
+        var savepayrcpt = false;
+        var payrcptno = "";
+        var errormessage = "";
+
+        var oTable;
+
+
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+            comp = getParameterByName('comp');
+            invoiceno = getParameterByName('invoiceno');
+
+            $('#comp').text('[' + comp + ']');
+
+            oTable = $('#invoicelist').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'invoiceing': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    },
+                    {
+                        "targets": [7],
+                        "visible": false
+                    }
+                ]
+            });
+
+            if (comp && comp.length) {
+                if (invoiceno && invoiceno.length) {
+
+                    var parameters_getMobile_InvoiceDetails = ["comp", comp, "invoiceno", invoiceno];
+                    PageMethod("getMobile_InvoiceDetails", parameters_getMobile_InvoiceDetails, succeededAjaxFn_getMobile_InvoiceDetails, failedAjaxFn_getMobile_InvoiceDetails, false);
+
+                    var parameters_getMobile_InvoicePayRcptList = ["comp", comp, "invoiceno", invoiceno];
+                    PageMethod("getMobile_InvoicePayRcptList", parameters_getMobile_InvoicePayRcptList, succeededAjaxFn_getMobile_InvoicePayRcptList, failedAjaxFn_getMobile_InvoicePayRcptList, false);
+
+                } else {
+
+                }
+            } else {
+                alert('Internal system error!');
+            }
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_InvoiceDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_InvoiceDetails: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_InvoiceDetails = JSON.parse(data.d);
+            $('#recordinvoiceno').val(result_getMobile_InvoiceDetails.GetSetinvoiceno);
+            $('#recordinvoicecat').val(result_getMobile_InvoiceDetails.GetSetinvoicecat);
+            $('#recordinvoicetype').val(result_getMobile_InvoiceDetails.GetSetinvoicetype);
+            $('#recordbpid').val(result_getMobile_InvoiceDetails.GetSetbpid);
+            $('#recordstatus').val(result_getMobile_InvoiceDetails.GetSetinvoicestatus);
+            $('#recordbpdesc').val(result_getMobile_InvoiceDetails.GetSetbpdesc);
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_InvoiceDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_InvoiceDetails: " + textStatus);
+        }
+
+        succeededAjaxFn_getMobile_InvoicePayRcptList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_InvoicePayRcptList: " + textStatus);
+
+            checkPendingPayRcptItem();
+
+            result_getMobile_InvoicePayRcptList = JSON.parse(data.d);
+            if (result_getMobile_InvoicePayRcptList.countpayrcpt > 0) {
+                $.each(result_getMobile_InvoicePayRcptList.arraypayrcptno, function (i, result) {
+                    var num_tabs = $('div#tabsPayRcpt ul li').length + 1;
+
+                    $('div#tabsPayRcpt ul').append(
+                        '<li ' + (i == 0 ? 'class="active"' : '') +'><a href="#payrcptitem" data-toggle="tab" onclick="getPayRcptItem(\'' + result +'\');">' + result + '</a></li>'
+                    );
+                    if (i == 0) {
+                        var parameters_getMobile_InvoicePayRcptItem = ["comp", comp, "invoiceno", invoiceno, "payrcptno", result];
+                        PageMethod("getMobile_InvoicePayRcptItem", parameters_getMobile_InvoicePayRcptItem, succeededAjaxFn_getMobile_InvoicePayRcptItem, failedAjaxFn_getMobile_InvoicePayRcptItem, false);
+
+                        $('#btnProcess').hide();
+                    }
+                });
+
+                //check if pending payrcpt item exist or not?
+                if (pendpayrcpt != 0) {
+
+                    var num_tabs = $('div#tabsPayRcpt ul li').length + 1;
+
+                    $('div#tabsPayRcpt ul').append(
+                        '<li><a href="#payrcptitem" data-toggle="tab" onclick="getPendingPayRcptItem();">BARU</a></li>'
+                    );
+                }
+            }
+            else
+            {
+                var num_tabs = $('div#tabsPayRcpt ul li').length + 1;
+
+                $('div#tabsPayRcpt ul').append(
+                    '<li class="active"><a href="#payrcptitem" data-toggle="tab" onclick="getNewPayRcptItem();">BARU</a></li>'
+                );
+
+                var parameters_getMobile_InvoiceHeaderList = ["comp", comp, "invoiceno", invoiceno];
+                PageMethod("getMobile_InvoiceHeaderList", parameters_getMobile_InvoiceHeaderList, succeededAjaxFn_getMobile_InvoiceHeaderList, failedAjaxFn_getMobile_InvoiceHeaderList, false);
+
+                if (pendpayrcpt != 0) {
+                    $('#btnProcess').show();
+                }
+                else
+                {
+                    $('#btnProcess').hide();
+                }
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_InvoicePayRcptList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_InvoicePayRcptList: " + textStatus);
+            $('#btnProcess').hide();
+        }
+
+        function getPayRcptItem(payrcptno) {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_InvoicePayRcptItem = ["comp", comp, "invoiceno", invoiceno, "payrcptno", payrcptno];
+            PageMethod("getMobile_InvoicePayRcptItem", parameters_getMobile_InvoicePayRcptItem, succeededAjaxFn_getMobile_InvoicePayRcptItem, failedAjaxFn_getMobile_InvoicePayRcptItem, false);
+
+            $('#btnProcess').hide();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_InvoicePayRcptItem = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_InvoicePayRcptItem: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_InvoicePayRcptItem = JSON.parse(data.d);
+            $.each(result_getMobile_InvoicePayRcptItem, function (i, result) {
+
+                $('#payrcptstatus').val(result.GetSetstatus);
+                oTable.row.add([
+                    i+1,
+                    result.GetSetcomp,
+                    result.GetSetpayrcptno,
+                    result.GetSetlineno,
+                    result.GetSetinvoiceno,
+                    result.GetSetinvoicedate,
+                    result.GetSetinvoiceno + '<br/>' + result.GetSetinvoicedate + '<br/>Jumlah: RM' + result.GetSetinvoiceprice,
+                    result.GetSetinvoiceprice,
+                    result.GetSetpayrcptprice + '<br/>' + result.GetSetpaytype + '<br/>' + result.GetSetpayrefno
+                ]).draw(false);
+            });
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_InvoicePayRcptItem = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_InvoicePayRcptItem: " + textStatus);
+        }
+
+        function checkPendingPayRcptItem() {
+            var parameters_check_PendingPayRcptList = ["comp", comp, "bpid", $('#recordbpid').val(), "invoiceno", invoiceno];
+            PageMethod("getMobile_PendingPayRcptList", parameters_check_PendingPayRcptList, succeededAjaxFn_check_PendingPayRcptList, failedAjaxFn_check_PendingPayRcptList, false);
+        }
+
+        succeededAjaxFn_check_PendingPayRcptList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_check_PendingPayRcptList: " + textStatus);
+            oTable.clear().draw();
+
+            result = JSON.parse(data.d);
+            if ($('#recordstatus').val() != 'CANCELLED') {
+                pendpayrcpt = result.countpendpayrcpt;
+            } else {
+                pendpayrcpt = 0;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_check_PendingPayRcptList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_check_PendingPayRcptList: " + textStatus);
+            pendpayrcpt = 0;
+        }
+
+        function getPendingPayRcptItem() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_PendingPayRcptList = ["comp", comp, "bpid", $('#recordbpid').val(), "invoiceno", invoiceno];
+            PageMethod("getMobile_PendingPayRcptList", parameters_getMobile_PendingPayRcptList, succeededAjaxFn_getMobile_PendingPayRcptList, failedAjaxFn_getMobile_PendingPayRcptList, false);
+
+            $('#btnProcess').show();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_PendingPayRcptList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PendingPayRcptList: " + textStatus);
+            oTable.clear().draw();
+
+            result_getMobile_PendingPayRcptList = JSON.parse(data.d);
+            pendpayrcpt = 0;
+            $.each(result_getMobile_PendingPayRcptList.arraypendpayrcptno, function (i, result) {
+                pendpayrcpt = pendpayrcpt + 1;
+                var pendingamount = result.GetSettotalamount - result.GetSetpayrcptamount;
+                oTable.row.add([
+                    i+1,
+                    result.GetSetcomp,
+                    result.GetSetpayrcptno,
+                    result.GetSetlineno,
+                    result.GetSetinvoiceno,
+                    result.GetSetinvoicedate,
+                    result.GetSetinvoiceno + '<br/>' + result.GetSetinvoicedate + '<br/>Invoice Type: ' + result.GetSetinvoicetype + '<br/>Jumlah: RM' + pendingamount,
+                    pendingamount,
+                    '<input id="amount_payrcpt_' + pendpayrcpt + '" name="amount_payrcpt_' + pendpayrcpt + '" type="text" value="' + pendingamount + '" class="form-control"/><select id="type_payrcpt_' + pendpayrcpt + '" name="type_payrcpt_' + pendpayrcpt + '" class="form-control" style="width: 100px"><option value="CASH" selected>TUNAI</option><option value="BANKING">BANK (EFT/I-Banking/Kad)</option></select><input id="refno_payrcpt_' + pendpayrcpt + '" name="refno_payrcpt_' + pendpayrcpt + '" type="text" class="form-control"/>'
+                ]).draw(false);
+            });
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PendingPayRcptList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PendingPayRcptList: " + textStatus);
+        }
+
+        function getNewPayRcptItem() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_InvoiceHeaderList = ["comp", comp, "invoiceno", invoiceno];
+            PageMethod("getMobile_InvoiceHeaderList", parameters_getMobile_InvoiceHeaderList, succeededAjaxFn_getMobile_InvoiceHeaderList, failedAjaxFn_getMobile_InvoiceHeaderList, false);
+
+            $('#btnProcess').show();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_InvoiceHeaderList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_InvoiceHeaderList: " + textStatus);
+            oTable.clear().draw();
+
+            result_getMobile_InvoiceHeaderList = JSON.parse(data.d);
+            if ($('#recordstatus').val() != 'CANCELLED') {
+                pendpayrcpt = 0;
+                $.each(result_getMobile_InvoiceHeaderList, function (i, result) {
+                    pendpayrcpt = pendpayrcpt + 1;
+                    oTable.row.add([
+                        i+1,
+                        result.GetSetcomp,
+                        result.GetSetpayrcptno,
+                        result.GetSetlineno,
+                        result.GetSetinvoiceno,
+                        result.GetSetinvoicedate,
+                        result.GetSetinvoiceno + '<br/>' + result.GetSetinvoicedate + '<br/>' + result.GetSetinvoicecat + '<br/>' + result.GetSetinvoicetype + '<br/>Jumlah: RM' + result.GetSettotalamount,
+                        result.GetSettotalamount,
+                        '<input id="amount_payrcpt_' + pendpayrcpt + '" name="amount_payrcpt_' + pendpayrcpt + '" type="text" value="' + result.GetSettotalamount + '" class="form-control"/><select id="type_payrcpt_' + pendpayrcpt + '" name="type_payrcpt_' + pendpayrcpt + '" class="form-control" style="width: 100px"><option value="CASH" selected>TUNAI</option><option value="BANKING">BANK (EFT/I-Banking/Kad)</option></select><input id="refno_payrcpt_' + pendpayrcpt + '" name="refno_payrcpt_' + pendpayrcpt + '" type="text" class="form-control"/>'
+                    ]).draw(false);
+
+                });
+
+            } else {
+                pendpayrcpt = 0;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_InvoiceHeaderList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_InvoiceHeaderList: " + textStatus);
+            pendpayrcpt = 0;
+        }
+
+        function processpayrcpt() {
+            $('#myDIV').modal({ backdrop: "static" });
+            var proceedprocess = false;
+
+            if (pendpayrcpt > 0) {
+                var y = 1;
+                oTable.rows().every(function (i, element) {
+                    var data = this.data();
+                    if ($('#amount_payrcpt_' + y).val() != "0") {
+                        proceedprocess = true;
+                    }
+                    y = y + 1;
+                });
+                if (proceedprocess) {
+                    //confirm receive invoice 1st
+                    var parameters_updateMobile_InvoiceHeaderStatus = ["comp", comp, "invoiceno", invoiceno, "status", "CONFIRMED", "userid", userid];
+                    PageMethod("updateMobile_InvoiceHeaderStatus", parameters_updateMobile_InvoiceHeaderStatus, succeededAjaxFn_updateMobile_InvoiceHeaderStatus, failedAjaxFn_updateMobile_InvoiceHeaderStatus, false);
+
+                    if (savepayrcpt) {
+                        //create payrcpt invoice
+                        var parameters_createMobile_PayRcptInvoice = ["comp", comp, "invoiceno", invoiceno, "userid", userid];
+                        PageMethod("createMobile_PayRcptInvoice", parameters_createMobile_PayRcptInvoice, succeededAjaxFn_createMobile_PayRcptInvoice, failedAjaxFn_createMobile_PayRcptInvoice, false);
+
+                        if (savepayrcpt && payrcptno != "") {
+                            //add line item for payrcpt invoice
+                            var x = 1;
+                            oTable.rows().every(function (i, element) {
+                                var data = this.data();
+                                //alert(data[1] + ":" + data[3] + ":" + data[4] + ":" + data[5] + ":" + $('#qty_payrcpt_' + i).val() + ":" + $('#location_payrcpt' + i).val());
+                                if ($('#amount_payrcpt_' + x).val() != "0") {
+                                    var parameters_addMobile_PayRcptItemInvoice = ["comp", comp, "payrcptno", payrcptno, "payrcptlineno", x, "invoiceno", data[4], "invoicedate", data[5], "invoiceprice", data[7], "paytype", $('#type_payrcpt_' + x).val(), "payrefno", $('#refno_payrcpt_' + x).val(), "payrcptprice", $('#amount_payrcpt_' + x).val(), "payremarks", ""];
+                                    PageMethod("addMobile_PayRcptItemInvoice", parameters_addMobile_PayRcptItemInvoice, succeededAjaxFn_addMobile_PayRcptItemInvoice, failedAjaxFn_addMobile_PayRcptItemInvoice, false);
+                                }
+                                x = x + 1;
+                            });
+
+                            //confirm payrcpt invoice
+                            var parameters_updateMobile_PayRcptInvoiceStatus = ["comp", comp, "payrcptno", payrcptno, "status", "CONFIRMED", "userid", userid];
+                            PageMethod("updateMobile_PayRcptInvoiceStatus", parameters_updateMobile_PayRcptInvoiceStatus, succeededAjaxFn_updateMobile_PayRcptInvoiceStatus, failedAjaxFn_updateMobile_PayRcptInvoiceStatus, false);
+
+                            if (savepayrcpt) {
+                                window.location.href = "BIOAppMobile_PaymentReceiptPage.html?userid=" + userid + "&comp=" + comp + "&invoiceno=" + invoiceno;
+                            }
+                            else
+                            {
+                                alert(errormessage);
+                            }
+                        }
+                    }
+
+                    if (savepayrcpt == false) {
+                        alert(errormessage);
+                    }
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_updateMobile_InvoiceHeaderStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_InvoiceHeaderStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepayrcpt = true;
+                errormessage = "";
+            }
+            else {
+                savepayrcpt = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_InvoiceHeaderStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_InvoiceHeaderStatus: " + textStatus);
+            savepayrcpt = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        succeededAjaxFn_createMobile_PayRcptInvoice = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_createMobile_PayRcptInvoice: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepayrcpt = true;
+                payrcptno = result.message;
+            } else {
+                savepayrcpt = false;
+                payrcptno = "";
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_createMobile_PayRcptInvoice = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_createMobile_PayRcptInvoice: " + textStatus);
+            savepayrcpt = false;
+            payrcptno = "";
+        }
+
+
+        succeededAjaxFn_addMobile_PayRcptItemInvoice = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_PayRcptItemInvoice: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepayrcpt = true;
+                errormessage = "";
+            }
+            else {
+                savepayrcpt = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_PayRcptItemInvoice = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_PayRcptItemInvoice: " + textStatus);
+            savepayrcpt = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        succeededAjaxFn_updateMobile_PayRcptInvoiceStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_PayRcptInvoiceStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savepayrcpt = true;
+                errormessage = "";
+            }
+            else {
+                savepayrcpt = false;
+                errormessage = result.message;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_PayRcptInvoiceStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_PayRcptInvoiceStatus: " + textStatus);
+            savepayrcpt = false;
+            errormessage = "Internal Server Error!";
+        }
+
+        function openlist() {
+            window.location.href = "BIOAppMobile_InvoiceList.html?userid=" + userid;
+        }
+
+        function openinvoice() {
+            window.location.href = "BIOAppMobile_InvoicePage.html?userid=" + userid + "&comp=" + comp + "&invoiceno=" + invoiceno;
+        }
+
+        function setSelectedIndexByName(s, v) {
+            for (var i = 0; i < s.options.length; i++) {
+                if (s.options[i].text == v) {
+                    s.options[i].selected = true;
+                    return;
+                }
+            }
+        }
+
+        function setSelectedIndexByValue(s, valsearch) {
+            // Loop through all the items in drop down list
+            for (i = 0; i < s.options.length; i++) {
+                if (s.options[i].value == valsearch) {
+                    // Item is found. Set its property and exit
+                    s.options[i].selected = true;
+                    break;
+                }
+            }
+            return;
+        }
+
+        function setSelectedIndexByIndex(s, i) {
+            s.options[i - 1].selected = true;
+            return;
+        }
+
+        function setQtyToPayRcpt(qtyinvoice, qtyavailable) {
+            if (qtyavailable > qtyinvoice) {
+                return qtyinvoice;
+            } else {
+                return qtyavailable;
+            }
+        }
+
+    </script>
+</body>
+</html>

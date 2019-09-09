@@ -1,0 +1,813 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BIOApp Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="img/logo.png" />
+    <link href="googleapis/css/fonts.css" rel="stylesheet">
+    <link rel="stylesheet" href="normalize/normalize.css">
+
+    <!-- Bootstrap 3.3.6 -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css" />-->
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" />
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <!-- DataTables -->
+    <link rel="stylesheet" href="datatables/css/dataTables.bootstrap.css">
+
+    <!-- Theme style -->
+    <link rel="stylesheet" href="dist/css/AdminLTE.min.css" />
+    <!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.10/css/AdminLTE.min.css" />-->
+
+    <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css" />
+    <!--[if lt IE 9]>
+      <script src="html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        body {
+            padding: 0px;
+            padding-bottom: 50px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            will-change: transform;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            display: flex;
+            height: 50px;
+            box-shadow: 0 -2px 5px -2px #333;
+            background-color: #fff;
+        }
+
+        .mobile-bottom-nav__item {
+            flex-grow: 1;
+            text-align: center;
+            font-size: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .mobile-bottom-nav__item--active {
+            color: red;
+        }
+
+        .mobile-bottom-nav__item-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* link */
+        .content-wrapper {
+            background-color: inherit;
+        }
+
+        .pagination {
+            float: right !important;
+            margin: inherit;
+        }
+
+        a {
+            text-decoration: none;
+            color: #003399;
+        }
+
+            a:hover {
+                color: #0033cc;
+                text-decoration: underline;
+            }
+
+            a:active {
+                color: #0066FF;
+            }
+
+        #wrap {
+            position: relative;
+            background-image: url(images/wrap.gif);
+            background-color: #fff;
+        }
+
+        /* clearer */
+
+        /* clearfix */
+        .clearfix:after {
+            content: ".";
+            display: block;
+            height: 0;
+            clear: both;
+            visibility: hidden;
+        }
+
+        .clearfix {
+            display: inline-table;
+            min-height: 1%;
+        }
+        /* Hides from IE-mac \*/
+        * html .clearfix {
+            height: 1%;
+        }
+
+        .clearfix {
+            display: block;
+        }
+        /* End hide from IE-mac */
+
+        .product_price {
+            margin: 0px;
+            padding: 5px 10px;
+            background-color: #FFF;
+            text-align: left;
+            border: 2px dashed #E0E0E0
+        }
+    </style>
+
+    <script>
+        window.console = window.console || function (t) { };
+    </script>
+    <script>
+        if (document.location.search.match(/type=embed/gi)) {
+            window.parent.postMessage("resize", "*");
+        }
+    </script>
+    <style>
+        .breadcrumb {
+            margin-bottom: 10px;
+        }
+
+        ul.breadcrumb {
+            padding: 10px 16px;
+            list-style: none;
+            background-color: #eee;
+        }
+
+            ul.breadcrumb li {
+                display: inline;
+                font-size: 18px;
+            }
+
+                ul.breadcrumb li + li:before {
+                    padding: 8px;
+                    color: black;
+                    content: "/\00a0";
+                }
+
+                ul.breadcrumb li a {
+                    color: #0275d8;
+                    text-decoration: none;
+                }
+
+                    ul.breadcrumb li a:hover {
+                        color: #01447e;
+                        text-decoration: underline;
+                    }
+    </style>
+</head>
+<body translate="no">
+
+    <!-- Modal -->
+    <div class="modal fade" id="myDIV" role="dialog">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="center-block"><img class="center-block" src="img/loader.gif" width="32" height="32" alt="" /></div>
+                    <p class="text-center"> Loading...</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--END Modal -->
+
+    <div class="wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="row col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-sm-10">
+            <section class="content-header">
+                <h1>
+                    BELIAN
+                    <small>BIOApp Mobile</small>
+                </h1>
+            </section>
+
+            <!-- Main content -->
+            <section class="content" style="align-self: center;">
+                <ol class="breadcrumb" style="align-self: auto;">
+                    <li class="breadcrumb-item"><a href="#" onclick="openlist();"><i class="fa fa-list"></i> Senarai</a></li>
+                    <li class="breadcrumb-item"><a href="#" onclick="openorder();">Pesanan</a></li>
+                    <li class="breadcrumb-item active">Penerimaan <span id="comp" name="comp"></span></li>
+                </ol>
+                <div class="menu-info" style="margin-bottom:5px;">
+                    <input type="text" id="labelorderno" name="labelorderno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="No. Pesanan:" />
+                    <input type="text" id="recordorderno" name="recordorderno" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                    <input type="text" id="labelbpid" name="labelbpid" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="Pembekal:" />
+                    <input type="hidden" id="recordbpid" name="recordbpid" />
+                    <input type="hidden" id="recordstatus" name="recordstatus" />
+                    <input type="text" id="recordbpdesc" name="recordbpdesc" class="col-lg-6 col-md-6 col-sm-6 col-xs-6" readonly="readonly" style="margin-bottom:5px;" placeholder="" />
+                </div>
+                <div id="tabsReceipt" class="nav-tabs-custom">
+                    <ul class="nav nav-tabs">
+                    </ul>
+                    <div class="tab-content">
+                        <div class="active tab-pane" id="receiveitem">
+
+                            <div class="">
+                                <div class="pull-left">
+                                    <input type="text" id="receiptstatus" name="receiptstatus" class="product_price form-control" readonly="readonly" value="" style="text-align:left;" />
+                                </div>
+                                <div class="pull-right">
+                                    <button type="button" class="btn btn-sm" onclick=""><i class="fa fa-print"></i></button>
+                                </div>
+                                <!-- /.box-header -->
+                                <div class="no-padding">
+
+                                    <table id="orderlist" class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th style="display:none;">Comp</th>
+                                                <th style="display:none;">ReceiptNo</th>
+                                                <th style="display:none;">LineNo</th>
+                                                <th style="display:none;">OrderNo</th>
+                                                <th style="display:none;">ItemNo</th>
+                                                <th>No. Item / Produk</th>
+                                                <th>Qty</th>
+                                                <th>Inventori</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                            <!-- /.box -->
+
+                        </div><!-- /.tab-pane-->
+                    </div><!-- /.tab-content-->
+                </div>
+                <div class="menu-info">
+                    <a id="btnProcess" name="btnProcess" href="#" class="btn btn-default btn-flat" onclick="processreceipt();" style="margin-bottom:5px;">Proses</a>
+                    <a id="btnBack" name="btnBack" href="#" onclick="openorder();" class="btn btn-default btn-flat" style="margin-bottom:5px;">Kembali</a>
+                </div>
+            </section>
+            <!-- /.content -->
+
+        </div>
+    </div>
+    <nav class="mobile-bottom-nav">
+        <div id="list" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">menu</i>
+                Senarai
+            </div>
+        </div>
+        <div id="order" class="mobile-bottom-nav__item mobile-bottom-nav__item--active">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">shopping_basket</i>
+                Belian
+            </div>
+        </div>
+        <div id="report" class="mobile-bottom-nav__item">
+            <div class="mobile-bottom-nav__item-content">
+                <i class="material-icons">receipt</i>
+                Laporan
+            </div>
+        </div>
+    </nav>
+
+    <!-- JQuery -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/jquery/dist/jquery.min.js"></script>
+    <!--<script src="dist/js/jquery.min.js"></script>-->
+    <!-- Bootstrap 3.3.6 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!--<script src="bootstrap/js/bootstrap.min.js"></script>-->
+    <!-- AdminLTE App -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.3.11/js/app.min.js"></script>
+    <!--<script src="dist/js/app.min.js"></script>-->
+    <!-- DataTables -->
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+    <!--<script src="datatables/js/jquery.dataTables.js"></script>-->
+
+    <script src="https://adminlte.io/themes/AdminLTE/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <!--<script src="datatables/js/bootstrap.dataTables.js"></script>-->
+
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/JQuery.WebService.Call.Helper.js" type="text/javascript"></script>
+
+    <script id="rendered-js">
+        var navItems = document.querySelectorAll(".mobile-bottom-nav__item");
+        navItems.forEach(function (e, i) {
+            e.addEventListener("click", function (e) {
+                navItems.forEach(function (e2, i2) {
+                    e2.classList.remove("mobile-bottom-nav__item--active");
+                });
+                this.classList.add("mobile-bottom-nav__item--active");
+                if (this.id == "list") {
+                    window.location.href = "BIOAppMobile_PurchaseList.html?userid=" + userid;
+                }
+                else if (this.id == "order") {
+                    window.location.href = "BIOAppMobile_PurchasePage.html?userid=" + userid;
+                }
+                else if (this.id == "report") {
+                    window.location.href = "BIOAppMobile_PurchaseList.html?userid=" + userid;
+                }
+            });
+        });
+
+        function getParameterByName(name) {
+            name = name.replace(/[[]/, "\[").replace(/[]]/, "\]");
+            var regex = new RegExp("[\?&]" + name + "=([^&#]*)"), results = regex.exec(location.search);
+            return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        }
+
+    </script>
+    <script>
+        var userid;
+        var comp;
+        var orderno;
+        var ordercat = "PURCHASE_ORDER";
+        var pendreceipt = 0;
+        var savereceipt = false;
+        var receiptno = "";
+        var urlhandler = "http://www.bioappsystem.com/bioappmalay/";
+
+        var oTable;
+
+
+        $(document).ready(function () {
+
+            $('#myDIV').modal({ backdrop: "static" });
+
+            userid = getParameterByName('userid');
+            comp = getParameterByName('comp');
+            orderno = getParameterByName('orderno');
+
+            $('#comp').text('[' + comp + ']');
+
+            oTable = $('#orderlist').DataTable({
+                'paging': false,
+                'lengthChange': false,
+                'searching': false,
+                'ordering': true,
+                'info': false,
+                'autoWidth': true,
+                "columnDefs": [
+                    {
+                        "targets": [1],
+                        "visible": false,
+                        "searchable": false
+                    },
+                    {
+                        "targets": [2],
+                        "visible": false
+                    },
+                    {
+                        "targets": [3],
+                        "visible": false
+                    },
+                    {
+                        "targets": [4],
+                        "visible": false
+                    },
+                    {
+                        "targets": [5],
+                        "visible": false
+                    }
+                ]
+            });
+
+            if (comp && comp.length) {
+                if (orderno && orderno.length) {
+
+                    var parameters_getMobile_PurchaseDetails = ["comp", comp, "orderno", orderno];
+                    PageMethod("getMobile_PurchaseDetails", parameters_getMobile_PurchaseDetails, succeededAjaxFn_getMobile_PurchaseDetails, failedAjaxFn_getMobile_PurchaseDetails, false);
+
+                    var parameters_getMobile_PurchaseReceiptList = ["comp", comp, "orderno", orderno];
+                    PageMethod("getMobile_PurchaseReceiptList", parameters_getMobile_PurchaseReceiptList, succeededAjaxFn_getMobile_PurchaseReceiptList, failedAjaxFn_getMobile_PurchaseReceiptList, false);
+
+                } else {
+
+                }
+            } else {
+                alert('Internal system error!');
+            }
+
+            $('#myDIV').modal('hide');
+        })
+
+        succeededAjaxFn_getMobile_PurchaseDetails = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PurchaseDetails: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_PurchaseDetails = JSON.parse(data.d);
+            $('#recordorderno').val(result_getMobile_PurchaseDetails.GetSetorderno);
+            $('#recordbpid').val(result_getMobile_PurchaseDetails.GetSetbpid);
+            $('#recordstatus').val(result_getMobile_PurchaseDetails.GetSetorderstatus);
+            $('#recordbpdesc').val(result_getMobile_PurchaseDetails.GetSetbpdesc);
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PurchaseDetails = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PurchaseDetails: " + textStatus);
+        }
+
+        succeededAjaxFn_getMobile_PurchaseReceiptList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PurchaseReceiptList: " + textStatus);
+
+            checkPendingReceiptItem();
+
+            result_getMobile_PurchaseReceiptItem = JSON.parse(data.d);
+            if (result_getMobile_PurchaseReceiptItem.countreceipt > 0) {
+                $.each(result_getMobile_PurchaseReceiptItem.arrayreceiptno, function (i, result) {
+                    var num_tabs = $('div#tabsReceipt ul li').length + 1;
+
+                    $('div#tabsReceipt ul').append(
+                        '<li ' + (i == 0 ? 'class="active"' : '') +'><a href="#receiveitem" data-toggle="tab" onclick="getReceiptItem(\'' + result +'\');">' + result + '</a></li>'
+                    );
+
+                    if (i == 0) {
+                        var parameters_getMobile_PurchaseReceiptItem = ["comp", comp, "orderno", orderno, "receiptno", result];
+                        PageMethod("getMobile_PurchaseReceiptItem", parameters_getMobile_PurchaseReceiptItem, succeededAjaxFn_getMobile_PurchaseReceiptItem, failedAjaxFn_getMobile_PurchaseReceiptItem, false);
+
+                        $('#btnProcess').hide();
+                    }
+                });
+
+                //check if pending receipt item exist or not?
+                if (pendreceipt != 0) {
+
+                    var num_tabs = $('div#tabsReceipt ul li').length + 1;
+
+                    $('div#tabsReceipt ul').append(
+                        '<li><a href="#receiveitem" data-toggle="tab" onclick="getPendingReceiptItem();">BARU</a></li>'
+                    );
+                }
+            }
+            else
+            {
+                var num_tabs = $('div#tabsReceipt ul li').length + 1;
+
+                $('div#tabsReceipt ul').append(
+                    '<li class="active"><a href="#receiveitem" data-toggle="tab" onclick="getNewReceiptItem();">BARU</a></li>'
+                );
+
+                var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+                PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+                if (pendreceipt != 0) {
+                    $('#btnProcess').show();
+                }
+                else
+                {
+                    $('#btnProcess').hide();
+                }
+            }
+
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PurchaseReceiptList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PurchaseReceiptList: " + textStatus);
+            $('#btnProcess').hide();
+        }
+
+        function getReceiptItem(receiptno) {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_PurchaseReceiptItem = ["comp", comp, "orderno", orderno, "receiptno", receiptno];
+            PageMethod("getMobile_PurchaseReceiptItem", parameters_getMobile_PurchaseReceiptItem, succeededAjaxFn_getMobile_PurchaseReceiptItem, failedAjaxFn_getMobile_PurchaseReceiptItem, false);
+
+            $('#btnProcess').hide();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_PurchaseReceiptItem = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PurchaseReceiptItem: " + textStatus);
+            //oTable.dataTable().fnClearTable();
+            oTable.clear().draw();
+
+            result_getMobile_PurchaseReceiptItem = JSON.parse(data.d);
+            $.each(result_getMobile_PurchaseReceiptItem, function (i, result) {
+                //console.log("succeededAjaxFn_getMobile_PurchaseItems: " + result.GetSetcomp + ":" + result.GetSetorderno);
+                //$('<tr><td></td><td><input type="text" id="itemno" name="itemno" class="form-control" placeholder="" /></td><td><input type="text" id="qty" name="qty" class="form-control" placeholder="" /></td><td><button type="button" class="btn btn-sm" onclick="additem();"><i class="fa fa-save"></i></button></td></tr>').appendTo('#orderlist');
+                $('#receiptstatus').val(result.GetSetstatus);
+                oTable.row.add([
+                    i + 1,
+                    result.GetSetcomp,
+                    result.GetSetreceiptno,
+                    result.GetSetlineno,
+                    result.GetSetorderno,
+                    result.GetSetitemno,
+                    result.GetSetitemno + '<br/>' + result.GetSetitemdesc,
+                    result.GetSetreceipt_quantity,
+                    result.GetSetlocation
+                ]).draw(false);
+            });
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PurchaseReceiptItem = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PurchaseReceiptItem: " + textStatus);
+        }
+
+        function checkPendingReceiptItem() {
+            var parameters_check_PendingReceiptList = ["comp", comp, "bpid", $('#recordbpid').val(), "orderno", orderno, "ordercat", ordercat];
+            PageMethod("getMobile_PendingReceiptList", parameters_check_PendingReceiptList, succeededAjaxFn_check_PendingReceiptList, failedAjaxFn_check_PendingReceiptList, false);
+        }
+
+        succeededAjaxFn_check_PendingReceiptList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_check_PendingReceiptList: " + textStatus);
+            oTable.clear().draw();
+
+            result = JSON.parse(data.d);
+            if ($('#recordstatus').val() != 'CANCELLED') {
+                pendreceipt = result.countpendreceipt;
+            } else {
+                pendreceipt = 0;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_check_PendingReceiptList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_check_PendingReceiptList: " + textStatus);
+            pendreceipt = 0;
+        }
+
+        function getPendingReceiptItem() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_PendingReceiptList = ["comp", comp, "bpid", $('#recordbpid').val(), "orderno", orderno, "ordercat", ordercat];
+            PageMethod("getMobile_PendingReceiptList", parameters_getMobile_PendingReceiptList, succeededAjaxFn_getMobile_PendingReceiptList, failedAjaxFn_getMobile_PendingReceiptList, false);
+
+            $('#btnProcess').show();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_PendingReceiptList = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PendingReceiptList: " + textStatus);
+            oTable.clear().draw();
+
+            result_getMobile_PendingReceiptList = JSON.parse(data.d);
+            $.each(result_getMobile_PendingReceiptList.arraypendreceiptno, function (i, result) {
+                oTable.row.add([
+                    i + 1,
+                    result.GetSetcomp,
+                    result.GetSetreceiptno,
+                    result.GetSetlineno,
+                    result.GetSetorderno,
+                    result.GetSetitemno,
+                    result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>Qty Order: ' + result.GetSetorder_quantity,
+                    '<input id="qty_receipt_' + result.GetSetlineno + '" name="qty_receipt' + result.GetSetlineno + '" type="text" value="' + result.GetSetorder_quantity + '" style="width:30px;"/>',
+                    '<select id="location_receipt' + result.GetSetlineno + '" name="location_receipt' + result.GetSetlineno + '"><option value="">-Select-</option></select>'
+                ]).draw(false);
+            });
+
+            oTable.rows().every(function (x, element) {
+                var data = this.data();
+                //get location stock availability
+                $.getJSON(urlhandler + "/GeneralHandler.ashx?action=GET_STOCKLOCATION&comp=" + comp,
+                    function (mps) {
+                        //reset stockavailable, hidden field of stock information & balance order qty
+                        var select = document.getElementById("location_receipt" + data[3]);
+                        for (var option in select) {
+                            select.remove(option);
+                        }
+                        document.getElementById("location_receipt" + data[3]).add(new Option("-Select-", ""));
+
+                        var x = 0;
+                        for (var i in mps) {
+                            //pure javascript
+                            var x = x + 1;
+                            document.getElementById("location_receipt" + data[3]).add(new Option(mps[i].locationdesc, mps[i].location));
+                            //using jquery
+                        }
+                    });
+            });
+                    
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PendingReceiptList = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PendingReceiptList: " + textStatus);
+        }
+
+        function getNewReceiptItem() {
+            $('#myDIV').modal({ backdrop: "static" });
+
+            var parameters_getMobile_PurchaseItems = ["comp", comp, "orderno", orderno];
+            PageMethod("getMobile_PurchaseItems", parameters_getMobile_PurchaseItems, succeededAjaxFn_getMobile_PurchaseItems, failedAjaxFn_getMobile_PurchaseItems, false);
+
+            $('#btnProcess').show();
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_getMobile_PurchaseItems = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_getMobile_PurchaseItems: " + textStatus);
+            oTable.clear().draw();
+
+            result_getMobile_PurchaseItems = JSON.parse(data.d);
+            if ($('#recordstatus').val() != 'CANCELLED') {
+
+                $.each(result_getMobile_PurchaseItems, function (i, result) {
+                    oTable.row.add([
+                        i + 1,
+                        result.GetSetcomp,
+                        result.GetSetreceiptno,
+                        result.GetSetlineno,
+                        result.GetSetorderno,
+                        result.GetSetitemno,
+                        result.GetSetitemno + '<br/>' + result.GetSetitemdesc + '<br/>Qty Order: ' + result.GetSetquantity,
+                        '<input id="qty_receipt_' + result.GetSetlineno + '" name="qty_receipt' + result.GetSetlineno + '" type="text" value="' + result.GetSetquantity + '" style="width:30px;"/>',
+                        '<select id="location_receipt' + result.GetSetlineno + '" name="location_receipt' + result.GetSetlineno + '"><option value="">-Select-</option></select>'
+                    ]).draw(false);
+
+                    pendreceipt = pendreceipt + 1;
+
+                });
+
+                oTable.rows().every(function (x, element) {
+                    var data = this.data();
+                    //get location stock availability
+                    $.getJSON(urlhandler + "/GeneralHandler.ashx?action=GET_STOCKLOCATION&comp=" + comp,
+                        function (mps) {
+                            //reset stockavailable, hidden field of stock information & balance order qty
+                            var select = document.getElementById("location_receipt" + data[3]);
+                            for (var option in select) {
+                                select.remove(option);
+                            }
+                            document.getElementById("location_receipt" + data[3]).add(new Option("-Select-", ""));
+
+                            var x = 0;
+                            for (var i in mps) {
+                                //pure javascript
+                                var x = x + 1;
+                                document.getElementById("location_receipt" + data[3]).add(new Option(mps[i].locationdesc, mps[i].location));
+                                //using jquery
+                            }
+                        });
+                });
+            } else {
+                pendreceipt = 0;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_getMobile_PurchaseItems = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_getMobile_PurchaseItems: " + textStatus);
+            pendreceipt = 0;
+        }
+
+        function processreceipt() {
+            $('#myDIV').modal({ backdrop: "static" });
+            var proceedprocess = false;
+
+            if (pendreceipt > 0) {
+                oTable.rows().every(function (i, element) {
+                    var data = this.data();
+                    if ($('#qty_receipt_' + i).val() != "0") {
+                        proceedprocess = true;
+                    }
+                });
+                if (proceedprocess) {
+                    //confirm receive order 1st
+                    var parameters_updateMobile_PurchaseOrderStatus = ["comp", comp, "orderno", orderno, "status", "CONFIRMED", "userid", userid];
+                    PageMethod("updateMobile_PurchaseOrderStatus", parameters_updateMobile_PurchaseOrderStatus, succeededAjaxFn_updateMobile_PurchaseOrderStatus, failedAjaxFn_updateMobile_PurchaseOrderStatus, false);
+
+                    if (savereceipt) {
+                        //create receipt order
+                        var parameters_createMobile_ReceiptOrder = ["comp", comp, "orderno", orderno, "userid", userid];
+                        PageMethod("createMobile_ReceiptOrder", parameters_createMobile_ReceiptOrder, succeededAjaxFn_createMobile_ReceiptOrder, failedAjaxFn_createMobile_ReceiptOrder, false);
+
+                        if (savereceipt && receiptno != "") {
+                            //add line item for receipt order
+                            var x = 1;
+                            oTable.rows().every(function (i, element) {
+                                var data = this.data();
+                                //alert(data[1] + ":" + data[3] + ":" + data[4] + ":" + data[5] + ":" + $('#qty_receipt_' + i).val() + ":" + $('#location_receipt' + i).val());
+
+                                var parameters_addMobile_ReceiptItemOrder = ["comp", comp, "receiptno", receiptno, "receiptlineno", x, "orderno", orderno, "lineno", data[3], "itemno", data[5], "qty", $('#qty_receipt_' + data[3]).val(), "location", $('#location_receipt' + data[3]).val()];
+                                PageMethod("addMobile_ReceiptItemOrder", parameters_addMobile_ReceiptItemOrder, succeededAjaxFn_addMobile_ReceiptItemOrder, failedAjaxFn_addMobile_ReceiptItemOrder, false);
+
+                                x = x + 1;
+                            });
+
+                            //confirm receipt order
+                            var parameters_updateMobile_ReceiptOrderStatus = ["comp", comp, "receiptno", receiptno, "status", "CONFIRMED", "userid", userid];
+                            PageMethod("updateMobile_ReceiptOrderStatus", parameters_updateMobile_ReceiptOrderStatus, succeededAjaxFn_updateMobile_ReceiptOrderStatus, failedAjaxFn_updateMobile_ReceiptOrderStatus, false);
+
+                            if (savereceipt) {
+                                window.location.href = "BIOAppMobile_PurchasePage.html?userid=" + userid + "&comp=" + comp + "&orderno=" + orderno;
+                            }
+                        }
+                    }
+
+                    if (savereceipt == false) {
+                        alert("Internal Server Error!");
+                    }
+                }
+            }
+
+            $('#myDIV').modal('hide');
+        }
+
+        succeededAjaxFn_updateMobile_PurchaseOrderStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_PurchaseOrderStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savereceipt = true;
+            }
+            else {
+                savereceipt = false;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_PurchaseOrderStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_PurchaseOrderStatus: " + textStatus);
+            savereceipt = false;
+        }
+
+        succeededAjaxFn_createMobile_ReceiptOrder = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_createMobile_ReceiptOrder: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savereceipt = true;
+                receiptno = result.message;
+            } else {
+                savereceipt = false;
+                receiptno = "";
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_createMobile_ReceiptOrder = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_createMobile_ReceiptOrder: " + textStatus);
+            savereceipt = false;
+            receiptno = "";
+        }
+
+
+        succeededAjaxFn_addMobile_ReceiptItemOrder = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_addMobile_ReceiptItemOrder: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savereceipt = true;
+            }
+            else {
+                savereceipt = false;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_addMobile_ReceiptItemOrder = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_addMobile_ReceiptItemOrder: " + textStatus);
+            savereceipt = false;
+        }
+
+        succeededAjaxFn_updateMobile_ReceiptOrderStatus = function (data, textStatus, jqXHR) {
+            console.log("succeededAjaxFn_updateMobile_ReceiptOrderStatus: " + textStatus);
+
+            result = JSON.parse(data.d);
+            if (result.status == "Y") {
+                savereceipt = true;
+            }
+            else {
+                savereceipt = false;
+            }
+        }
+
+        //notification for failed ajax transaction
+        failedAjaxFn_updateMobile_ReceiptOrderStatus = function (jqXHR, textStatus, errorThrown) {
+            console.log("failedAjaxFn_updateMobile_ReceiptOrderStatus: " + textStatus);
+            savereceipt = false;
+        }
+
+        function openlist() {
+            window.location.href = "BIOAppMobile_PurchaseList.html?userid=" + userid;
+        }
+
+        function openorder() {
+            window.location.href = "BIOAppMobile_PurchasePage.html?userid=" + userid + "&comp=" + comp + "&orderno=" + orderno;
+        }
+
+    </script>
+</body>
+</html>
