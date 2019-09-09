@@ -1,0 +1,475 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPage.master.cs" Inherits="MasterPage" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>B.I.O.App | Bussiness Information & Operation Application</title>
+
+    <!-- Select2 -->
+    <link href="vendors/select2/dist/css/select2.min.css" rel="stylesheet"/>
+
+    <!-- Bootstrap -->
+    <link href="vendors/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <!-- Font Awesome -->
+    <link href="vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet"/>
+    <!-- jVectorMap -->
+    <link href="css/maps/jquery-jvectormap-2.0.3.css" rel="stylesheet"/>
+    <!-- iCheck -->
+    <link href="vendors/iCheck/skins/flat/green.css" rel="stylesheet"/>
+    <!-- PNotify -->
+    <link href="vendors/pnotify/dist/pnotify.css" rel="stylesheet"/>
+    <link href="vendors/pnotify/dist/pnotify.buttons.css" rel="stylesheet"/>
+    <link href="vendors/pnotify/dist/pnotify.nonblock.css" rel="stylesheet"/>
+    <!-- Custom Theme Style -->
+    <link href="build/css/custom.css" rel="stylesheet"/>
+
+    <!-- jQuery -->
+    <script src="vendors/jquery/dist/jquery.min.js"></script>
+    
+    <asp:ContentPlaceHolder id="head" runat="server">
+
+    </asp:ContentPlaceHolder>
+</head>
+<body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0;">
+              <a href="Dashboard1.aspx" class="site_title"><i class="fa fa-paw"></i><span> B.I.O.App</span></a>
+            </div>
+
+            <div class="clearfix"></div>
+
+            <!-- menu profile quick info -->
+            <div class="profile">
+              <div class="profile_pic">
+                <img src="images/user.png" alt="..." class="img-circle profile_img"/>
+              </div>
+              <div class="profile_info">
+                <span>Selamat Datang,</span>
+                <h2><%=sUserName %></h2>
+              </div>
+            </div>
+            <!-- /menu profile quick info -->
+
+            <br />
+
+            <!-- sidebar menu -->
+            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+              <div class="menu_section">
+                <h3>&nbsp;</h3>
+                <ul class="nav side-menu">
+                  <li style="display:<%= oMainCon.isContains(lsUserRoleMod,"010")%>;"><a><i class="fa fa-home"></i>Halaman Utama <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,oModUser.GetSetscreenid.Trim().Length>0?oModUser.GetSetscreenid:"010010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=<%=oModUser.GetSetscreenid.Trim().Length>0?oModUser.GetSetscreenid:"010010"%>">Paparan Muka </a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"200")%>;"><a><i class="fa fa-desktop"></i>Operasi & Pentadbiran <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"200010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=200010">Operasi - Tempahan Jahitan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"200020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=200020">Operasi - Maklumat Pelajar</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"020")%>;"><a><i class="fa fa-cubes"></i>Item & Produk <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"020010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=020010">Daftar Item & Produk</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"020020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=020020">Senarai Item & Produk</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"030")%>;"><a><i class="fa fa-user"></i>Pembekal & Pelanggan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"030010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=030010">Daftar Pembekal & Pelanggan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"030020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=030020">Senarai Pembekal & Pelanggan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"040")%>;"><a><i class="fa fa-edit"></i>Pesanan Jualan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"040010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=040010"">Daftar Pesanan Jualan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"040020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=040020"">Senarai Pesanan Jualan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"040090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=040090"">Laporan Pesanan Jualan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"050")%>;"><a><i class="fa fa-legal"></i>Perkhidmatan & Servis <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"050010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=050010">Daftar Perkhidmatan & Servis</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"050020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=050020">Senarai Perkhidmatan & Servis</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"160")%>;"><a><i class="fa fa-sticky-note"></i>Pesanan Agihan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"160010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=160010">Daftar Pesanan Agihan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"160020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=160020">Senarai Pesanan Agihan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"160090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=160090"">Laporan Pesanan Agihan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"180")%>;"><a><i class="fa fa-exchange"></i>Pesanan Pindahan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"180010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=180010">Daftar Pesanan Pindahan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"180020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=180020">Senarai Pesanan Pindahan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"180090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=180090">Laporan Pesanan Pindahan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"060")%>;"><a><i class="fa fa-truck"></i>Penghantaran Pesanan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"060010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=060010">Daftar Penghantaran Pesanan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"060020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=060020">Senarai Penghantaran Pesanan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"060090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=060090">Laporan Penghantaran Pesanan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"070")%>;"><a><i class="fa fa-newspaper-o"></i>Invois & Bayaran <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"070010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=070010">Daftar Invois & Bayaran</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"070020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=070020">Senarai Invois & Bayaran</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"070090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=070090">Laporan Invois & Bayaran</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"080")%>;"><a><i class="fa fa-briefcase"></i>Bayaran Terima <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"080010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=080010">Daftar Bayaran Terima</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"080020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=080020">Senarai Bayaran Terima</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"090")%>;"><a><i class="fa fa-copy"></i>Pesanan Belian <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"090010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=090010">Daftar Pesanan Belian</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"090020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=090020">Senarai Pesanan Belian</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"090090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=090090">Laporan Pesanan Belian</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"170")%>;"><a><i class="fa fa-square"></i>Pesanan Terimaan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"170010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=170010">Daftar Pesanan Terimaan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"170020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=170020">Senarai Pesanan Terimaan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"170090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=170090">Laporan Pesanan Terimaan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"100")%>;"><a><i class="fa fa-download"></i>Penerimaan Pesanan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"100010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=100010">Daftar Penerimaan Pesanan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"100020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=100020">Senarai Penerimaan Pesanan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"100090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=100090">Laporan Penerimaan Pesanan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"110")%>;"><a><i class="fa fa-archive"></i>Stok & Inventori <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"110010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=110010">Senarai Stok & Inventori </a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"110020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=110020">Transaksi Stok & Inventori</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"110030")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=110030">Perlarasan Stok & Inventori</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"110040")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=110040">Penyata Stok & Inventori</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"110050")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=110050">Penutupan Stok & Inventori</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"110060")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=110060">Pengurusan Item Aset</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"120")%>;"><a><i class="fa fa-bookmark"></i>Bil & Belanja <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"120010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=120010">Daftar Bil & Belanja</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"120020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=120020">Senarai Bil & Belanja</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"120090")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=120090">Laporan Bil & Belanja</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"130")%>;"><a><i class="fa fa-paypal"></i>Bayaran Belanja<span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"130010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=130010">Daftar Bayaran Belanja</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"130020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=130020">Senarai Bayaran Belanja</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"140")%>;"><a><i class="fa fa-line-chart"></i>Pendapatan & Kewangan <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"140010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=140010">Penyata Pendapatan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"140020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=140020">Penyata Taksiran Zakat</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"140030")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=140030">Penyata Bayaran Terima & Belanja</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"140040")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=140040">Penyata Aliran Kewangan</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"140050")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=140050">Penutupan Aliran Kewangan</a></li>
+                    </ul>
+                  </li>
+                  <li style="display:<%=oMainCon.isContains(lsUserRoleMod,"150")%>;"><a><i class="fa fa-dollar"></i>Wang Runcit <span class="fa fa-chevron-down"></span></a>
+                    <ul class="nav child_menu">
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"150010")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=150010">Daftar Wang Runcit</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"150020")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=150020">Transaksi Wang Runcit</a></li>
+                      <li style="display:<%=oMainCon.isContains(lsUserRoleSubMod,"150030")%>;"><a href="HiddenEvent.aspx?event=open_screen&screenid=150030">Rekupan Wang Runcit</a></li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <!-- /sidebar menu -->
+            
+            <!-- /menu footer buttons -->
+            <!--
+            <div class="sidebar-footer hidden-small">
+              <a data-toggle="tooltip" data-placement="top" title="Settings">
+                <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+              </a>
+              <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+              </a>
+              <a data-toggle="tooltip" data-placement="top" title="Lock">
+                <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+              </a>
+              <a data-toggle="tooltip" data-placement="top" title="Logout">
+                <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+              </a>
+            </div>
+            -->
+            <!-- /menu footer buttons -->
+
+          </div>
+        </div>
+
+        <!-- top navigation -->
+        <div class="top_nav">
+          <div class="nav_menu">
+            <nav class="navbar">
+              <div class="nav toggle">
+                <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+              </div>
+              <!--<div class="collapse navbar-collapse" id="example-navbar-collapse">-->
+              <div class="navbar-collapse" id="example-navbar-collapse">
+                  <ul class="nav navbar-nav navbar-right">
+                                        
+                    <li class="">
+                      <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <img src="images/user.png" alt=""/><%=sUserName %>
+                        <span class=" fa fa-angle-down"></span>
+                      </a>
+                      <ul class="dropdown-menu dropdown-usermenu pull-right">
+                        <li><a href="#"> Profil Pengguna</a></li>
+                        <li><a href="HiddenEvent.aspx?event=logout"><i class="fa fa-sign-out pull-right"></i> Log Keluar</a></li>
+                      </ul>
+                    </li>
+                    <li class="">
+                      <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <img src="images/fye1.jpg" alt=""/>FYR [<%=sCurrFyr %>]
+                        <span class=" fa fa-angle-down"></span>
+                      </a>
+                      <ul class="dropdown-menu dropdown-usermenu pull-right">
+                        <li><a href="HiddenEvent.aspx?event=select_fyr&fyr=2016">FYR [2016]</a></li>
+                        <li><a href="HiddenEvent.aspx?event=select_fyr&fyr=2017">FYR [2017]</a></li>
+                        <li><a href="HiddenEvent.aspx?event=select_fyr&fyr=2018">FYR [2018]</a></li>
+                        <li><a href="HiddenEvent.aspx?event=select_fyr&fyr=2019">FYR [2019]</a></li>
+                        <li><a href="HiddenEvent.aspx?event=select_fyr&fyr=2020">FYR [2020]</a></li>
+                        <li><a href="HiddenEvent.aspx?event=select_fyr&fyr=2021">FYR [2021]</a></li>
+                      </ul>
+                    </li>
+                    <li class="">
+                      <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <img src="images/<%=modCompInfo.GetSetcomp_icon %>" alt=""/><%=modCompInfo.GetSetcomp %> : <%=modCompInfo.GetSetcomp_name %>
+                        <span class=" fa fa-angle-down"></span>
+                      </a>
+                      <ul class="dropdown-menu dropdown-usermenu pull-right">
+                        <%
+                            for (int i = 0; i<lsUserCompInfo.Count; i++)
+                            {
+                                MainModel modComp = (MainModel)lsUserCompInfo[i];
+                        %>
+                                <li><a href="HiddenEvent.aspx?event=select_comp&comp=<%=modComp.GetSetcomp %>"><%=modComp.GetSetcomp %> : <%=modComp.GetSetcomp_name %></a></li>
+                        <%
+                            }
+                        %>
+                      </ul>
+
+                    </li>
+                    <!--
+                    <li class="">
+                        <asp:HyperLink ID="lnkdwnload" runat="server" NavigateUrl="~/Content/BIOAppMobile.apk" CssClass="btn btn-link"><img src="images/android.png" class="left img-responsive" style="width:40px;height:40px;"/> Download BIOAppMobile</asp:HyperLink>
+                    </li>
+                    -->
+                  </ul>
+              </div>
+            </nav>
+          </div>
+        </div>
+        <!-- /top navigation -->
+
+        <!-- page content -->
+            <div class="right_col" role="main">
+              <div class="row">
+                <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">
+                </asp:ContentPlaceHolder>
+              </div>
+            </div>
+        <!-- /page content -->
+
+        <!-- footer content -->
+        
+        <footer>
+          <div class="pull-right">
+            &copy; 2019 <a target="_blank" href="#" title="B.I.O.App">B.I.O.App</a> | All Rights Reserved.
+          </div>
+          <div class="clearfix"></div>
+        </footer>
+        
+        <!-- /footer content -->
+      </div>
+    </div>
+    <!-- Bootstrap -->
+    <script src="vendors/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- FastClick -->
+    <script src="vendors/fastclick/lib/fastclick.js"></script>
+    <!-- NProgress -->
+    <script src="vendors/nprogress/nprogress.js"></script>
+    
+    <!-- jQuery autocomplete -->
+    <script src="vendors/devbridge-autocomplete/dist/jquery.autocomplete.min.js"></script>
+
+    <!-- Datatables -->
+    <script src="vendors/datatables.net/js/jquery.dataTables.min.js"></script>
+    <script src="vendors/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+    <script src="vendors/datatables.net-buttons/js/dataTables.buttons.min.js"></script>
+    <script src="vendors/datatables.net-buttons-bs/js/buttons.bootstrap.min.js"></script>
+    <script src="vendors/datatables.net-buttons/js/buttons.flash.min.js"></script>
+    <script src="vendors/datatables.net-buttons/js/buttons.html5.min.js"></script>
+    <script src="vendors/datatables.net-buttons/js/buttons.print.min.js"></script>
+    <script src="vendors/datatables.net-fixedheader/js/dataTables.fixedHeader.min.js"></script>
+    <script src="vendors/datatables.net-keytable/js/dataTables.keyTable.min.js"></script>
+    <script src="vendors/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+    <script src="vendors/datatables.net-responsive-bs/js/responsive.bootstrap.js"></script>
+    <script src="vendors/datatables.net-scroller/js/datatables.scroller.min.js"></script>
+    <script src="vendors/jszip/dist/jszip.min.js"></script>
+    <script src="vendors/pdfmake/build/pdfmake.min.js"></script>
+    <script src="vendors/pdfmake/build/vfs_fonts.js"></script>
+    
+    <!-- jQuery Sparklines -->
+    <script src="vendors/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
+    <!-- Flot -->
+    <script src="vendors/Flot/jquery.flot.js"></script>
+    <script src="vendors/Flot/jquery.flot.pie.js"></script>
+    <script src="vendors/Flot/jquery.flot.time.js"></script>
+    <script src="vendors/Flot/jquery.flot.stack.js"></script>
+    <script src="vendors/Flot/jquery.flot.resize.js"></script>
+
+    <!-- Flot plugins -->
+    <script src="js/flot/jquery.flot.orderBars.js"></script>
+    <script src="js/flot/date.js"></script>
+    <script src="js/flot/jquery.flot.spline.js"></script>
+    <script src="js/flot/curvedLines.js"></script>
+
+    <!-- bootstrap-daterangepicker -->
+    <script src="js/moment/moment.min.js"></script>
+    <script src="js/datepicker/daterangepicker.js"></script>
+
+    <!-- WebMethodService Call Helper -->
+    <script src="js/WebMethodService.Call.Helper.js" type="text/javascript"></script>
+
+    <!-- PNotify -->
+    <script src="vendors/pnotify/dist/pnotify.js"></script>
+    <script src="vendors/pnotify/dist/pnotify.buttons.js"></script>
+    <script src="vendors/pnotify/dist/pnotify.nonblock.js"></script>
+    
+    <!-- Custom Theme Scripts -->
+    <script src="build/js/custom.min.js"></script>
+
+    <!-- Select2 -->
+    <script src="vendors/select2/dist/js/select2.full.min.js"></script>
+
+    <%
+        
+    %>
+    <script>
+        //must add this code so that select2 can work with modal dialog
+        $.fn.modal.Constructor.prototype.enforceFocus = function () { };
+
+        $(document).ready(function () {
+            $(".select2_single").select2({
+                placeholder: "-select-",
+                allowClear: true
+            });
+            $(".select2_group").select2({});
+            $(".select2_multiple").select2({
+                maximumSelectionLength: 4,
+                placeholder: "With Max Selection limit 4",
+                allowClear: true
+            });
+
+            $MENU_TOGGLE.on('click', function () {
+                $(window).resize();
+            });
+
+        });
+    </script>
+
+    <!-- Datatables -->
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#datatable-buttons").length) {
+                    $("#datatable-buttons").DataTable({
+                        dom: "Bfrtip",
+                        buttons: [
+                          {
+                              extend: "copy",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "csv",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "excel",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "pdfHtml5",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "print",
+                              className: "btn-sm"
+                          },
+                        ],
+                        responsive: false
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            $('#datatable').dataTable();
+            $('#datatable2').dataTable();
+
+            $('#datatable-keytable').DataTable({
+                keys: true
+            });
+
+            $('#datatable-responsive').DataTable();
+
+            $('#datatable-scroller').DataTable({
+                ajax: "js/datatables/json/scroller-demo.json",
+                deferRender: true,
+                scrollY: 380,
+                scrollCollapse: true,
+                scroller: true
+            });
+
+            var table = $('#datatable-fixed-header').DataTable({
+                fixedHeader: true
+            });
+
+            TableManageButtons.init();
+
+        });
+    </script>
+    <!-- /Datatables -->
+
+
+    <%
+        
+    %>
+    
+</body>
+</html>

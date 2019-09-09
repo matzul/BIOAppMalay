@@ -1,0 +1,204 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class IncomeStatetement : System.Web.UI.Page
+{
+    public MainController oMainCon = new MainController();
+    public String sCurrComp = "";
+    public String sUserId = "";
+    public String sAction = "";
+    public String sStockStateNo = "";
+    public String sAlertMessage = "";
+    
+    public ArrayList lsRevenueHeader = new ArrayList();
+    public double totalrevenueamount = 0;
+    public ArrayList lsExpensesHeader = new ArrayList();
+    public double totalexpensesamount = 0;
+    public ArrayList lsStockTransHeader = new ArrayList();
+    public double totalinventoryamount = 0;
+    public ArrayList lsStockSOHHeader = new ArrayList();
+
+    public double totalstatementamount = 0;
+
+    public String sDateFrom = "";
+    public String sDateTo = "";
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!Page.IsPostBack)
+        {
+            initialValues();
+            processValues();
+        }
+    }
+
+    private DateTime FirstDayOfMonth()
+    {
+        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    }
+
+    private void initialValues()
+    {
+        if (Session["comp"] != null)
+        {
+            sCurrComp = Session["comp"].ToString();
+        }
+        if (Session["userid"] != null)
+        {
+            sUserId = Session["userid"].ToString();
+        }
+        if (Request.QueryString["action"] != null)
+        {
+            sAction = Request.QueryString["action"].ToString();
+        }
+        if (Request.QueryString["stockstateno"] != null)
+        {
+            sStockStateNo = Request.QueryString["stockstateno"].ToString();
+        }
+        if (Request.QueryString["alertmessage"] != null)
+        {
+            sAlertMessage = Request.QueryString["alertmessage"].ToString();
+        }
+        sDateFrom = FirstDayOfMonth().ToString("dd-MM-yyyy 00:00:00");
+        sDateTo = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
+    }
+
+    private void getValues()
+    {
+        if (Session["userid"] != null)
+        {
+            sUserId = Session["userid"].ToString();
+        }
+        if (Session["comp"] != null)
+        {
+            sCurrComp = Session["comp"].ToString();
+        }
+        if (Request.Params.Get("hidAction") != null)
+        {
+            sAction = oMainCon.replaceNull(Request.Params.Get("hidAction"));
+        }
+        if (Request.Params.Get("hidStockStateNo") != null)
+        {
+            sStockStateNo = oMainCon.replaceNull(Request.Params.Get("hidStockStateNo"));
+        }
+        if (Request.Params.Get("datefrom") != null)
+        {
+            sDateFrom = oMainCon.replaceNull(Request.Params.Get("datefrom"));
+        }
+        if (Request.Params.Get("dateto") != null)
+        {
+            sDateTo = oMainCon.replaceNull(Request.Params.Get("dateto"));
+        }
+
+        if (sDateFrom.Trim().Length == 0)
+            sDateFrom = FirstDayOfMonth().ToString("dd-MM-yyyy 00:00:00");
+
+        if (sDateTo.Trim().Length == 0)
+            sDateTo = DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss");
+
+    }
+
+    private void processValues()
+    {
+        if (oMainCon.compareTwoDateTime(sDateFrom, sDateTo) > 0)
+        {
+            if (sAction.Equals("OPEN"))
+            {
+                String additionalquery = "";
+
+                ArrayList invoicecat = new ArrayList();
+                invoicecat.Add("SALES_INVOICE");
+                invoicecat.Add("RECEIPT_VOUCHER");
+                ArrayList invoicetype = new ArrayList();
+                invoicetype.Add("OTHER_INCOME");
+                additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME') or (invoice_header.invoicecat = 'JOURNAL_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
+                lsRevenueHeader = oMainCon.getInvoiceHeaderList(sCurrComp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
+
+                ArrayList expensescat = new ArrayList();
+                expensescat.Add("PURCHASE_INVOICE");
+                expensescat.Add("PAYMENT_VOUCHER");
+                ArrayList expensestype = new ArrayList();
+                expensestype.Add("SUPPLY_EXPENSES");
+                expensestype.Add("SALARIES_WAGES");
+                expensestype.Add("TRAVEL_EXPENSES");
+                expensestype.Add("ENTERTAINMENT_EXPENSES");
+                expensestype.Add("MARKETING_ADVERTISING");
+                expensestype.Add("RENTAL_LEASING");
+                expensestype.Add("REPAIR_MAINTENANCE");
+                expensestype.Add("DEPRECIATION_EXPENSES");
+                expensestype.Add("BAD_DEBT_EXPENSES");
+                expensestype.Add("SUBSCRIPTION_REGISTRATION");
+                expensestype.Add("INSURANCE_SECURITY");
+                expensestype.Add("PROFESSIONAL_STATUTORY");
+                expensestype.Add("BILL_UTILITIES");
+                expensestype.Add("TAXATION");
+                expensestype.Add("SELLING_SERVICES");
+                expensestype.Add("OTHER_EXPENSES");
+                additionalquery = " and  (expenses_header.expensescat = 'PURCHASE_INVOICE' or expenses_header.expensescat = 'TRANSFER_INVOICE' or (expenses_header.expensescat in ('PAYMENT_VOUCHER','JOURNAL_VOUCHER') ";
+                String exptyp = "";
+                for (int i = 0; i < expensestype.Count; i++)
+                {
+                    String str = (String)expensestype[i];
+                    if (i.Equals(0))
+                    {
+                        exptyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        exptyp = exptyp + ",'" + str + "'";
+                    }
+                }
+                additionalquery = additionalquery + " and  expenses_header.expensestype in (" + exptyp + "))) ";
+                additionalquery = additionalquery + @"  and  NOT EXISTS (select item.itemno from item, expenses_details 
+                                                        where expenses_header.expensesno = expenses_details.expensesno and expenses_header.comp = expenses_details.comp and expenses_header.expensescat = 'PURCHASE_INVOICE'
+                                                        and expenses_details.itemno = item.itemno and expenses_details.comp = item.comp
+                                                        and item.itemcat = 'INVENTORY')";
+                lsExpensesHeader = oMainCon.getExpensesHeaderList(sCurrComp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
+
+                var lsStockTransListing = oMainCon.getItemStockTransactionsListing(sCurrComp, "", "", "", sDateFrom, sDateTo, "OUT");
+                var lsNewStockTransListing = lsStockTransListing.GroupBy(item => new
+                {
+                    item.GetSetcomp,
+                    item.GetSettransdate,
+                    item.GetSettranstype,
+                    item.GetSettransno,
+                    item.GetSetorderno,
+                    item.GetSetadjustmenttype
+                }).Select(newItem => new MainModel
+                {
+                    GetSetcomp = newItem.Key.GetSetcomp,
+                    GetSettransdate = newItem.Key.GetSettransdate,
+                    GetSettranstype = newItem.Key.GetSettranstype,
+                    GetSettransno = newItem.Key.GetSettransno,
+                    GetSetorderno = newItem.Key.GetSetorderno,
+                    GetSetadjustmenttype = newItem.Key.GetSetadjustmenttype,
+                    GetSettotalamount = newItem.Sum(x => x.GetSettransprice * x.GetSettransqty)
+                }).ToArray();
+                lsStockTransHeader = new ArrayList(lsNewStockTransListing);
+            }
+        }
+        else
+        {
+            lsRevenueHeader = new ArrayList();
+            lsStockTransHeader = new ArrayList();
+            lsExpensesHeader = new ArrayList();
+            sAlertMessage = "ERROR|The Date To must later than Date From...";
+        }        
+
+    }
+
+    protected void btnAction_Click(object sender, EventArgs e)
+    {
+        if (Request.RequestType == "POST")
+        {
+            getValues();
+            processValues();
+        }
+    }
+
+}
