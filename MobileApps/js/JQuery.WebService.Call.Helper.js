@@ -2,7 +2,6 @@
 // jQuery call AJAX Page Method                                                |
 //-----------------------------------------------------------------------------+
 function PageMethod(fn, paramArray, successFn, errorFn) {
-    //var pagePath = 'http://www.bioappsystem.com/bioappmalay/WebService.asmx';
     var pagePath = 'http://localhost/bioappmalay/WebService.asmx';
     //var pagePath = window.location.pathname; //only applicable for page in webapplication
     //-------------------------------------------------------------------------+
@@ -32,7 +31,6 @@ function PageMethod(fn, paramArray, successFn, errorFn) {
 }
 
 function PageMethod(fn, paramArray, successFn, errorFn, asyncFn) {
-    //var pagePath = 'http://www.bioappsystem.com/bioappmalay/WebService.asmx';
     var pagePath = 'http://localhost/bioappmalay/WebService.asmx';
     //var pagePath = window.location.pathname; //only applicable for page in webapplication
     //-------------------------------------------------------------------------+
