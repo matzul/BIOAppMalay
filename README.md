@@ -24,4 +24,4 @@ Diharap dengan usaha kecil ini, dapat membantu peniaga-peniaga di luar sana menj
 yang diperkenalkan iaitu 1Merekod, 2Menyemak, 3Memantau, 4Mengawal & 5Melaporkan aktiviti serta perkembangan perniagaan dengan lebih 
 efektif & efisyen.
 
-Layari <a href="www.bioappsystem.com">www.bioappsystem.com</a> untuk keterangan lanjut.
+Layari <a href="http://www.bioappsystem.com">www.bioappsystem.com</a> untuk keterangan lanjut.
