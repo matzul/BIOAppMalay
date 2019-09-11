@@ -24,7 +24,8 @@ Diharap dengan usaha kecil ini, dapat membantu peniaga-peniaga di luar sana menj
 yang diperkenalkan iaitu 1Merekod, 2Menyemak, 3Memantau, 4Mengawal & 5Melaporkan aktiviti serta perkembangan perniagaan dengan lebih 
 efektif & efisyen.
 
-# Layari laman web berikut untuk maklumat lanjut.
+![technical00](https://user-images.githubusercontent.com/9710351/64705559-b839bd80-d4e2-11e9-99ed-a3f1ca868bcc.png)
+
 # http://www.bioappsystem.com
 
 # [Manual Pengguna Sistem BIOApp ver9.9.19.pdf](https://github.com/matzul/BIOAppMalay/files/3599435/Manual.Pengguna.Sistem.BIOApp.ver9.9.19.pdf)
