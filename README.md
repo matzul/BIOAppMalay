@@ -56,4 +56,3 @@ efektif & efisyen.
 3. Run 'sql_script_bioapp.sql'. Download from folder DatabaseScript
 4. Run 'sql_data_bioapp.sql'. Download from folder DatabaseScript
 5. Login as System Admin for userid: imanzulkefli@gmail.com password: a1b2c3
->>>>>>> dac772ef2f8014f831b553a6ecb42add60e3f6b0
