@@ -47,7 +47,7 @@ efektif & efisyen.
 ![technical06](https://user-images.githubusercontent.com/9710351/64677554-61b08d00-d4aa-11e9-93d3-571e388f318e.png)
 9. Sistem dijalankan dengan berjaya
 ![technical07](https://user-images.githubusercontent.com/9710351/64677612-7bea6b00-d4aa-11e9-8ea0-2fe2df6bee5f.png)
-<<<<<<< HEAD
+
 =======
 
 # Database
