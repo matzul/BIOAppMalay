@@ -47,3 +47,13 @@ efektif & efisyen.
 ![technical06](https://user-images.githubusercontent.com/9710351/64677554-61b08d00-d4aa-11e9-93d3-571e388f318e.png)
 9. Sistem dijalankan dengan berjaya
 ![technical07](https://user-images.githubusercontent.com/9710351/64677612-7bea6b00-d4aa-11e9-8ea0-2fe2df6bee5f.png)
+<<<<<<< HEAD
+=======
+
+# Database
+1. Create new MySql Database schema name: bioappdb
+2. Open MySql Database. For easy use MySQL Workbench.
+3. Run 'sql_script_bioapp.sql'. Download from folder DatabaseScript
+4. Run 'sql_data_bioapp.sql'. Download from folder DatabaseScript
+5. Login as System Admin for userid: imanzulkefli@gmail.com password: a1b2c3
+>>>>>>> dac772ef2f8014f831b553a6ecb42add60e3f6b0
