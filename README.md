@@ -48,8 +48,6 @@ efektif & efisyen.
 9. Sistem dijalankan dengan berjaya
 ![technical07](https://user-images.githubusercontent.com/9710351/64677612-7bea6b00-d4aa-11e9-8ea0-2fe2df6bee5f.png)
 
-=======
-
 # Database
 1. Create new MySql Database schema name: bioappdb
 2. Open MySql Database. For easy use MySQL Workbench.
