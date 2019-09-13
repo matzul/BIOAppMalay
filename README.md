@@ -51,5 +51,5 @@ efektif & efisyen.
 # Database
 1. Create new MySql Database schema name: bioappdb
 2. Open MySql Database. For easy use MySQL Workbench.
-3. Run 'sql_script_bioapp.sql'
-4. Run 'sql_data_bioapp.sql'
+3. Run 'sql_script_bioapp.sql'. Download from folder DatabaseScript
+4. Run 'sql_data_bioapp.sql'. Download from folder DatabaseScript
