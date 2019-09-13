@@ -53,4 +53,4 @@ efektif & efisyen.
 2. Open MySql Database. For easy use MySQL Workbench.
 3. Run 'sql_script_bioapp.sql'. Download from folder DatabaseScript
 4. Run 'sql_data_bioapp.sql'. Download from folder DatabaseScript
-5. Login as System Admin for userid: sysadmin password: a1b2c3
+5. Login as System Admin for userid: imanzulkefli@gmail.com password: a1b2c3
