@@ -1,0 +1,83 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPageSalaryChild.master.cs" Inherits="HumanResource_MasterPageSalaryChild" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>BIOAppHR - Sistem Pengurusan Sumber Manusia (Pengurusan Gaji)</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/style_main.css" type="text/css" rel="stylesheet" />
+    <link href="css/tab.css" type="text/css" rel="stylesheet" />
+    <link href="css/calendar.css" type="text/css" rel="stylesheet" />
+    <link href="css/tabbable.css" type="text/css" rel="stylesheet" />
+    <link href="css/style_autocomplete.css" rel="stylesheet" />
+    <link href="css/style_table_tree.css" rel="stylesheet" />
+    <link href="css/style_table_scroll.css" rel="stylesheet" />
+    <link href="css/style_modal.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="js/JQuery.WebService.Call.Helper.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!--<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>-->
+    <script type="text/javascript" src="js/script.js"></script>
+    <script type="text/javascript" src="js/calendar.js"></script>
+    <script type="text/javascript" src="js/calendar-en.js"></script>
+    <script type="text/javascript" src="js/calendar-setup.js"></script>
+    <script type="text/javascript" src="js/jquery.autocomplete.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript">
+        var popupWindow2;
+
+        function parent_disable2() {
+            var flag = true;
+            if (popupWindow2 && !popupWindow2.closed) {
+                popupWindow2.focus();
+                flag = false;
+            }
+            return flag;
+        }
+
+        function fOpenWindow2(url) {
+            $('body').css({ 'opacity': 0.3 });
+            popupWindow2 = window.open(url, "popup_window2", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=900,height=700");
+            if (popupWindow2 == null) {
+                alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+            } else {
+                wleft = (screen.width - 900) / 2;
+                wtop = (screen.height - 700) / 2;
+                if (wleft < 0) {
+                    wleft = 0;
+                }
+                if (wtop < 0) {
+                    wtop = 0;
+                }
+                popupWindow2.moveTo(wleft, wtop);
+            }
+            checkPopupWindow2();
+        }
+
+        function checkPopupWindow2() {
+            var popupCheck2 = setInterval(function () {
+                if (popupWindow2.closed) {
+                    clearInterval(popupCheck2);
+                    $('body').css({ 'opacity': 1 });
+                    console.log('window closed!');
+                }
+            }, 100);
+        }
+
+    </script>
+    <asp:ContentPlaceHolder id="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <div class="widget">
+        <div class="widget-content">
+        <asp:ContentPlaceHolder id="ContentPlaceHolder1" runat="server">
+        
+        </asp:ContentPlaceHolder>
+        </div>
+    </div>
+</body>
+</html>

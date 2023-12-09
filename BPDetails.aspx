@@ -23,6 +23,9 @@
                                         <option value="FINANCIAL" <%=oModBP.GetSetbpcat.Equals("FINANCIAL")?"selected":"" %>>INSTITUSI KEWANGAN</option>
                                         <option value="SUBSIDIARY" <%=oModBP.GetSetbpcat.Equals("SUBSIDIARY")?"selected":"" %>>ANAK SYARIKAT</option>
                                         <option value="GOVERMENT" <%=oModBP.GetSetbpcat.Equals("GOVERMENT")?"selected":"" %>>KERAJAAN/ BADAN BERKANUN</option>
+                                        <option value="CORPORATE" <%=oModBP.GetSetbpcat.Equals("CORPORATE")?"selected":"" %>>SYARIKAT SWASTA</option>
+                                        <option value="PARTNERS" <%=oModBP.GetSetbpcat.Equals("PARTNERS")?"selected":"" %>>RAKAN STRATEGIK</option>
+                                        <option value="STAKEHOLDER" <%=oModBP.GetSetbpcat.Equals("STAKEHOLDER")?"selected":"" %>>PEMEGANG TARUH</option>
                                         <option value="SHOP" <%=oModBP.GetSetbpcat.Equals("SHOP")?"selected":"" %>>KEDAI RUNCIT/ PEMBORONG</option>
                                         <option value="SERVICE" <%=oModBP.GetSetbpcat.Equals("SERVICE")?"selected":"" %>>AGENSI PERKHIDMATAN</option>
                                         <option value="CLUB" <%=oModBP.GetSetbpcat.Equals("CLUB")?"selected":"" %>>KELAB/ PERSATUAN</option>

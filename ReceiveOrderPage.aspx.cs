@@ -5,8 +5,10 @@ using MigraDoc.Rendering;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
@@ -49,8 +51,35 @@ public partial class ReceiveOrderPage : System.Web.UI.Page
         modCompInfo = oMainCon.getCompInfoDetails(sCurrComp);
         oModOrder = oMainCon.getPurchaseOrderHeaderDetails(sCurrComp, sOrderNo);
         lsOrderLineItem = oMainCon.getPurchaseOrderDetailsList(sCurrComp, sOrderNo, 0, "");
+        GenerateQRCode();
         generatePDFFile();
     }
+
+    private void GenerateQRCode()
+    {
+        string urlQR = "https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=" + sOrderNo + "&choe=UTF-8";
+        WebResponse response = default(WebResponse);
+        Stream remoteStream = default(Stream);
+        StreamReader readStream = default(StreamReader);
+        WebRequest request = WebRequest.Create(urlQR);
+        response = request.GetResponse();
+        remoteStream = response.GetResponseStream();
+        readStream = new StreamReader(remoteStream);
+        System.Drawing.Image img = System.Drawing.Image.FromStream(remoteStream);
+        byte[] imageArray = imageToByteArray(img);
+        string imageFilename2 = "base64:" + Convert.ToBase64String(imageArray);
+        img.Save(Server.MapPath("~/Attachment/QRCode.png"));
+        response.Close();
+        remoteStream.Close();
+        readStream.Close();
+    }
+    public static byte[] imageToByteArray(System.Drawing.Image imageIn)
+    {
+        MemoryStream ms = new MemoryStream();
+        imageIn.Save(ms, ImageFormat.Png);
+        return ms.ToArray();
+    }
+
     private void generatePDFFile()
     {
         // Create a MigraDoc document
@@ -95,14 +124,15 @@ public partial class ReceiveOrderPage : System.Web.UI.Page
         image.WrapFormat.Style = WrapStyle.Through;
 
         // Put 2nd logo in the header
-        string logo_mod = Server.MapPath("~/images/"+modCompInfo.GetSetcomp_logo2);
-        MigraDoc.DocumentObjectModel.Shapes.Image image2 = section.Headers.Primary.AddImage(logo_mod);
-        image2.Height = "1cm";
+        string qrcode_logo = Server.MapPath("~/Attachment/QRCode.png");
+        MigraDoc.DocumentObjectModel.Shapes.Image image2 = section.Headers.Primary.AddImage(qrcode_logo);
+        image2.Height = "2cm";
+        image2.Width = "2.5cm";
         image2.LockAspectRatio = true;
         image2.RelativeVertical = RelativeVertical.Line;
         image2.RelativeHorizontal = RelativeHorizontal.Margin;
         image2.Top = ShapePosition.Top;
-        image2.Left = ShapePosition.Left;
+        image2.Left = ShapePosition.Right;
         image2.WrapFormat.Style = WrapStyle.Through;
 
         // Create Header

@@ -1,0 +1,57 @@
+[Version] 
+Signature="$Windows NT$" 
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318} 
+Provider=%PRINTER% 
+LayoutFile=layout.inf
+CatalogFile=vserial.cat
+DriverVer=29/08/2011,1.0.0.0
+
+[Manufacturer] 
+%PRINTER%=DeviceList, NTx86, NTamd64
+
+[DeviceList.NTx86] 
+%DESCRIPTION%=DriverInstall, USB\VID_1FC9&PID_2014
+
+[DeviceList.NTamd64] 
+%DESCRIPTION%=DriverInstall, USB\VID_1FC9&PID_2014
+
+;------------------------------------------------------------------------------
+;  Windows 2000/XP Sections
+;------------------------------------------------------------------------------
+
+[DriverInstall.nt] 
+include=mdmcpq.inf
+CopyFiles=DriverCopyFiles
+AddReg=DriverInstall.nt.AddReg 
+
+[DriverCopyFiles]
+usbser.sys,,,0x20
+
+[DriverInstall.nt.AddReg] 
+HKR,,DevLoader,,*ntkern 
+HKR,,NTMPDriver,,usbser.sys 
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider" 
+
+[DriverInstall.nt.Services] 
+include=mdmcpq.inf
+AddService=usbser, 0x00000002, DriverService
+
+
+[DriverInstall.nt.HW]
+include=mdmcpq.inf
+
+[DriverService] 
+DisplayName=%DESCRIPTION% 
+ServiceType=1
+StartType=3
+ErrorControl=1
+ServiceBinary=%12%\usbser.sys 
+
+;------------------------------------------------------------------------------
+;  String Definitions
+;------------------------------------------------------------------------------
+
+[Strings] 
+PRINTER="Printer"
+DESCRIPTION="Printer USB Virtual COM port" 

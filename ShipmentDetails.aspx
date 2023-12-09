@@ -23,7 +23,7 @@
                                       <select class="form-control" id="shipmentcat" name="shipmentcat" required="required">
                                         <option value="">-Select-</option>
                                         <option value="SALES_ORDER" <%=oModHeader.GetSetshipmentcat.Equals("SALES_ORDER")?"selected":"" %>>PESANAN JUALAN</option>
-                                        <!--<option value="GIVE_ORDER" <%=oModHeader.GetSetshipmentcat.Equals("GIVE_ORDER")?"selected":"" %>>PESANAN AGIHAN</option>-->
+                                        <option value="GIVE_ORDER" <%=oModHeader.GetSetshipmentcat.Equals("GIVE_ORDER")?"selected":"" %>>PESANAN AGIHAN</option>
                                         <option value="TRANSFER_ORDER" <%=oModHeader.GetSetshipmentcat.Equals("TRANSFER_ORDER")?"selected":"" %>>PESANAN PINDAHAN</option>
                                       </select>
                                     <label for="remarks">Catatan:</label>
@@ -483,7 +483,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                             if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                                document.getElementById("bpaddress").value = "<%=modBP.GetSetbpaddress%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>";
                                                 $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                                 $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                             }
@@ -492,14 +492,14 @@
                                   }
                     %>
                     <%
-                                  if (lsComp.Count > 0)
-                                  {
-                                      for (int i = 0; i < lsComp.Count; i++)
-                                      {
-                                          MainModel modComp = (MainModel)lsComp[i];
+                if (lsComp.Count > 0)
+                {
+                    for (int i = 0; i < lsComp.Count; i++)
+                    {
+                        MainModel modComp = (MainModel)lsComp[i];
                     %>      
                                             if ($(this).val() == "<%=modComp.GetSetcomp%>") {
-                                                document.getElementById("bpaddress").value = "<%=modComp.GetSetcomp_address%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modComp.GetSetcomp_address, ", ")%>";
                                                 $('#bpcontact').val("<%=modComp.GetSetcomp_contact%>");
                                                 $('#bpdesc').val("<%=modComp.GetSetcomp_name%>");
                                             }
@@ -866,6 +866,31 @@
                 %>
 
                 });
+
+                function removeEnterStr(str) {
+                    var str2 = str.replace(/\s+/g, ' ').trim();
+                    return str2;
+                }
+				
+				function openprintshipment() {
+					var popupWindow = '';
+					
+					popupWindow = window.open("ShipmentOrderPage.aspx?action=OPEN&comp=<%=sCurrComp%>&shipmentno=<%=sShipmentNo%>", "open_printshipment", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+					
+					if (popupWindow == null) {
+						alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+					} else {
+						wleft = (screen.width - 1000) / 2;
+						wtop = (screen.height - 800) / 2;
+						if (wleft < 0) {
+							wleft = 0;
+						}
+						if (wtop < 0) {
+							wtop = 0;
+						}
+						popupWindow.moveTo(wleft, wtop);
+					}
+				}
 
             </script>            
 

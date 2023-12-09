@@ -476,6 +476,12 @@
 
             <script type="text/javascript">
 
+                function replaceAll(find, replace, str)
+                {
+                    var re = new RegExp(find, 'g'); str = str.replace(re, replace);
+                    return str;
+                }
+
                 //populate bp details, item discount
                 $(document).ready(function () {
                     $('#bpid').change(function () {
@@ -492,7 +498,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                 if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                    $('#bpaddress').text("<%=modBP.GetSetbpaddress%>");
+                                    $('#bpaddress').text("<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>");
                                     $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                     $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                 }

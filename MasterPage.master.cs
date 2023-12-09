@@ -16,6 +16,7 @@ public partial class MasterPage : System.Web.UI.MasterPage
     public ArrayList lsUserCompInfo = new ArrayList();
     public MainModel modCompInfo = new MainModel();
     public UserProfileModel oModUser = new UserProfileModel();
+    public CounterModel oModCounter = new CounterModel();
 
     public String eventType = "";
     public String sCurrFyr = "";
@@ -25,6 +26,7 @@ public partial class MasterPage : System.Web.UI.MasterPage
     public String sUserType = "";
     public String sUserStatus = "";
     public String sMessage = "";
+    public String sAccessPOS = "N";
 
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -65,6 +67,11 @@ public partial class MasterPage : System.Web.UI.MasterPage
             lsUserCompInfo = oMainCon.getUserCompInfoList("", sUserId, "ACTIVE");
             lsUserRoleMod = oMainCon.getUserRoleModule(sUserId, sCurrComp);
             lsUserRoleSubMod = oMainCon.getUserRoleSubModule(sUserId, sCurrComp);
+            oModCounter = oMainCon.getCounterMasterDetails(sCurrComp, "", "", "");
+            if (oModCounter.GetSetcomp.Length > 0 && lsUserRoleMod.Count > 0)
+            {
+                sAccessPOS = "Y";
+            }
         }
     }
 

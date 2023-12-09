@@ -119,6 +119,7 @@ public partial class ZakatCalculationMobile : System.Web.UI.Page
         }
 
         DateTime datetimeClosing1 = Convert.ToDateTime(sOpeningDate, oMainCon.ukDtfi);
+        datetimeClosing1 = datetimeClosing1.AddYears(1);
         String sZakatClosingDate1 = "30-11-" + datetimeClosing1.ToString("yyyy") + " 23:59:59";
 
         if (oMainCon.compareTwoDateTime(sOpeningDate, sZakatClosingDate1) > 0)
@@ -494,6 +495,7 @@ public partial class ZakatCalculationMobile : System.Web.UI.Page
         {
 
             DateTime datetimeClosing1 = Convert.ToDateTime(oModZakatCalculation.GetSetopeningdate, oMainCon.ukDtfi);
+            datetimeClosing1 = datetimeClosing1.AddYears(1);
             String sZakatClosingDate1 = "30-11-" + datetimeClosing1.ToString("yyyy") + " 23:59:59";
 
             if (oMainCon.compareTwoDateTime(oModZakatCalculation.GetSetopeningdate, sZakatClosingDate1) > 0)

@@ -508,7 +508,7 @@
         });
 
         function viewstockstateSOH(comp, stockstateno) {
-            var popupWindow = window.open("StockStateSOH.aspx?action=OPEN&comp=" + comp + "&stockstateno=" + stockstateno, "open_stockstateSOH", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+            var popupWindow = window.open("StockStateSOHMobile.aspx?action=OPEN&userid=<%=sUserId%>&stockstateno=" + stockstateno, "open_stockstateSOH", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
             if (popupWindow == null) {
                 alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
             } else {

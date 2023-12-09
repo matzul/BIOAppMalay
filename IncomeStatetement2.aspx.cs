@@ -35,6 +35,9 @@ public partial class IncomeStatetement2 : System.Web.UI.Page
     public String sDateFrom = "";
     public String sDateTo = "";
 
+    public ArrayList lsAssetCapitalHeader = new ArrayList();
+    public double totalassetcapitalamount = 0;
+
     protected void Page_Load(object sender, EventArgs e)
     {
         if (!Page.IsPostBack)
@@ -123,29 +126,64 @@ public partial class IncomeStatetement2 : System.Web.UI.Page
                 //invoicecat.Add("RECEIPT_VOUCHER");
                 //ArrayList invoicetype = new ArrayList();
                 //invoicetype.Add("OTHER_INCOME");
-                additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME') or (invoice_header.invoicecat = 'JOURNAL_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
+
+                //additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME') or (invoice_header.invoicecat = 'JOURNAL_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
+                //lsRevenueHeader = oMainCon.getInvoiceHeaderListSum(sCurrComp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
+
+                ArrayList lsParamType = oMainCon.getParametertype("INCOME");
+                ArrayList revenuetype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    revenuetype.Add(modParam.GetSetparamttype);
+                }
+
+                additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat in ('RECEIPT_VOUCHER','JOURNAL_VOUCHER') ";
+                String revtyp = "";
+                for (int i = 0; i < revenuetype.Count; i++)
+                {
+                    String str = (String)revenuetype[i];
+                    if (i.Equals(0))
+                    {
+                        revtyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        revtyp = revtyp + ",'" + str + "'";
+                    }
+                }
+                additionalquery = additionalquery + " and  invoice_header.invoicetype in (" + revtyp + "))) ";
                 lsRevenueHeader = oMainCon.getInvoiceHeaderListSum(sCurrComp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
 
                 //ArrayList expensescat = new ArrayList();
                 //expensescat.Add("PURCHASE_INVOICE");
                 //expensescat.Add("PAYMENT_VOUCHER");
+                //ArrayList expensestype = new ArrayList();
+                //expensestype.Add("SUPPLY_EXPENSES");
+                //expensestype.Add("SALARIES_WAGES");
+                //expensestype.Add("TRAVEL_EXPENSES");
+                //expensestype.Add("ENTERTAINMENT_EXPENSES");
+                //expensestype.Add("MARKETING_ADVERTISING");
+                //expensestype.Add("RENTAL_LEASING");
+                //expensestype.Add("REPAIR_MAINTENANCE");
+                //expensestype.Add("DEPRECIATION_EXPENSES");
+                //expensestype.Add("BAD_DEBT_EXPENSES");
+                //expensestype.Add("SUBSCRIPTION_REGISTRATION");
+                //expensestype.Add("INSURANCE_SECURITY");
+                //expensestype.Add("PROFESSIONAL_STATUTORY");
+                //expensestype.Add("BILL_UTILITIES");
+                //expensestype.Add("TAXATION");
+                //expensestype.Add("SELLING_SERVICES");
+                //expensestype.Add("OTHER_EXPENSES");
+
+                ArrayList lsParamType2 = oMainCon.getParametertype("EXPENSES");
                 ArrayList expensestype = new ArrayList();
-                expensestype.Add("SUPPLY_EXPENSES");
-                expensestype.Add("SALARIES_WAGES");
-                expensestype.Add("TRAVEL_EXPENSES");
-                expensestype.Add("ENTERTAINMENT_EXPENSES");
-                expensestype.Add("MARKETING_ADVERTISING");
-                expensestype.Add("RENTAL_LEASING");
-                expensestype.Add("REPAIR_MAINTENANCE");
-                expensestype.Add("DEPRECIATION_EXPENSES");
-                expensestype.Add("BAD_DEBT_EXPENSES");
-                expensestype.Add("SUBSCRIPTION_REGISTRATION");
-                expensestype.Add("INSURANCE_SECURITY");
-                expensestype.Add("PROFESSIONAL_STATUTORY");
-                expensestype.Add("BILL_UTILITIES");
-                expensestype.Add("TAXATION");
-                expensestype.Add("SELLING_SERVICES");
-                expensestype.Add("OTHER_EXPENSES");
+                for (int i = 0; i < lsParamType2.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType2[i];
+                    expensestype.Add(modParam.GetSetparamttype);
+                }
+
                 additionalquery = " and  (expenses_header.expensescat = 'PURCHASE_INVOICE' or expenses_header.expensescat = 'TRANSFER_INVOICE' or (expenses_header.expensescat in ('PAYMENT_VOUCHER','JOURNAL_VOUCHER') ";
                 String exptyp = "";
                 for (int i = 0; i < expensestype.Count; i++)
@@ -164,7 +202,7 @@ public partial class IncomeStatetement2 : System.Web.UI.Page
                 additionalquery = additionalquery + @"  and  NOT EXISTS (select item.itemno from item, expenses_details 
                                                         where expenses_header.expensesno = expenses_details.expensesno and expenses_header.comp = expenses_details.comp and expenses_header.expensescat = 'PURCHASE_INVOICE'
                                                         and expenses_details.itemno = item.itemno and expenses_details.comp = item.comp
-                                                        and item.itemcat = 'INVENTORY')";
+                                                        and item.itemcat in ('INVENTORY','ASSET'))";
                 lsExpensesHeader = oMainCon.getExpensesHeaderListSum(sCurrComp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
 
                 MainModel modLastStockState = oMainCon.getStockStateLastHeaderDetails(sCurrComp, sDateFrom, "CLOSED");
@@ -350,6 +388,11 @@ public partial class IncomeStatetement2 : System.Web.UI.Page
                 }).ToArray();
                 lsStockTransHeader = new ArrayList(lsOutStockTransListing);
                 */
+
+                String additionalqueryasset = "";
+                additionalqueryasset = " and expenses_header.expensescat in ('PAYMENT_VOUCHER','JOURNAL_VOUCHER') and expenses_header.expensestype in ('ASSET_PROCUREMENT') ";
+                lsAssetCapitalHeader = oMainCon.getExpensesHeaderListSum(sCurrComp, "", "", sDateFrom, sDateTo, additionalqueryasset, "CONFIRMED");
+
             }
         }
         else

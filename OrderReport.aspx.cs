@@ -50,8 +50,13 @@ public partial class OrderReport : System.Web.UI.Page
         }
         lsBP = oMainCon.getBPList(sCurrComp, "", "", "");
         lsItem = oMainCon.getItemList(sCurrComp, "", "", "");
+        sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+        sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
     }
-
+    private DateTime FirstDayOfMonth()
+    {
+        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    }
     private void getValues()
     {
         if (Session["userid"] != null)
@@ -86,11 +91,12 @@ public partial class OrderReport : System.Web.UI.Page
             sOrderNo = "";
             sBPID = "";
             sStatus = "";
-            sStartDate = "";
-            sEndDate = "";
+            sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+            sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
             sItemNo = "";
             shipmentStatus = "";
             invoiceStatus = "";
+
         }
     }
 

@@ -23,7 +23,7 @@
                                       <select class="form-control" id="receiptcat" name="receiptcat" required="required">
                                         <option value="">-select-</option>
                                         <option value="PURCHASE_ORDER" <%=oModHeader.GetSetreceiptcat.Equals("PURCHASE_ORDER")?"selected":"" %>>PESANAN BELIAN</option>
-                                        <!--<option value="RECEIVE_ORDER" <%=oModHeader.GetSetreceiptcat.Equals("RECEIVE_ORDER")?"selected":"" %>>PESANAN TERIMAAN</option>-->
+                                        <option value="RECEIVE_ORDER" <%=oModHeader.GetSetreceiptcat.Equals("RECEIVE_ORDER")?"selected":"" %>>PESANAN TERIMAAN</option>
                                         <option value="TRANSFER_ORDER" <%=oModHeader.GetSetreceiptcat.Equals("TRANSFER_ORDER")?"selected":"" %>>PESANAN PINDAHAN</option>
                                       </select>
                                     <label for="remarks">Catatan:</label>
@@ -486,7 +486,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                             if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                                document.getElementById("bpaddress").value = "<%=modBP.GetSetbpaddress%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>";
                                                 $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                                 $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                             }
@@ -502,7 +502,7 @@
                                           MainModel modComp = (MainModel)lsComp[i];
                     %>      
                                             if ($(this).val() == "<%=modComp.GetSetcomp%>") {
-                                                document.getElementById("bpaddress").value = "<%=modComp.GetSetcomp_address%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modComp.GetSetcomp_address, ", ")%>";
                                                 $('#bpcontact').val("<%=modComp.GetSetcomp_contact%>");
                                                 $('#bpdesc').val("<%=modComp.GetSetcomp_name%>");
                                             }

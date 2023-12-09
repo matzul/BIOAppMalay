@@ -1,0 +1,62 @@
+;------------------------------------------------------------------------------
+; Printer Comunication Device Class driver INF FILE
+; (C)2014 Copyright JS
+;------------------------------------------------------------------------------
+
+[Version]
+Signature="$Windows NT$"
+Class=Ports
+ClassGuid={4D36E978-E325-11CE-BFC1-08002BE10318}
+Provider=%MFGNAME%
+LayoutFile=layout.inf
+CatalogFile=vserial.cat
+DriverVer=12/20/2012,6.1.7600.1
+
+[Manufacturer]
+%MFGNAME%=DeviceList
+
+[DestinationDirs]
+DefaultDestDir=12
+
+[SourceDisksFiles]
+
+[SourceDisksNames]
+
+[DeviceList]
+%DESCRIPTION%=DriverInstall, USB\VID_0483&PID_5740
+
+;------------------------------------------------------------------------------
+;  Windows 2000/XP Sections
+;------------------------------------------------------------------------------
+
+[DriverInstall.nt]
+CopyFiles=DriverCopyFiles
+AddReg=DriverInstall.nt.AddReg
+
+[DriverCopyFiles]
+usbser.sys,,,0x20
+
+[DriverInstall.nt.AddReg]
+HKR,,DevLoader,,*ntkern
+HKR,,NTMPDriver,,usbser.sys
+HKR,,EnumPropPages32,,"MsPorts.dll,SerialPortPropPageProvider"
+
+[DriverInstall.nt.Services]
+AddService=usbser, 0x00000002, DriverService
+
+[DriverService]
+DisplayName=%SERVICE%
+ServiceType = 1        ; SERVICE_KERNEL_DRIVER
+StartType = 3          ; SERVICE_DEMAND_START
+ErrorControl = 1       ; SERVICE_ERROR_NORMAL
+ServiceBinary= %12%\usbser.sys
+
+;------------------------------------------------------------------------------
+;  String Definitions
+;------------------------------------------------------------------------------
+
+[Strings]
+MFGNAME     = "Printer"
+DESCRIPTION = "USB Virtual serial port"
+SERVICE     = "USB Virtual serial port"
+

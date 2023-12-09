@@ -382,6 +382,7 @@ public partial class AdjustmentDetails : System.Web.UI.Page
                         }
                         else 
                         {
+                            String result0 = oMainCon.deleteItemStock(oModItemStock);
                             String result1 = oMainCon.insertItemStock(oModItemStock);
                         }
 

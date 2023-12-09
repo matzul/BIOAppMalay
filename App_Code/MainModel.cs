@@ -199,6 +199,42 @@ public class MainModel
         }
     }
 
+    private string comp_type = "";
+    [DataMember]
+    public string GetSetcomp_type
+    {
+        get
+        {
+            string text = comp_type;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_type = value;
+        }
+    }
+
+    private string comp_cat = "";
+    [DataMember]
+    public string GetSetcomp_cat
+    {
+        get
+        {
+            string text = comp_cat;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_cat = value;
+        }
+    }
+
     private string comp_accountbank = "";
     [DataMember]
     public string GetSetcomp_accountbank
@@ -250,6 +286,24 @@ public class MainModel
         set
         {
             comp_address = value;
+        }
+    }
+
+    private string comp_daerah = "";
+    [DataMember]
+    public string GetSetcomp_daerah
+    {
+        get
+        {
+            string text = comp_daerah;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_daerah = value;
         }
     }
 
@@ -376,6 +430,174 @@ public class MainModel
         set
         {
             comp_logo2 = value;
+        }
+    }
+
+    private string comp_status = "";
+    [DataMember]
+    public string GetSetcomp_status
+    {
+        get
+        {
+            string text = comp_status;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_status = value;
+        }
+    }
+
+    //update by fakhrul @ 20012020
+    private string comp_longitud = "";
+    [DataMember]
+    public string GetSetcomp_longitud
+    {
+        get
+        {
+            string text = comp_longitud;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_longitud = value;
+        }
+    }
+
+    private string comp_latitud = "";
+    [DataMember]
+    public string GetSetcomp_latitud
+    {
+        get
+        {
+            string text = comp_latitud;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_latitud = value;
+        }
+    }
+
+    //update by fakhrul @ 08022020
+    private string comp_target = "";
+    [DataMember]
+    public string GetSetcomp_target
+    {
+        get
+        {
+            string text = comp_target;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_target = value;
+        }
+    }
+
+    //update by fakhrul @ 08022020
+    private string comp_StartDate = "";
+    [DataMember]
+    public string GetSetcomp_StartDate
+    {
+        get
+        {
+            string text = comp_StartDate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_StartDate = value;
+        }
+    }
+
+    //update by fakhrul @ 08022020
+    private string comp_EndDate = "";
+    [DataMember]
+    public string GetSetcomp_EndDate
+    {
+        get
+        {
+            string text = comp_EndDate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_EndDate = value;
+        }
+    }
+
+    private string comp_registerno = "";
+    [DataMember]
+    public string GetSetcomp_registerno
+    {
+        get
+        {
+            string text = comp_registerno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_registerno = value;
+
+        }
+    }
+
+    private string comp_area = "";
+    [DataMember]
+    public string GetSetcomp_area
+    {
+        get
+        {
+            string text = comp_area;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_area = value;
+
+        }
+    }
+    private string comp_landstatus = "";
+    [DataMember]
+    public string GetSetcomp_landstatus
+    {
+        get
+        {
+            string text = comp_landstatus;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            comp_landstatus = value;
+
         }
     }
 
@@ -693,6 +915,24 @@ public class MainModel
         set
         {
             lineno = value;
+        }
+    }
+
+    private int saleslineno = 0;
+    [DataMember]
+    public int GetSetsaleslineno
+    {
+        get
+        {
+            int num = saleslineno;
+            if (num != 0)
+                return num;
+            else
+                return 0;
+        }
+        set
+        {
+            saleslineno = value;
         }
     }
 
@@ -1315,6 +1555,262 @@ public class MainModel
     }
 
     #endregion/*** END MODEL FOR GENERAL***/
+
+    #region/*** BEGIN JAWATANKUASA COMP ***/
+
+    private string committee_id = "";
+    [DataMember]
+    public string GetSetcommittee_id
+    {
+        get
+        {
+            string text = committee_id;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_id = value;
+        }
+    }
+
+    private string committee_name = "";
+    [DataMember]
+    public string GetSetcommittee_name
+    {
+        get
+        {
+            string text = committee_name;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_name = value;
+        }
+    }
+
+    private string committee_address = "";
+    [DataMember]
+    public string GetSetcommittee_address
+    {
+        get
+        {
+            string text = committee_address;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_address = value;
+        }
+    }
+
+    private string committee_contact = "";
+    [DataMember]
+    public string GetSetcommittee_contact
+    {
+        get
+        {
+            string text = committee_contact;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_contact = value;
+        }
+    }
+
+    private string committee_role = "";
+    [DataMember]
+    public string GetSetcommittee_role
+    {
+        get
+        {
+            string text = committee_role;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_role = value;
+        }
+    }
+
+    private string committee_prevrole = "";
+    [DataMember]
+    public string GetSetcommittee_prevrole
+    {
+        get
+        {
+            string text = committee_prevrole;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_prevrole = value;
+        }
+    }
+
+    private string committee_appointmentby = "";
+    [DataMember]
+    public string GetSetcommittee_appointmentby
+    {
+        get
+        {
+            string text = committee_appointmentby;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_appointmentby = value;
+        }
+    }
+
+    private string committee_certno = "";
+    [DataMember]
+    public string GetSetcommittee_certno
+    {
+        get
+        {
+            string text = committee_certno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_certno = value;
+        }
+    }
+
+    private string exchangeid = "";
+    [DataMember]
+    public string GetSetexchangeid
+    {
+        get
+        {
+            string text = exchangeid;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            exchangeid = value;
+        }
+    }
+
+    private string committee_dob = "";
+    [DataMember]
+    public string GetSetcommittee_dob
+    {
+        get
+        {
+            string text = committee_dob;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_dob = value;
+        }
+    }
+
+    private string committee_doa = "";
+    [DataMember]
+    public string GetSetcommittee_doa
+    {
+        get
+        {
+            string text = committee_doa;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_doa = value;
+        }
+    }
+
+    private string committee_age = "";
+    [DataMember]
+    public string GetSetcommittee_age
+    {
+        get
+        {
+            string text = committee_age;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_age = value;
+        }
+    }
+
+    private string committee_job = "";
+    [DataMember]
+    public string GetSetcommittee_job
+    {
+        get
+        {
+            string text = committee_job;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_job = value;
+        }
+    }
+
+    private string committee_status = "";
+    [DataMember]
+    public string GetSetcommittee_status
+    {
+        get
+        {
+            string text = committee_status;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            committee_status = value;
+        }
+    }
+    #endregion/*** END JAWATANKUASA COMP*/
+
 
     #region/*** BEGIN MODEL FOR PEOPLE ***/
 
@@ -2169,6 +2665,23 @@ public class MainModel
             orderno = value;
         }
     }
+    private string salesorderno = "";
+    [DataMember]
+    public string GetSetsalesorderno
+    {
+        get
+        {
+            string text = salesorderno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            salesorderno = value;
+        }
+    }
     private string orderdate = "";
     [DataMember]
     public string GetSetorderdate
@@ -2319,6 +2832,23 @@ public class MainModel
         set
         {
             plandeliverydate = value;
+        }
+    }
+    private string expirydate = "";
+    [DataMember]
+    public string GetSetexpirydate
+    {
+        get
+        {
+            string text = expirydate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            expirydate = value;
         }
     }
     private string orderremarks = "";
@@ -2622,6 +3152,279 @@ public class MainModel
     }
 
     #endregion/*** END MODEL FOR SHIPMENT***/
+
+    #region /*** BEGIN CASH IN & OUT***/
+
+    private string CashInOutcomp = "";
+    [DataMember]
+    public string GetSetCashInOutcomp
+    {
+        get
+        {
+            string text = CashInOutcomp;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutcomp = value;
+        }
+    }
+
+    private string CashInOutno = "";
+    [DataMember]
+    public string GetSetCashInOutno
+    {
+        get
+        {
+            string text = CashInOutno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutno = value;
+        }
+    }
+
+
+    private string CashInOutAmount = "";
+    [DataMember]
+    public string GetSetCashInOutAmount
+    {
+        get
+        {
+            string text = CashInOutAmount;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutAmount = value;
+        }
+    }
+
+    private string CashInOutType = "";
+    [DataMember]
+    public string GetSetCashInOutType
+    {
+        get
+        {
+            string text = CashInOutType;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutType = value;
+        }
+    }
+    private string paramttype = "";
+    [DataMember]
+    public string GetSetparamttype
+    {
+        get
+        {
+            string text = paramttype;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            paramttype = value;
+        }
+    }
+    private string paramtdesc = "";
+    [DataMember]
+    public string GetSetparamtdesc
+    {
+        get
+        {
+            string text = paramtdesc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            paramtdesc = value;
+        }
+    }
+
+    private string paramtcode = "";
+    [DataMember]
+    public string GetSetparamtcode
+    {
+        get
+        {
+            string text = paramtcode;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            paramtcode = value;
+        }
+    }
+    private string paramtcategory = "";
+    [DataMember]
+    public string GetSetparamtcategory
+    {
+        get
+        {
+            string text = paramtcategory;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            paramtcategory = value;
+        }
+    }
+    private string TotalCashIn = "";
+    [DataMember]
+    public string GetSetTotalCashIn
+    {
+        get
+        {
+            string text = TotalCashIn;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            TotalCashIn = value;
+        }
+    }
+
+    private string TotalCashout = "";
+    [DataMember]
+    public string GetSetTotalCashout
+    {
+        get
+        {
+            string text = TotalCashout;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            TotalCashout = value;
+        }
+    }
+
+
+    private string CashInOutpayno = "";
+    [DataMember]
+    public string GetSetCashInOutpayno
+    {
+        get
+        {
+            string text = CashInOutpayno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutpayno = value;
+        }
+    }
+    private string CashInOutresno = "";
+    [DataMember]
+    public string GetSetCashInOutresno
+    {
+        get
+        {
+            string text = CashInOutresno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutresno = value;
+        }
+    }
+
+    private string CashInOutdate = "";
+    [DataMember]
+    public string GetSetCashInOutdate
+    {
+        get
+        {
+            string text = CashInOutdate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutdate = value;
+        }
+    }
+
+
+
+    private string CashInOutDesc = "";
+    [DataMember]
+    public string GetSetCashInOutDesc
+    {
+        get
+        {
+            string text = CashInOutDesc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutDesc = value;
+        }
+    }
+
+    private string CashInOutStatus = "";
+    [DataMember]
+    public string GetSetCashInOutStatus
+    {
+        get
+        {
+            string text = CashInOutStatus;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            CashInOutStatus = value;
+        }
+    }
+
+    #endregion/*** END CASH IN & OUT***/
 
     #region/*** BEGIN MODEL FOR INVOICE***/
 
@@ -3563,6 +4366,591 @@ public class MainModel
 
     #endregion/*** END MODEL FOR BP ***/
 
+
+    #region/*** BEGIN MODEL FOR ASSET ***/
+
+    private string assetno = "";
+    [DataMember]
+    public string GetSetassetno
+    {
+        get
+        {
+            string text = assetno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            assetno = value;
+        }
+    }
+    private string assetdesc = "";
+    [DataMember]
+    public string GetSetassetdesc
+    {
+        get
+        {
+            string text = assetdesc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            assetdesc = value;
+        }
+    }
+    private string assettyp = "";
+    [DataMember]
+    public string GetSetassettyp
+    {
+        get
+        {
+            string text = assettyp;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            assettyp = value;
+        }
+    }
+    private string assetcat = "";
+    [DataMember]
+    public string GetSetassetcat
+    {
+        get
+        {
+            string text = assetcat;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            assetcat = value;
+        }
+    }
+    private string assetowner = "";
+    [DataMember]
+    public string GetSetassetowner
+    {
+        get
+        {
+            string text = assetowner;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            assetowner = value;
+        }
+    }
+    private string assetrefno = "";
+    [DataMember]
+    public string GetSetassetrefno
+    {
+        get
+        {
+            string text = assetrefno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            assetrefno = value;
+        }
+    }
+    private string datemfg = "";
+    [DataMember]
+    public string GetSetdatemfg
+    {
+        get
+        {
+            string text = datemfg;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            datemfg = value;
+        }
+    }
+    private string warranty = "";
+    [DataMember]
+    public string GetSetwarranty
+    {
+        get
+        {
+            string text = warranty;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            warranty = value;
+        }
+    }
+    private string datewarend = "";
+    [DataMember]
+    public string GetSetdatewarend
+    {
+        get
+        {
+            string text = datewarend;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            datewarend = value;
+        }
+    }
+    private string datereg = "";
+    [DataMember]
+    public string GetSetdatereg
+    {
+        get
+        {
+            string text = datereg;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            datereg = value;
+        }
+    }
+    private string deprtyp = "";
+    [DataMember]
+    public string GetSetdeprtyp
+    {
+        get
+        {
+            string text = deprtyp;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            deprtyp = value;
+        }
+    }
+
+    private double costreg = 0;
+    [DataMember]
+    public double GetSetcostreg
+    {
+        get
+        {
+            double doubleno = costreg;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            costreg = value;
+        }
+    }
+
+    private int qtyreg = 0;
+    [DataMember]
+    public int GetSetqtyreg
+    {
+        get
+        {
+            int num = qtyreg;
+            if (num != 0)
+                return num;
+            else
+                return 0;
+        }
+        set
+        {
+            qtyreg = value;
+        }
+    }
+
+    private double deprrate = 0;
+    [DataMember]
+    public double GetSetdeprrate
+    {
+        get
+        {
+            double doubleno = deprrate;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            deprrate = value;
+        }
+    }
+    private double depraccum = 0;
+    [DataMember]
+    public double GetSetdepraccum
+    {
+        get
+        {
+            double doubleno = depraccum;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            depraccum = value;
+        }
+    }
+    private double assetnbv = 0;
+    [DataMember]
+    public double GetSetassetnbv
+    {
+        get
+        {
+            double doubleno = assetnbv;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            assetnbv = value;
+        }
+    }
+
+    private string tranno = "";
+    [DataMember]
+    public string GetSettranno
+    {
+        get
+        {
+            string text = tranno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            tranno = value;
+        }
+    }
+
+    private string trancode = "";
+    [DataMember]
+    public string GetSettrancode
+    {
+        get
+        {
+            string text = trancode;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            trancode = value;
+        }
+    }
+
+    private string trancat = "";
+    [DataMember]
+    public string GetSettrancat
+    {
+        get
+        {
+            string text = trancat;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            trancat = value;
+        }
+    }
+
+    private string trandate = "";
+    [DataMember]
+    public string GetSettrandate
+    {
+        get
+        {
+            string text = trandate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            trandate = value;
+        }
+    }
+    private int tranqty = 0;
+    [DataMember]
+    public int GetSettranqty
+    {
+        get
+        {
+            int num = tranqty;
+            if (num != 0)
+                return num;
+            else
+                return 0;
+        }
+        set
+        {
+            tranqty = value;
+        }
+    }
+    private double tranvalue = 0;
+    [DataMember]
+    public double GetSettranvalue
+    {
+        get
+        {
+            double doubleno = tranvalue;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            tranvalue = value;
+        }
+    }
+
+    private string country = "";
+    [DataMember]
+    public string GetSetcountry
+    {
+        get
+        {
+            string text = country;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            country = value;
+        }
+    }
+
+    private string country_desc = "";
+    [DataMember]
+    public string GetSetcountry_desc
+    {
+        get
+        {
+            string text = country_desc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            country_desc = value;
+        }
+    }
+
+    private string state = "";
+    [DataMember]
+    public string GetSetstate
+    {
+        get
+        {
+            string text = state;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            state = value;
+        }
+    }
+
+    private string state_desc = "";
+    [DataMember]
+    public string GetSetstate_desc
+    {
+        get
+        {
+            string text = state_desc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            state_desc = value;
+        }
+    }
+
+    private string district = "";
+    [DataMember]
+    public string GetSetdistrict
+    {
+        get
+        {
+            string text = district;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            district = value;
+        }
+    }
+
+    private string district_desc = "";
+    [DataMember]
+    public string GetSetdistrict_desc
+    {
+        get
+        {
+            string text = district_desc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            district_desc = value;
+        }
+    }
+
+    private string placedate = "";
+    [DataMember]
+    public string GetSetplacedate
+    {
+        get
+        {
+            string text = placedate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            placedate = value;
+        }
+    }
+
+    private string purpose = "";
+    [DataMember]
+    public string GetSetpurpose
+    {
+        get
+        {
+            string text = purpose;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            purpose = value;
+        }
+    }
+
+    private string officerid = "";
+    [DataMember]
+    public string GetSetofficerid
+    {
+        get
+        {
+            string text = officerid;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            officerid = value;
+        }
+    }
+
+    private string officername = "";
+    [DataMember]
+    public string GetSetofficername
+    {
+        get
+        {
+            string text = officername;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            officername = value;
+        }
+    }
+
+    private string contactno = "";
+    [DataMember]
+    public string GetSetcontactno
+    {
+        get
+        {
+            string text = contactno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            contactno = value;
+        }
+    }
+
+    #endregion/*** END MODEL FOR ASSET ***/
+
     #region/*** BEGIN MODEL FOR OTHER BP ***/
 
     private string obpid = "";
@@ -4195,6 +5583,433 @@ public class MainModel
     }
 
     #endregion/*** END MODEL FOR EXPENSES***/
+
+    #region/*** BEGIN MODEL FOR INCOME ***/
+
+    private string incomeno = "";
+    [DataMember]
+    public string GetSetincomeno
+    {
+        get
+        {
+            string text = incomeno;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomeno = value;
+        }
+    }
+    private int income_lineno = 0;
+    [DataMember]
+    public int GetSetincome_lineno
+    {
+        get
+        {
+            int num = income_lineno;
+            if (num != 0)
+                return num;
+            else
+                return 0;
+        }
+        set
+        {
+            income_lineno = value;
+        }
+    }
+    private string incomedate = "";
+    [DataMember]
+    public string GetSetincomedate
+    {
+        get
+        {
+            string text = incomedate;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomedate = value;
+        }
+    }
+    private string incometype = "";
+    [DataMember]
+    public string GetSetincometype
+    {
+        get
+        {
+            string text = incometype;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incometype = value;
+        }
+    }
+    private string incomecat = "";
+    [DataMember]
+    public string GetSetincomecat
+    {
+        get
+        {
+            string text = incomecat;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomecat = value;
+        }
+    }
+    private string incomeyear = "";
+    [DataMember]
+    public string GetSetincomeyear
+    {
+        get
+        {
+            string text = incomeyear;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomeyear = value;
+        }
+    }
+    private double incomeamount = 0;
+    [DataMember]
+    public double GetSetincomeamount
+    {
+        get
+        {
+            double doubleno = incomeamount;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            incomeamount = value;
+        }
+    }
+    private double incomeprice = 0;
+    [DataMember]
+    public double GetSetincomeprice
+    {
+        get
+        {
+            double doubleno = incomeprice;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            incomeprice = value;
+        }
+    }
+    private double totalincome = 0;
+    [DataMember]
+    public double GetSettotalincome
+    {
+        get
+        {
+            double doubleno = totalincome;
+            if (doubleno != 0)
+                return doubleno;
+            else
+                return 0;
+        }
+        set
+        {
+            totalincome = value;
+        }
+    }
+    private string incomestatus = "";
+    [DataMember]
+    public string GetSetincomestatus
+    {
+        get
+        {
+            string text = incomestatus;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomestatus = value;
+        }
+    }
+
+    private float incometotal = 0;
+    [DataMember]
+    public float GetSetincometotal
+    {
+        get
+        {
+            float number = incometotal;
+            if (number != null)
+                return number;
+            else
+                return 0;
+        }
+        set
+        {
+            incometotal = value;
+        }
+    }
+
+    private string incomeself = "";
+    [DataMember]
+    public string GetSetincomeself
+    {
+        get
+        {
+            string text = incomeself;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomeself = value;
+        }
+    }
+
+    private string incomespouse = "";
+    [DataMember]
+    public string GetSetincomespouse
+    {
+        get
+        {
+            string text = incomespouse;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomespouse = value;
+        }
+    }
+
+    private string incomedonation = "";
+    [DataMember]
+    public string GetSetincomedonation
+    {
+        get
+        {
+            string text = incomedonation;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomedonation = value;
+        }
+    }
+
+    private string incomejkm = "";
+    [DataMember]
+    public string GetSetincomejkm
+    {
+        get
+        {
+            string text = incomejkm;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomejkm = value;
+        }
+    }
+
+    private string incomezakat = "";
+    [DataMember]
+    public string GetSetincomezakat
+    {
+        get
+        {
+            string text = incomezakat;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomezakat = value;
+        }
+    }
+
+    private string incomepencen = "";
+    [DataMember]
+    public string GetSetincomepencen
+    {
+        get
+        {
+            string text = incomepencen;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomepencen = value;
+        }
+    }
+
+    private string incomebr1m = "";
+    [DataMember]
+    public string GetSetincomebr1m
+    {
+        get
+        {
+            string text = incomebr1m;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomebr1m = value;
+        }
+    }
+
+    private string incomeperkeso = "";
+    [DataMember]
+    public string GetSetincomeperkeso
+    {
+        get
+        {
+            string text = incomeperkeso;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomeperkeso = value;
+        }
+    }
+
+    private string incomerentbendang = "";
+    [DataMember]
+    public string GetSetincomerentbendang
+    {
+        get
+        {
+            string text = incomerentbendang;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomerentbendang = value;
+        }
+    }
+
+    private string incomerenthouse = "";
+    [DataMember]
+    public string GetSetincomerenthouse
+    {
+        get
+        {
+            string text = incomerenthouse;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomerenthouse = value;
+        }
+    }
+
+    private string incomekwapm = "";
+    [DataMember]
+    public string GetSetincomekwapm
+    {
+        get
+        {
+            string text = incomekwapm;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomekwapm = value;
+        }
+    }
+
+    private string incomeasb = "";
+    [DataMember]
+    public string GetSetincomeasb
+    {
+        get
+        {
+            string text = incomeasb;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomeasb = value;
+        }
+    }
+
+    private string incomeothers = "";
+    [DataMember]
+    public string GetSetincomeothers
+    {
+        get
+        {
+            string text = incomeothers;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            incomeothers = value;
+        }
+    }
+
+    #endregion/*** END MODEL FOR INCOME***/
 
     #region/*** BEGIN MODEL FOR PAYMENT PAID ***/
 
@@ -5249,7 +7064,100 @@ public class MainModel
         }
     }
 
+    private string useraccess = "";
+    [DataMember]
+    public string GetSetuseraccess
+    {
+        get
+        {
+            string text = useraccess;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            useraccess = value;
+        }
+    }
+
     #endregion
+
+    #region/*** BEGIN INFO COMP ***/
+
+    private string info_no = "";
+    [DataMember]
+    public string GetSetinfo_no
+    {
+        get
+        {
+            string text = info_no;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            info_no = value;
+        }
+    }
+
+    private string info_type = "";
+    [DataMember]
+    public string GetSetinfo_type
+    {
+        get
+        {
+            string text = info_type;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            info_type = value;
+        }
+    }
+
+    private string info_desc = "";
+    [DataMember]
+    public string GetSetinfo_desc
+    {
+        get
+        {
+            string text = info_desc;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            info_desc = value;
+        }
+    }
+
+    private string info_status = "";
+    [DataMember]
+    public string GetSetinfo_status
+    {
+        get
+        {
+            string text = info_status;
+            if (text != null)
+                return text;
+            else
+                return string.Empty;
+        }
+        set
+        {
+            info_status = value;
+        }
+    }
+    #endregion/*** END INFO COMP ***/
 
     #region LOCATION
     private string endlocation = "";

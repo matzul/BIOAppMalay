@@ -1,0 +1,33 @@
+/* 	1. CSS for tab menu
+	2. Last update : 26th May 2004
+	3. Updated by : Fauzi
+*/
+
+/* Tab area */
+div.tabArea {
+	font-size: 80%;
+  	font-weight: normal;
+}
+/* The tab, common */
+a.tab {
+	background-color: #E8EFF7;
+	border: 1px solid #C8D2F0;
+	border-bottom-width: 0px;
+	padding: 2px 1em 2px 1em;
+	position: relative;
+	text-decoration: none;
+	top: -1px;
+	z-index: 100;
+}
+/* Tab, when hover */
+a.tab:hover {
+  	background-color: #7F9BC9;
+  	color: #FFFFFF;
+  	font-weight: normal;
+}
+/* Tab, when active */
+a.tab.activeTab, a.tab.activeTab:hover, a.tab.activeTab:visited {
+  	background-color: #7F9BC9;
+  	color: #FFFFFF;
+  	z-index: 102;
+}

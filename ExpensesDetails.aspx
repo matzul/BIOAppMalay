@@ -22,24 +22,51 @@
                                     <label for="expensescat">Kategori:</label>
                                       <select class="form-control" id="expensescat" name="expensescat" required="required">
                                         <option value="">-select-</option>
-                                        <option value="PURCHASE_INVOICE" <%=oModExpenses.GetSetexpensescat.Equals("PURCHASE_INVOICE")?"selected":"" %>>INVOIS BELIAN</option>
-                                        <option value="TRANSFER_INVOICE" <%=oModExpenses.GetSetexpensescat.Equals("TRANSFER_INVOICE")?"selected":"" %>>INVOIS PINDAHAN</option>
-                                        <option value="PAYMENT_VOUCHER" <%=oModExpenses.GetSetexpensescat.Equals("PAYMENT_VOUCHER")?"selected":"" %>>VOUCHER BAYARAN</option>
-                                        <option value="JOURNAL_VOUCHER" <%=oModExpenses.GetSetexpensescat.Equals("JOURNAL_VOUCHER")?"selected":"" %>>VOUCHER PERLARASAN</option>
+                                        <option value="PURCHASE_INVOICE" <%=oModExpenses.GetSetexpensescat.Equals("PURCHASE_INVOICE") ? "selected" : "" %>>INVOIS BELIAN</option>
+                                        <option value="TRANSFER_INVOICE" <%=oModExpenses.GetSetexpensescat.Equals("TRANSFER_INVOICE") ? "selected" : "" %>>INVOIS PINDAHAN</option>
+                                        <option value="PAYMENT_VOUCHER" <%=oModExpenses.GetSetexpensescat.Equals("PAYMENT_VOUCHER") ? "selected" : "" %>>VOUCHER BAYARAN</option>
+                                        <%
+                                            if (oModExpenses.GetSetstatus.Equals("CONFIRMED") || oModExpenses.GetSetstatus.Equals("CANCELLED"))
+                                            { 
+                                        %>
+                                        <option value="JOURNAL_VOUCHER" <%=oModExpenses.GetSetexpensescat.Equals("JOURNAL_VOUCHER") ? "selected" : "" %>>VOUCHER PERLARASAN</option>
+                                        <%
+                                            }
+                                        %>
                                         <!--
-                                        <option value="FINANCIAL_RELINQUISHMENT" <%=oModExpenses.GetSetexpensescat.Equals("FINANCIAL_RELINQUISHMENT")?"selected":"" %>>PERBELANJAAN KEWANGAN</option>
-                                        <option value="BANK_DEPOSIT" <%=oModExpenses.GetSetexpensescat.Equals("BANK_DEPOSIT")?"selected":"" %>>DEPOSIT BANK</option>
-                                        <option value="CASH_WITHDRAWAL" <%=oModExpenses.GetSetexpensescat.Equals("CASH_WITHDRAWAL")?"selected":"" %>>PENGELUARAN TUNAI</option>
-                                        <option value="OTHER_PAYMENT" <%=oModExpenses.GetSetexpensescat.Equals("OTHER_PAYMENT")?"selected":"" %>>LAIN-LAIN BAYARAN</option>
+                                        <option value="FINANCIAL_RELINQUISHMENT" <%=oModExpenses.GetSetexpensescat.Equals("FINANCIAL_RELINQUISHMENT") ? "selected" : "" %>>PERBELANJAAN KEWANGAN</option>
+                                        <option value="BANK_DEPOSIT" <%=oModExpenses.GetSetexpensescat.Equals("BANK_DEPOSIT") ? "selected" : "" %>>DEPOSIT BANK</option>
+                                        <option value="CASH_WITHDRAWAL" <%=oModExpenses.GetSetexpensescat.Equals("CASH_WITHDRAWAL") ? "selected" : "" %>>PENGELUARAN TUNAI</option>
+                                        <option value="OTHER_PAYMENT" <%=oModExpenses.GetSetexpensescat.Equals("OTHER_PAYMENT") ? "selected" : "" %>>LAIN-LAIN BAYARAN</option>
                                         -->
                                       </select>
                                     <label for="expensestype">Jenis Bil & Belanja:</label>
                                       <select class="form-control" id="expensestype" name="expensestype" required="required">
                                         <option value="">-select-</option>
-                                        <option value="NOT_APPLICABLE" <%=oModExpenses.GetSetexpensestype.Equals("NOT_APPLICABLE")?"selected":"" %>>TIDAK BERKENAAN</option>
+                                        <option value="NOT_APPLICABLE" <%=oModExpenses.GetSetexpensestype.Equals("NOT_APPLICABLE") ? "selected" : "" %>>TIDAK BERKENAAN</option>
+                                        <%
+                                            for (int x = 0; x < lsExpensesType.Count; x++)
+                                            {
+                                                MainModel modParam = (MainModel)lsExpensesType[x];
+                                        %>
+                                                <option value="<%=modParam.GetSetparamttype %>" <%=oModExpenses.GetSetexpensestype.Equals(modParam.GetSetparamttype) ? "selected" : "" %>><%=modParam.GetSetparamtdesc %></option>
+                                        <%
+                                            }
+                                        %>
+                                        <%
+                                            if (oModExpenses.GetSetstatus.Equals("CONFIRMED") || oModExpenses.GetSetstatus.Equals("CANCELLED"))
+                                            { 
+                                        %>
+                                        <option value="BANK_DEPOSIT" <%=oModExpenses.GetSetexpensestype.Equals("BANK_DEPOSIT") ? "selected" : "" %>>BANK DEPOSIT</option>
+                                        <option value="CASH_WITHDRAWAL" <%=oModExpenses.GetSetexpensestype.Equals("CASH_WITHDRAWAL") ? "selected" : "" %>>PENGELUARAN TUNAI</option>
+                                        <%
+                                            }
+                                        %>
+                                        <!--
                                         <option value="FINANCIAL_RELINQUISHMENTS" <%=oModExpenses.GetSetexpensestype.Equals("FINANCIAL_RELINQUISHMENTS")?"selected":"" %>>PENGEMBALIAN KEWANGAN</option>
                                         <option value="BANK_DEPOSIT" <%=oModExpenses.GetSetexpensestype.Equals("BANK_DEPOSIT")?"selected":"" %>>BANK DEPOSIT</option>
                                         <option value="CASH_WITHDRAWAL" <%=oModExpenses.GetSetexpensestype.Equals("CASH_WITHDRAWAL")?"selected":"" %>>PENGELUARAN TUNAI</option>
+                                        <option value="ASSET_PROCUREMENT" <%=oModExpenses.GetSetexpensestype.Equals("ASSET_PROCUREMENT")?"selected":"" %>>PEROLEHAN ASET & BAHAN MODAL</option>
                                         <option value="SUPPLY_EXPENSES" <%=oModExpenses.GetSetexpensestype.Equals("SUPPLY_EXPENSES")?"selected":"" %>>BEKALAN & BAHAN MENTAH</option>
                                         <option value="SALARIES_WAGES" <%=oModExpenses.GetSetexpensestype.Equals("SALARIES_WAGES")?"selected":"" %>>GAJI & UPAH</option>
                                         <option value="TRAVEL_EXPENSES" <%=oModExpenses.GetSetexpensestype.Equals("TRAVEL_EXPENSES")?"selected":"" %>>PERBELANJAAN PERJALANAN</option>
@@ -57,6 +84,7 @@
                                         <option value="TAXATION" <%=oModExpenses.GetSetexpensestype.Equals("TAXATION")?"selected":"" %>>PERCUKAIAN (TAX)</option>
                                         <option value="SELLING_SERVICES" <%=oModExpenses.GetSetexpensestype.Equals("SELLING_SERVICES")?"selected":"" %>>KOS PENJUALAN & PERKHIDMATAN</option>
                                         <option value="OTHER_EXPENSES" <%=oModExpenses.GetSetexpensestype.Equals("OTHER_EXPENSES")?"selected":"" %>>PERBELANJAAN LAIN-LAIN</option>
+                                        -->
                                       </select>
                                     <label for="remarks">Rujukan/ Catatan:</label>
                                     <input type="text" id="remarks" class="form-control" name="remarks" value="<%=oModExpenses.GetSetremarks%>" />
@@ -524,8 +552,7 @@
                                           MainModel modBP = (MainModel)lsPayTo[i];
                     %>      
                                 if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                    //$('textarea#bpaddress').text("<%=modBP.GetSetbpaddress%>").val();
-                                    document.getElementById("bpaddress").value = "<%=modBP.GetSetbpaddress%>";
+                                    document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>";
                                     $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                     $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                 }
@@ -534,7 +561,6 @@
                                   }
                     %>
                         if ($('#bpdesc').val() == 'OTHER') {
-                            //$('textarea#bpaddress').text('').val();
                             document.getElementById("bpaddress").value = "";
                             $('#bpaddress').prop('disabled', false);
                             $('#bpcontact').val('');
@@ -988,7 +1014,7 @@
                                     %>
                                         if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                         {
-                                            document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                            document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                             $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                         }
                                     <%
@@ -998,7 +1024,7 @@
                                     %>
                                         else if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                         {
-                                            document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                            document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                             $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                         }
                                     <%
@@ -1030,7 +1056,7 @@
                         %>
                                 if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                 {
-                                    document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                    document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                     $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                 }
                         <%
@@ -1040,7 +1066,7 @@
                         %>
                                 else if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                 {
-                                    document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                    document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                     $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                 }
                         <%

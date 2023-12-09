@@ -22,6 +22,7 @@ public partial class InvoiceDetails : System.Web.UI.Page
     public ArrayList lsOtherBP = new ArrayList();
     public ArrayList lsPendInvMod = new ArrayList();
     public ArrayList lsInvoiceLineItem = new ArrayList();
+    public ArrayList lsInvoiceType = new ArrayList();
     public ArrayList lsTax = new ArrayList();
     public String selected_bp = "";
 
@@ -439,6 +440,7 @@ public partial class InvoiceDetails : System.Web.UI.Page
             }
         }
         lsTax = oMainCon.getTaxList(sCurrComp);
+        lsInvoiceType = oMainCon.getParametertype("'CAP-INCOME','INCOME'", "ACTIVE");
 
     }
 

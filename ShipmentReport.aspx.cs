@@ -32,6 +32,10 @@ public partial class ShipmentReport : System.Web.UI.Page
             processValues();
         }
     }
+    private DateTime FirstDayOfMonth()
+    {
+        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    }
     private void initialValues()
     {
         if (Session["comp"] != null)
@@ -48,6 +52,8 @@ public partial class ShipmentReport : System.Web.UI.Page
         }
         lsBP = oMainCon.getBPListIncludeSub(sCurrComp);
         lsItem = oMainCon.getItemList(sCurrComp, "", "", "");
+        sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+        sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
     }
 
     private void getValues()
@@ -84,8 +90,8 @@ public partial class ShipmentReport : System.Web.UI.Page
             sShipmentNo = "";
             sBPID = "";
             sStatus = "";
-            sStartDate = "";
-            sEndDate = "";
+            sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+            sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
             sItemNo = "";
             invoiceStatus = "";
             sOrderNo = "";

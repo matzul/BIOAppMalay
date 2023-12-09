@@ -82,11 +82,12 @@ public partial class AdminCPanel1 : System.Web.UI.Page
 
         if (sAction.Equals("SAVE"))
         {
-            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "01");
+            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "");
             oUserProfile.GetSetusername = oMainCon.replaceNull(Request.Params.Get("username"));
             oUserProfile.GetSetuseradd = oMainCon.replaceNull(Request.Params.Get("useradd"));
             oUserProfile.GetSetusertelno = oMainCon.replaceNull(Request.Params.Get("usertelno"));
             oUserProfile.GetSetuserpwd = oMainCon.replaceNull(Request.Params.Get("userpassword"));
+            oUserProfile.GetSetusertype = oMainCon.replaceNull(Request.Params.Get("usertype"));
 
         }
     }
@@ -99,11 +100,11 @@ public partial class AdminCPanel1 : System.Web.UI.Page
         }
         else if (sAction.Equals("OPEN"))
         {
-            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "01");
+            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "");
         }
         else if (sAction.Equals("EDIT"))
         {
-            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "01");
+            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "");
         }
         else if (sAction.Equals("SAVE"))
         {
@@ -148,7 +149,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -217,7 +218,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -291,7 +292,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sUserId = createdby;
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
         if (TokenNumber.Equals(TokenNumberConfig))
@@ -459,7 +460,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -517,7 +518,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -574,7 +575,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sUserId = HttpContext.Current.Session["userid"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
         if (TokenNumber.Equals(TokenNumberConfig))
@@ -617,7 +618,7 @@ public partial class AdminCPanel1 : System.Web.UI.Page
             sUserId = HttpContext.Current.Session["userid"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
         if (TokenNumber.Equals(TokenNumberConfig))

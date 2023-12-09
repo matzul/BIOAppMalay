@@ -13,22 +13,22 @@
             <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top dark"><i class="glyphicon glyphicon-import blue"></i> CADANGAN PENDAPATAN (RM)</span>
               <div class="count blue"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModRevenuePlan.GetSetTODATE)) %></div>
-              <span class="count_bottom">Terkini [<%=sCurrFyr %>]</span>
+              <span class="count_bottom">Tahun [<%=sCurrFyr %>]</span>
             </div>
             <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top dark"><i class="glyphicon glyphicon-import green"></i> PENDAPATAN SEBENAR (RM)</span>
               <div class="count green"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModRevenueActual.GetSetTODATE)) %></div>
-              <span class="count_bottom">Terkini [<%=sCurrFyr %>]</span>
+              <span class="count_bottom">Tahun [<%=sCurrFyr %>]</span>
             </div>
             <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top dark"><i class="glyphicon glyphicon-export orange"></i> CADANGAN PERBELANJAAN (RM)</span>
               <div class="count orange"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModExpensesPlan.GetSetTODATE)) %></div>
-              <span class="count_bottom">Terkini [<%=sCurrFyr %>]</span>
+              <span class="count_bottom">Tahun [<%=sCurrFyr %>]</span>
             </div>
             <div class="col-md-3 col-sm-4 col-xs-6 tile_stats_count">
               <span class="count_top dark"><i class="glyphicon glyphicon-export red"></i> PERBELANJAAN SEBENAR (RM)</span>
               <div class="count red"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModExpensesActual.GetSetTODATE)) %></div>
-              <span class="count_bottom">Terkini [<%=sCurrFyr %>]</span>
+              <span class="count_bottom">Tahun [<%=sCurrFyr %>]</span>
             </div>
           </div>
           <!-- /top tiles -->
@@ -152,7 +152,7 @@
               <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
-                    <h2>Invois Jualan <small>TERKINI [<%=sCurrDate %>]</small></h2>
+                    <h2>Invois Jualan <small>Tahun [<%=sCurrFyr %>]</small></h2>
                     <ul class="nav navbar-right panel_toolbox">
                       <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
                       </li>
@@ -170,7 +170,7 @@
                               <div class="count blue"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModRevenueActualSummary.GetSetTODATE)) %></div>
                               <p>TOTAL (RM)</p>
                               <h3>Jumlah Invois</h3>
-                              <p>Terkini [<%=sCurrDate %>]</p>
+                              <p>Tahun [<%=sCurrFyr %>]</p>
                           </div>
                       </div>
                       <div class="animated flipInY col-lg-3 col-md-3 col-sm-4 col-xs-12">
@@ -179,7 +179,7 @@
                               <div class="count green"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModCollectionActualSummary.GetSetTODATE)) %></div>
                               <p>TOTAL (RM)</p>
                               <h3>Bayaran Terima</h3>
-                              <p>Terkini [<%=sCurrDate %>]</p>
+                              <p>Tahun [<%=sCurrFyr %>]</p>
                           </div>
                       </div>
                       <div class="animated flipInY col-lg-3 col-md-3 col-sm-4 col-xs-12">
@@ -188,7 +188,7 @@
                               <div class="count red"><%=String.Format("{0:#,##0.00}",Convert.ToDecimal(oModRevenueActualSummary.GetSetTODATE-oModCollectionActualSummary.GetSetTODATE)) %></div>
                               <p>TOTAL (RM)</p>
                               <h3>Belum Terima</h3>
-                              <p>Terkini [<%=sCurrDate %>]</p>
+                              <p>Tahun [<%=sCurrFyr %>]</p>
                           </div>
                       </div>
                   </div>
@@ -288,6 +288,10 @@
                                 <option value="2017">2017</option>
                                 <option value="2018">2018</option>
                                 <option value="2019">2019</option>
+                                <option value="2020">2020</option>
+                                <option value="2021">2021</option>
+                                <option value="2022">2022</option>
+                                <option value="2023">2023</option>
                                 </select>
                             </div>
                             </div>

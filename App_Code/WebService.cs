@@ -20,10 +20,11 @@ using System.Configuration;
 [System.Web.Script.Services.ScriptService]
 public class WebService : System.Web.Services.WebService
 {
-    private String TokenNumber = "00000000";
+    private String TokenNumber = "M05kit0@1";
     private String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
     public MainController oMainCon = new MainController();
+    public HRController oHRCon = new HRController();
 
     public WebService()
     {
@@ -281,6 +282,199 @@ public class WebService : System.Web.Services.WebService
         HttpContext.Current.Response.Write(jsonResponse);
     }
 
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void uploadFileAsset()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        string comp = "";
+        string userid = "";
+        string status = "N";
+        string fileName = "";
+        string imageurl = "";
+        string message = "Intenal Server Error!";
+
+        //MainController oMainCon = new MainController();
+        //MainModel modComp = new MainModel();
+
+        if (HttpContext.Current.Session["comp"] != null)
+        {
+            comp = HttpContext.Current.Session["comp"].ToString();
+        }
+
+        if (HttpContext.Current.Session["userid"] != null)
+        {
+            userid = HttpContext.Current.Session["userid"].ToString();
+        }
+
+        if (HttpContext.Current.Request.Form.AllKeys.Any())
+        {
+            string comp2 = HttpContext.Current.Request.Form["inputitem[0]"];
+            string userid2 = HttpContext.Current.Request.Form["inputitem[1]"];
+            string itemno = HttpContext.Current.Request.Form["inputitem[2]"];
+            var FILE = HttpContext.Current.Request.Files["inputitem[3]"];
+
+            if (comp.Equals(comp2) && userid.Equals(userid2))
+            {
+                fileName = "upload_" + userid + "_" + comp + "_" + itemno + "_" + Path.GetFileName(FILE.FileName);
+                if (fileName != string.Empty)
+                {
+                    //imageurl = "http://websvc.zakatkedah.com.my" + HttpContext.Current.Request.ApplicationPath + "/Attachment/" + fileName;
+                    //imageurl = "http://localhost:62709/Attachment/" + fileName;
+                    imageurl = "./Attachment/" + fileName;
+                    FILE.SaveAs(Server.MapPath("./Attachment/") + fileName);
+                    status = "Y";
+                }
+            }
+            else
+            {
+                message = "invalid comp code & userid!";
+            }
+        }
+        object result = new { status = status, filename = fileName, imageurl = imageurl, message = message };
+
+        jsonResponse = new JavaScriptSerializer().Serialize(result);
+
+        //return jsonResponse;
+
+        HttpContext.Current.Response.Write(jsonResponse);
+
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void storeFileAsset()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+        String sComp = "";
+        String sUserId = "";
+
+        //MainController oMainCon = new MainController();
+        //MainModel modComp = new MainModel();
+
+        if (HttpContext.Current.Session["comp"] != null)
+        {
+            sComp = HttpContext.Current.Session["comp"].ToString();
+        }
+
+        if (HttpContext.Current.Session["userid"] != null)
+        {
+            sUserId = HttpContext.Current.Session["userid"].ToString();
+        }
+
+        if (HttpContext.Current.Request.Form.AllKeys.Any())
+        {
+            string comp = HttpContext.Current.Request.Form["inputitem[0]"];
+            string userid = HttpContext.Current.Request.Form["inputitem[1]"];
+            string itemno = HttpContext.Current.Request.Form["inputitem[2]"];
+            string filename = HttpContext.Current.Request.Form["inputitem[3]"];
+            string imgwidth = HttpContext.Current.Request.Form["inputitem[4]"];
+            string imgheight = HttpContext.Current.Request.Form["inputitem[5]"];
+
+            if (comp.Equals(sComp) && userid.Equals(sUserId))
+            {
+                ArrayList lsFileName = new ArrayList();
+                lsFileName = getFileAttached(filename);
+                for (int j = 0; j < lsFileName.Count; j++)
+                {
+                    String sFileNameAndFolder = (String)lsFileName[j];
+                    if (oMainCon.storeBLOBFileAsset(comp, itemno, userid, sFileNameAndFolder, filename, imgwidth, imgheight).Equals("Y"))
+                    {
+                        //To delete file from the folder
+                        FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                        filetodelete.Delete();
+                        sStatus = "Y";
+                        sMessage = "";
+                    }
+                    else
+                    {
+                        sMessage = "unable to store blob file!";
+                    }
+                }
+            }
+            else
+            {
+                sMessage = "invalid comp code & userid!";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void deleteFileAsset()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+        String sComp = "";
+        String sUserId = "";
+
+        //MainController oMainCon = new MainController();
+        //MainModel modComp = new MainModel();
+
+        if (HttpContext.Current.Session["comp"] != null)
+        {
+            sComp = HttpContext.Current.Session["comp"].ToString();
+        }
+
+        if (HttpContext.Current.Session["userid"] != null)
+        {
+            sUserId = HttpContext.Current.Session["userid"].ToString();
+        }
+
+        if (HttpContext.Current.Request.Form.AllKeys.Any())
+        {
+            string comp = HttpContext.Current.Request.Form["inputitem[0]"];
+            string userid = HttpContext.Current.Request.Form["inputitem[1]"];
+            string itemno = HttpContext.Current.Request.Form["inputitem[2]"];
+            string filename = HttpContext.Current.Request.Form["inputitem[3]"];
+
+            if (comp.Equals(sComp) && userid.Equals(sUserId))
+            {
+
+                if (oMainCon.deleteBLOBFileAsset(comp, itemno, userid, filename).Equals("Y"))
+                {
+                    //To delete file from the folder
+                    ArrayList lsFileName = new ArrayList();
+                    lsFileName = getFileAttached(filename);
+                    for (int j = 0; j < lsFileName.Count; j++)
+                    {
+                        String sFileNameAndFolder = (String)lsFileName[j];
+                        FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                        filetodelete.Delete();
+                    }
+                    sStatus = "Y";
+                    sMessage = "";
+                }
+                else
+                {
+                    sMessage = "unable to delete image file!";
+                }
+
+            }
+            else
+            {
+                sMessage = "invalid comp code & userid!";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        HttpContext.Current.Response.Write(jsonResponse);
+    }
+
     public ArrayList getFileAttached(String sFileName)
     {
         ArrayList lsFileAttached = new ArrayList();
@@ -297,6 +491,817 @@ public class WebService : System.Web.Services.WebService
         catch (Exception e)
         {
             oMainCon.WriteToLogFile(DateTime.Now.ToString() + ": [WebService.cs:getFileAttached()] " + e.Message.ToString());
+        }
+        return lsFileAttached;
+    }
+
+    public ArrayList getFileAttached(String sFileName, String serverMapPath)
+    {
+        ArrayList lsFileAttached = new ArrayList();
+        try
+        {
+            String sFilePath = serverMapPath;
+            String[] filePaths = Directory.GetFiles(sFilePath, sFileName);
+            for (int i = 0; i < filePaths.Length; i++)
+            {
+                //lsFileAttached.Add(Path.GetFileName(filePaths[i].ToString()));
+                lsFileAttached.Add(Path.GetFullPath(filePaths[i].ToString()));
+            }
+        }
+        catch (Exception e)
+        {
+            oMainCon.WriteToLogFile(DateTime.Now.ToString() + ": [WebService.cs:getFileAttached()] " + e.Message.ToString());
+        }
+        return lsFileAttached;
+    }
+
+    //for human resource - matzul 22/06/2022
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void insertStaffExcuse()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sComp = "";
+        String sUserId = "";
+        String sStatus = "N";
+        String sFileName1 = "";
+        String sFileName2 = "";
+        String sFileName3 = "";
+        String sMessage = "Intenal Server Error!";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (HttpContext.Current.Session["comp"] != null)
+            {
+                sComp = HttpContext.Current.Session["comp"].ToString();
+            }
+
+            if (HttpContext.Current.Session["userid"] != null)
+            {
+                sUserId = HttpContext.Current.Session["userid"].ToString();
+            }
+
+            if (HttpContext.Current.Request.Form.AllKeys.Any())
+            {
+                HRModel modItem = new HRModel();
+                modItem.GetSetcomp = sComp;
+                modItem.GetSetfyr = HttpContext.Current.Request.Form["inputitem[0]"];
+                modItem.GetSetstaffno = HttpContext.Current.Request.Form["inputitem[1]"];
+                modItem.GetSetcat = HttpContext.Current.Request.Form["inputitem[2]"];
+                modItem.GetSettype = HttpContext.Current.Request.Form["inputitem[3]"];
+                modItem.GetSetfromdate = HttpContext.Current.Request.Form["inputitem[4]"];
+                modItem.GetSettodate = HttpContext.Current.Request.Form["inputitem[5]"];
+                modItem.GetSetstatus = HttpContext.Current.Request.Form["inputitem[6]"];
+                modItem.GetSetreason = HttpContext.Current.Request.Form["inputitem[7]"];
+                modItem.GetSetfromtime = HttpContext.Current.Request.Form["inputitem[11]"];
+                modItem.GetSettotime = HttpContext.Current.Request.Form["inputitem[12]"];
+                modItem.GetSetcreatedby = sUserId;
+                String result = oHRCon.insertStaffExcuseDetails(modItem);
+                if (result.Equals("Y"))
+                {
+                    modItem = oHRCon.getStaffExcuseDetails(modItem.GetSetcomp, modItem.GetSetfyr, modItem.GetSetstaffno, modItem.GetSetcat, modItem.GetSettype, modItem.GetSetfromdate, modItem.GetSettodate, 0, Server.MapPath("./Attachment/HumanResource/"));
+
+                    var FILE1 = HttpContext.Current.Request.Files["inputitem[8]"];
+                    if (Path.GetFileName(FILE1 == null ? "" : FILE1.FileName) != string.Empty)
+                    {
+                        sFileName1 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE1.FileName);
+                        FILE1.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName1);
+                    }
+
+                    var FILE2 = HttpContext.Current.Request.Files["inputitem[9]"];
+                    if (Path.GetFileName(FILE2 == null ? "" : FILE2.FileName) != string.Empty)
+                    {
+                        sFileName2 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE2.FileName);
+                        FILE2.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName2);
+                    }
+
+                    var FILE3 = HttpContext.Current.Request.Files["inputitem[10]"];
+                    if (Path.GetFileName(FILE3 == null ? "" : FILE3.FileName) != string.Empty)
+                    {
+                        sFileName3 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE3.FileName);
+                        FILE3.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName3);
+                    }
+                    //update table together with blob file
+                    result = oHRCon.updateStaffExcuseAttachment(modItem, Server.MapPath("./Attachment/HumanResource/"), sFileName1, sFileName2, sFileName3);
+
+                    //insert staff exception day
+                    result = oHRCon.insertStaffExceptionDetails(modItem, "EXCUSE");
+
+                    sStatus = result;
+                }
+            }
+        }
+        object objData = new { status = sStatus, message = sMessage };
+
+        jsonResponse = new JavaScriptSerializer().Serialize(objData);
+
+        HttpContext.Current.Response.Write(jsonResponse);
+
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void updateStaffExcuse()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sComp = "";
+        String sUserId = "";
+        String sStatus = "N";
+        String sFileName1 = "";
+        String sFileName2 = "";
+        String sFileName3 = "";
+        String sMessage = "Intenal Server Error!";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (HttpContext.Current.Session["comp"] != null)
+            {
+                sComp = HttpContext.Current.Session["comp"].ToString();
+            }
+
+            if (HttpContext.Current.Session["userid"] != null)
+            {
+                sUserId = HttpContext.Current.Session["userid"].ToString();
+            }
+
+            if (HttpContext.Current.Request.Form.AllKeys.Any())
+            {
+                String exc_id = HttpContext.Current.Request.Form["inputitem[0]"];
+                if (exc_id.Length > 0)
+                {
+                    HRModel modItem = oHRCon.getStaffExcuseDetails(sComp, "", "", "", "", "", "", Int64.Parse(exc_id), Server.MapPath("./Attachment/HumanResource/"));
+                    if (modItem.GetSetid > 0)
+                    {
+                        modItem.GetSetcomp = sComp;
+                        modItem.GetSetstaffno = HttpContext.Current.Request.Form["inputitem[1]"];
+                        modItem.GetSetcat = HttpContext.Current.Request.Form["inputitem[2]"];
+                        modItem.GetSettype = HttpContext.Current.Request.Form["inputitem[3]"];
+                        modItem.GetSetfromdate = HttpContext.Current.Request.Form["inputitem[4]"];
+                        modItem.GetSettodate = HttpContext.Current.Request.Form["inputitem[5]"];
+                        modItem.GetSetstatus = HttpContext.Current.Request.Form["inputitem[6]"];
+                        modItem.GetSetreason = HttpContext.Current.Request.Form["inputitem[7]"];
+                        modItem.GetSetfromtime = HttpContext.Current.Request.Form["inputitem[11]"];
+                        modItem.GetSettotime = HttpContext.Current.Request.Form["inputitem[12]"];
+                        if (modItem.GetSetstatus.Equals("PERMOHONAN"))
+                        {
+                            modItem.GetSetmodifiedby = sUserId;
+                        }
+                        else if (modItem.GetSetstatus.Equals("PENGESAHAN"))
+                        {
+                            modItem.GetSetreliefedby = sUserId;
+
+                        }
+                        else if (modItem.GetSetstatus.Equals("LULUS"))
+                        {
+                            modItem.GetSetapprovedby = sUserId;
+
+                        }
+                        else if (modItem.GetSetstatus.Equals("DITOLAK"))
+                        {
+                            modItem.GetSetrejectedby = sUserId;
+
+                        }
+                        else if (modItem.GetSetstatus.Equals("BATAL"))
+                        {
+                            modItem.GetSetcancelledby = sUserId;
+
+                        }
+
+                        var FILE1 = HttpContext.Current.Request.Files["inputitem[8]"];
+                        if (Path.GetFileName(FILE1 == null ? "" : FILE1.FileName) != string.Empty)
+                        {
+                            if (!modItem.GetSetfilename1.Equals(FILE1.FileName))
+                            {
+                                sFileName1 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE1.FileName);
+                                FILE1.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName1);
+
+                                //To delete file from the folder
+                                ArrayList lsFileName = new ArrayList();
+                                lsFileName = getFileAttached(modItem.GetSetfilename1, Server.MapPath("./Attachment/HumanResource/"));
+                                for (int j = 0; j < lsFileName.Count; j++)
+                                {
+                                    String sFileNameAndFolder = (String)lsFileName[j];
+                                    FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                                    filetodelete.Delete();
+                                }
+                            }
+                            else
+                            {
+                                sFileName1 = modItem.GetSetfilename1;
+                            }
+                        }
+                        else
+                        {
+                            if (modItem.GetSetfilename1.Length > 0)
+                            {
+                                sFileName1 = modItem.GetSetfilename1;
+                            }
+                        }
+
+                        var FILE2 = HttpContext.Current.Request.Files["inputitem[9]"];
+                        if (Path.GetFileName(FILE2 == null ? "" : FILE2.FileName) != string.Empty)
+                        {
+                            if (!modItem.GetSetfilename2.Equals(FILE2.FileName))
+                            {
+                                sFileName2 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE2.FileName);
+                                FILE2.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName2);
+
+                                //To delete file from the folder
+                                ArrayList lsFileName = new ArrayList();
+                                lsFileName = getFileAttached(modItem.GetSetfilename2, Server.MapPath("./Attachment/HumanResource/"));
+                                for (int j = 0; j < lsFileName.Count; j++)
+                                {
+                                    String sFileNameAndFolder = (String)lsFileName[j];
+                                    FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                                    filetodelete.Delete();
+                                }
+                            }
+                            else
+                            {
+                                sFileName2 = modItem.GetSetfilename2;
+                            }
+                        }
+                        else
+                        {
+                            if (modItem.GetSetfilename2.Length > 0)
+                            {
+                                sFileName2 = modItem.GetSetfilename2;
+                            }
+                        }
+
+                        var FILE3 = HttpContext.Current.Request.Files["inputitem[10]"];
+                        if (Path.GetFileName(FILE3 == null ? "" : FILE3.FileName) != string.Empty)
+                        {
+                            if (!modItem.GetSetfilename3.Equals(FILE3.FileName))
+                            {
+                                sFileName3 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE3.FileName);
+                                FILE3.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName3);
+
+                                //To delete file from the folder
+                                ArrayList lsFileName = new ArrayList();
+                                lsFileName = getFileAttached(modItem.GetSetfilename3, Server.MapPath("./Attachment/HumanResource/"));
+                                for (int j = 0; j < lsFileName.Count; j++)
+                                {
+                                    String sFileNameAndFolder = (String)lsFileName[j];
+                                    FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                                    filetodelete.Delete();
+                                }
+                            }
+                            else
+                            {
+                                sFileName3 = modItem.GetSetfilename3;
+                            }
+                        }
+                        else
+                        {
+                            if (modItem.GetSetfilename3.Length > 0)
+                            {
+                                sFileName3 = modItem.GetSetfilename3;
+                            }
+                        }
+
+                        //update table staff excuse only
+                        String result = oHRCon.updateStaffExcuseDetails(modItem);
+
+                        //delete staff exception day - old data
+                        result = oHRCon.deleteStaffExceptionDetails(modItem, "EXCUSE");
+
+                        //insert staff exception day - new data with new date
+                        result = oHRCon.insertStaffExceptionDetails(modItem, "EXCUSE");
+
+                        //update table together with blob file
+                        result = oHRCon.updateStaffExcuseAttachment(modItem, Server.MapPath("./Attachment/HumanResource/"), sFileName1, sFileName2, sFileName3);
+
+                        sStatus = result;
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "record not found!";
+
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "exc_id is not passing!";
+                }
+            }
+        }
+        object objData = new { status = sStatus, message = sMessage };
+
+        jsonResponse = new JavaScriptSerializer().Serialize(objData);
+
+        HttpContext.Current.Response.Write(jsonResponse);
+
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void insertStaffLeave()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sComp = "";
+        String sUserId = "";
+        String sStatus = "N";
+        String sFileName1 = "";
+        String sFileName2 = "";
+        String sFileName3 = "";
+        String sMessage = "Intenal Server Error!";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (HttpContext.Current.Session["comp"] != null)
+            {
+                sComp = HttpContext.Current.Session["comp"].ToString();
+            }
+
+            if (HttpContext.Current.Session["userid"] != null)
+            {
+                sUserId = HttpContext.Current.Session["userid"].ToString();
+            }
+
+            if (HttpContext.Current.Request.Form.AllKeys.Any())
+            {
+                HRModel modItem = new HRModel();
+                modItem.GetSetcomp = sComp;
+                modItem.GetSetfyr = HttpContext.Current.Request.Form["inputitem[0]"];
+                modItem.GetSetstaffno = HttpContext.Current.Request.Form["inputitem[1]"];
+                modItem.GetSetcat = HttpContext.Current.Request.Form["inputitem[2]"];
+                modItem.GetSettype = HttpContext.Current.Request.Form["inputitem[3]"];
+                modItem.GetSetfromdate = HttpContext.Current.Request.Form["inputitem[4]"];
+                modItem.GetSettodate = HttpContext.Current.Request.Form["inputitem[5]"];
+                modItem.GetSetstatus = HttpContext.Current.Request.Form["inputitem[6]"];
+                modItem.GetSetreason = HttpContext.Current.Request.Form["inputitem[7]"];
+                modItem.GetSetfromtime = HttpContext.Current.Request.Form["inputitem[11]"];
+                modItem.GetSettotime = HttpContext.Current.Request.Form["inputitem[12]"];
+                modItem.GetSetvariety = (HttpContext.Current.Request.Form["inputitem[13]"].Length > 0 ? int.Parse(HttpContext.Current.Request.Form["inputitem[13]"]) : 1); 
+                modItem.GetSetcreatedby = sUserId;
+                String result = oHRCon.insertStaffLeaveDetails(modItem);
+                if (result.Equals("Y"))
+                {
+                    modItem = oHRCon.getStaffLeaveDetails(modItem.GetSetcomp, modItem.GetSetfyr, modItem.GetSetstaffno, modItem.GetSetcat, modItem.GetSettype, modItem.GetSetfromdate, modItem.GetSettodate, 0, Server.MapPath("./Attachment/HumanResource/"));
+
+                    var FILE1 = HttpContext.Current.Request.Files["inputitem[8]"];
+                    if (Path.GetFileName(FILE1 == null ? "" : FILE1.FileName) != string.Empty)
+                    {
+                        sFileName1 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE1.FileName);
+                        FILE1.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName1);
+                    }
+
+                    var FILE2 = HttpContext.Current.Request.Files["inputitem[9]"];
+                    if (Path.GetFileName(FILE2 == null ? "" : FILE2.FileName) != string.Empty)
+                    {
+                        sFileName2 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE2.FileName);
+                        FILE2.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName2);
+                    }
+
+                    var FILE3 = HttpContext.Current.Request.Files["inputitem[10]"];
+                    if (Path.GetFileName(FILE3 == null ? "" : FILE3.FileName) != string.Empty)
+                    {
+                        sFileName3 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE3.FileName);
+                        FILE3.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName3);
+                    }
+                    //update table together with blob file
+                    result = oHRCon.updateStaffLeaveAttachment(modItem, Server.MapPath("./Attachment/HumanResource/"), sFileName1, sFileName2, sFileName3);
+
+                    //insert staff exception day
+                    result = oHRCon.insertStaffExceptionDetails(modItem, "LEAVE");
+
+                    sStatus = result;
+                }
+            }
+        }
+        object objData = new { status = sStatus, message = sMessage };
+
+        jsonResponse = new JavaScriptSerializer().Serialize(objData);
+
+        HttpContext.Current.Response.Write(jsonResponse);
+
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void updateStaffLeave()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sComp = "";
+        String sUserId = "";
+        String sStatus = "N";
+        String sFileName1 = "";
+        String sFileName2 = "";
+        String sFileName3 = "";
+        String sMessage = "Intenal Server Error!";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (HttpContext.Current.Session["comp"] != null)
+            {
+                sComp = HttpContext.Current.Session["comp"].ToString();
+            }
+
+            if (HttpContext.Current.Session["userid"] != null)
+            {
+                sUserId = HttpContext.Current.Session["userid"].ToString();
+            }
+
+            if (HttpContext.Current.Request.Form.AllKeys.Any())
+            {
+                String leave_id = HttpContext.Current.Request.Form["inputitem[0]"];
+                if (leave_id.Length > 0)
+                {
+                    HRModel modItem = oHRCon.getStaffLeaveDetails(sComp, "", "", "", "", "", "", Int64.Parse(leave_id), Server.MapPath("./Attachment/HumanResource/"));
+                    if (modItem.GetSetid > 0)
+                    {
+                        modItem.GetSetcomp = sComp;
+                        modItem.GetSetstaffno = HttpContext.Current.Request.Form["inputitem[1]"];
+                        modItem.GetSetcat = HttpContext.Current.Request.Form["inputitem[2]"];
+                        modItem.GetSettype = HttpContext.Current.Request.Form["inputitem[3]"];
+                        modItem.GetSetfromdate = HttpContext.Current.Request.Form["inputitem[4]"];
+                        modItem.GetSettodate = HttpContext.Current.Request.Form["inputitem[5]"];
+                        modItem.GetSetstatus = HttpContext.Current.Request.Form["inputitem[6]"];
+                        modItem.GetSetreason = HttpContext.Current.Request.Form["inputitem[7]"];
+                        modItem.GetSetfromtime = HttpContext.Current.Request.Form["inputitem[11]"];
+                        modItem.GetSettotime = HttpContext.Current.Request.Form["inputitem[12]"];
+                        modItem.GetSetvariety = (HttpContext.Current.Request.Form["inputitem[13]"].Length > 0 ? int.Parse(HttpContext.Current.Request.Form["inputitem[13]"]) : 1);
+                        if (modItem.GetSetstatus.Equals("PERMOHONAN"))
+                        {
+                            modItem.GetSetmodifiedby = sUserId;
+                        }
+                        else if (modItem.GetSetstatus.Equals("PENGESAHAN"))
+                        {
+                            modItem.GetSetreliefedby = sUserId;
+
+                        }
+                        else if (modItem.GetSetstatus.Equals("LULUS"))
+                        {
+                            modItem.GetSetapprovedby = sUserId;
+
+                        }
+                        else if (modItem.GetSetstatus.Equals("DITOLAK"))
+                        {
+                            modItem.GetSetrejectedby = sUserId;
+
+                        }
+                        else if (modItem.GetSetstatus.Equals("BATAL"))
+                        {
+                            modItem.GetSetcancelledby = sUserId;
+
+                        }
+
+                        var FILE1 = HttpContext.Current.Request.Files["inputitem[8]"];
+                        if (Path.GetFileName(FILE1 == null ? "" : FILE1.FileName) != string.Empty)
+                        {
+                            if (!modItem.GetSetfilename1.Equals(FILE1.FileName))
+                            {
+                                sFileName1 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE1.FileName);
+                                FILE1.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName1);
+
+                                //To delete file from the folder
+                                ArrayList lsFileName = new ArrayList();
+                                lsFileName = getFileAttached(modItem.GetSetfilename1, Server.MapPath("./Attachment/HumanResource/"));
+                                for (int j = 0; j < lsFileName.Count; j++)
+                                {
+                                    String sFileNameAndFolder = (String)lsFileName[j];
+                                    FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                                    filetodelete.Delete();
+                                }
+                            }
+                            else
+                            {
+                                sFileName1 = modItem.GetSetfilename1;
+                            }
+                        }
+                        else
+                        {
+                            if (modItem.GetSetfilename1.Length > 0)
+                            {
+                                sFileName1 = modItem.GetSetfilename1;
+                            }
+                        }
+
+                        var FILE2 = HttpContext.Current.Request.Files["inputitem[9]"];
+                        if (Path.GetFileName(FILE2 == null ? "" : FILE2.FileName) != string.Empty)
+                        {
+                            if (!modItem.GetSetfilename2.Equals(FILE2.FileName))
+                            {
+                                sFileName2 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE2.FileName);
+                                FILE2.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName2);
+
+                                //To delete file from the folder
+                                ArrayList lsFileName = new ArrayList();
+                                lsFileName = getFileAttached(modItem.GetSetfilename2, Server.MapPath("./Attachment/HumanResource/"));
+                                for (int j = 0; j < lsFileName.Count; j++)
+                                {
+                                    String sFileNameAndFolder = (String)lsFileName[j];
+                                    FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                                    filetodelete.Delete();
+                                }
+                            }
+                            else
+                            {
+                                sFileName2 = modItem.GetSetfilename2;
+                            }
+                        }
+                        else
+                        {
+                            if (modItem.GetSetfilename2.Length > 0)
+                            {
+                                sFileName2 = modItem.GetSetfilename2;
+                            }
+                        }
+
+                        var FILE3 = HttpContext.Current.Request.Files["inputitem[10]"];
+                        if (Path.GetFileName(FILE3 == null ? "" : FILE3.FileName) != string.Empty)
+                        {
+                            if (!modItem.GetSetfilename3.Equals(FILE3.FileName))
+                            {
+                                sFileName3 = modItem.GetSetcomp + "_" + modItem.GetSetfyr + "_" + modItem.GetSetstaffno + "_" + modItem.GetSetid + "_" + Path.GetFileName(FILE3.FileName);
+                                FILE3.SaveAs(Server.MapPath("./Attachment/HumanResource/") + sFileName3);
+
+                                //To delete file from the folder
+                                ArrayList lsFileName = new ArrayList();
+                                lsFileName = getFileAttached(modItem.GetSetfilename3, Server.MapPath("./Attachment/HumanResource/"));
+                                for (int j = 0; j < lsFileName.Count; j++)
+                                {
+                                    String sFileNameAndFolder = (String)lsFileName[j];
+                                    FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                                    filetodelete.Delete();
+                                }
+                            }
+                            else
+                            {
+                                sFileName3 = modItem.GetSetfilename3;
+                            }
+                        }
+                        else
+                        {
+                            if (modItem.GetSetfilename3.Length > 0)
+                            {
+                                sFileName3 = modItem.GetSetfilename3;
+                            }
+                        }
+
+                        //update table staff excuse only
+                        String result = oHRCon.updateStaffLeaveDetails(modItem);
+
+                        //delete staff exception day - old data
+                        result = oHRCon.deleteStaffExceptionDetails(modItem, "LEAVE");
+
+                        //insert staff exception day - new data with new date
+                        result = oHRCon.insertStaffExceptionDetails(modItem, "LEAVE");
+
+                        //update table together with blob file
+                        result = oHRCon.updateStaffLeaveAttachment(modItem, Server.MapPath("./Attachment/HumanResource/"), sFileName1, sFileName2, sFileName3);
+
+                        sStatus = result;
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "record not found!";
+
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "exc_id is not passing!";
+                }
+            }
+        }
+        object objData = new { status = sStatus, message = sMessage };
+
+        jsonResponse = new JavaScriptSerializer().Serialize(objData);
+
+        HttpContext.Current.Response.Write(jsonResponse);
+
+    }
+
+    // Begin add - fakhrul 04/09/2020
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void uploadFile2()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        string sComp = "";
+        string sUserId = "";
+        string status = "N";
+        string fileName = "";
+        string imageurl = "";
+        string message = "Intenal Server Error!";
+
+        //MainController oMainCon = new MainController();
+        //MainModel modComp = new MainModel();
+
+        if (HttpContext.Current.Session["comp"] != null)
+        {
+            sComp = HttpContext.Current.Session["comp"].ToString();
+        }
+
+        if (HttpContext.Current.Session["userid"] != null)
+        {
+            sUserId = HttpContext.Current.Session["userid"].ToString();
+        }
+
+        if (HttpContext.Current.Request.Form.AllKeys.Any())
+        {
+            String comp = HttpContext.Current.Request.Form["inputitem[0]"];
+            String userid = HttpContext.Current.Request.Form["inputitem[1]"];
+            string itemno = HttpContext.Current.Request.Form["inputitem[2]"];
+            var FILE = HttpContext.Current.Request.Files["inputitem[3]"];
+            string dir = HttpContext.Current.Request.Form["inputitem[4]"];
+
+            //if (comp.Equals(comp2) && userid.Equals(userid2))
+            if (comp.Trim().Length > 0 && itemno.Trim().Length > 0)
+            {
+                //fileName = "upload_" + userid + "_" + comp + "_" + itemno + "_" + Path.GetFileName(FILE.FileName);
+                fileName = "upload_" + userid + "_" + itemno + "_" + Path.GetFileName(FILE.FileName);
+                if (fileName != string.Empty)
+                {
+                    imageurl = ConfigurationSettings.AppSettings["imageurl"] + dir + fileName;
+                    FILE.SaveAs(Server.MapPath("./Attachment/" + dir) + fileName);
+                    status = "Y";
+                }
+            }
+            else
+            {
+                message = "invalid comp code & itemno!";
+            }
+        }
+        object result = new { status = status, filename = fileName, imageurl = imageurl, message = message };
+
+        jsonResponse = convertJson(result);
+
+        //return jsonResponse;
+
+        HttpContext.Current.Response.Write(jsonResponse);
+
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void storeFile2()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+        String sComp = "";
+        String sUserId = "";
+
+        //MainController oMainCon = new MainController();
+        //MainModel modComp = new MainModel();
+
+        if (HttpContext.Current.Session["comp"] != null)
+        {
+            sComp = HttpContext.Current.Session["comp"].ToString();
+        }
+
+        if (HttpContext.Current.Session["userid"] != null)
+        {
+            sUserId = HttpContext.Current.Session["userid"].ToString();
+        }
+
+        if (HttpContext.Current.Request.Form.AllKeys.Any())
+        {
+            string comp = HttpContext.Current.Request.Form["inputitem[0]"];
+            string userid = HttpContext.Current.Request.Form["inputitem[1]"];
+            string itemno = HttpContext.Current.Request.Form["inputitem[2]"];
+            string filename = HttpContext.Current.Request.Form["inputitem[3]"];
+            string imgwidth = HttpContext.Current.Request.Form["inputitem[4]"];
+            string imgheight = HttpContext.Current.Request.Form["inputitem[5]"];
+            string dir = HttpContext.Current.Request.Form["inputitem[6]"];
+
+            //if (comp.Equals(sComp) && userid.Equals(sUserId))
+            if (comp.Trim().Length > 0 && itemno.Trim().Length > 0)
+            {
+                ArrayList lsFileName = new ArrayList();
+                lsFileName = getFileAttached2(dir, filename);
+                for (int j = 0; j < lsFileName.Count; j++)
+                {
+                    String sFileNameAndFolder = (String)lsFileName[j];
+                    if (oMainCon.storeBLOBFile(comp, itemno, userid, sFileNameAndFolder, filename, imgwidth, imgheight).Equals("Y"))
+                    {
+                        //To delete file from the folder
+                        FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                        filetodelete.Delete();
+                        sStatus = "Y";
+                        sMessage = "";
+                    }
+                    else
+                    {
+                        sMessage = "unable to store blob file!";
+                    }
+                }
+            }
+            else
+            {
+                sMessage = "invalid comp code & itemno!";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        jsonResponse = convertJson(objData);
+        HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod(EnableSession = true)]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public void deleteFile2()
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+
+        String jsonResponse = "";
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+        String sComp = "";
+        String sUserId = "";
+
+        //MainController oMainCon = new MainController();
+        //MainModel modComp = new MainModel();
+
+        if (HttpContext.Current.Session["comp"] != null)
+        {
+            sComp = HttpContext.Current.Session["comp"].ToString();
+        }
+
+        if (HttpContext.Current.Session["userid"] != null)
+        {
+            sUserId = HttpContext.Current.Session["userid"].ToString();
+        }
+
+        if (HttpContext.Current.Request.Form.AllKeys.Any())
+        {
+            string comp = HttpContext.Current.Request.Form["inputitem[0]"];
+            string userid = HttpContext.Current.Request.Form["inputitem[1]"];
+            string itemno = HttpContext.Current.Request.Form["inputitem[2]"];
+            string filename = HttpContext.Current.Request.Form["inputitem[3]"];
+            string dir = HttpContext.Current.Request.Form["inputitem[4]"];
+
+            //if (comp.Equals(sComp) && userid.Equals(sUserId))
+            if (comp.Trim().Length > 0 && itemno.Trim().Length > 0)
+            {
+
+                if (oMainCon.deleteBLOBFile(comp, itemno, userid, filename).Equals("Y"))
+                {
+                    //To delete file from the folder
+                    ArrayList lsFileName = new ArrayList();
+                    lsFileName = getFileAttached2(dir, filename);
+                    for (int j = 0; j < lsFileName.Count; j++)
+                    {
+                        String sFileNameAndFolder = (String)lsFileName[j];
+                        FileInfo filetodelete = new FileInfo(sFileNameAndFolder);
+                        filetodelete.Delete();
+                    }
+                    sStatus = "Y";
+                    sMessage = "";
+                }
+                else
+                {
+                    sMessage = "unable to delete image file!";
+                }
+
+            }
+            else
+            {
+                sMessage = "invalid comp code & itemno!";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        jsonResponse = convertJson(objData);
+        HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    public ArrayList getFileAttached2(String sDir, String sFileName)
+    {
+        ArrayList lsFileAttached = new ArrayList();
+        try
+        {
+            String sFilePath = Server.MapPath("./Attachment/" + sDir);
+            String[] filePaths = Directory.GetFiles(sFilePath, sFileName);
+            for (int i = 0; i < filePaths.Length; i++)
+            {
+                //lsFileAttached.Add(Path.GetFileName(filePaths[i].ToString()));
+                lsFileAttached.Add(Path.GetFullPath(filePaths[i].ToString()));
+            }
+        }
+        catch (Exception e)
+        {
+            oMainCon.WriteToLogFile(DateTime.Now.ToString() + ": [WebService.cs:getFileAttached2()] " + e.Message.ToString());
         }
         return lsFileAttached;
     }
@@ -406,6 +1411,169 @@ public class WebService : System.Web.Services.WebService
 
     [WebMethod]
     [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_BPListing(String comp, String desc, String bpid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        ArrayList lsBP = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsBP = oMainCon.getBPList(comp, bpid, desc, "");
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsInvoiceHeader);
+        jsonResponse = convertJson(lsBP);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_BPDetails(String comp, String bpid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        MainModel modBP = new MainModel();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            modBP = oMainCon.getBPDetails(comp, bpid, "");
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsInvoiceHeader);
+        jsonResponse = convertJson(modBP);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_BPDetails(String comp, String bpid, String bpdesc, String bpaddress, String bpcontact, String bpcat, String discounttype, String cashguarantee, String bankguarantee, String creditlimit, String bpstatus)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "Y";
+        String sMessage = "";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (bpid.Length == 0)
+            {
+                MainModel oModHeader = new MainModel();
+                oModHeader.GetSetcomp = comp;
+                oModHeader.GetSetbpid = oMainCon.getNextRunningNo(comp, "BUSINESS_PARTNER", "ACTIVE");
+                oModHeader.GetSetbpdesc = bpdesc;
+                oModHeader.GetSetbpaddress = bpaddress;
+                oModHeader.GetSetbpcontact = bpcontact;
+                oModHeader.GetSetbpcat = bpcat;
+                oModHeader.GetSetdiscounttype = discounttype;
+                oModHeader.GetSetcashguarantee = Convert.ToDouble(cashguarantee);
+                oModHeader.GetSetbankguarantee = Convert.ToDouble(bankguarantee);
+                oModHeader.GetSetcreditlimit = Convert.ToDouble(creditlimit);
+                oModHeader.GetSetbpreference = "";
+                oModHeader.GetSetbpstatus = bpstatus;
+
+                MainModel bpdetails = oMainCon.getBPDetails(comp, "", bpdesc);
+                if (bpdetails.GetSetbpid.Trim().Length == 0)
+                {
+                    if (oMainCon.insertBusinessPartner(oModHeader).Equals("Y"))
+                    {
+                        oMainCon.updateNextRunningNo(comp, "BUSINESS_PARTNER", "ACTIVE");
+                        sStatus = "Y";
+                        sMessage = oModHeader.GetSetbpid;
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "Pendaftaran Tidak Berjaya!";
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "Pembekal/ Pelanggan ini telah didaftarkan!";
+                }
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Pendaftaran Tidak Berjaya! Internal Server Error...";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string updateMobile_BPDetails(String comp, String bpid, String bpdesc, String bpaddress, String bpcontact, String bpcat, String discounttype, String cashguarantee, String bankguarantee, String creditlimit, String bpstatus)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "Y";
+        String sMessage = "";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (bpid.Length > 0)
+            {
+                MainModel bpdetails = oMainCon.getBPDetails(comp, bpid);
+                if (bpdetails.GetSetbpid.Trim().Length > 0)
+                {
+                    bpdetails.GetSetbpdesc = bpdesc;
+                    bpdetails.GetSetbpaddress = bpaddress;
+                    bpdetails.GetSetbpcontact = bpcontact;
+                    bpdetails.GetSetbpcat = bpcat;
+                    bpdetails.GetSetdiscounttype = discounttype;
+                    bpdetails.GetSetcashguarantee = Convert.ToDouble(cashguarantee);
+                    bpdetails.GetSetbankguarantee = Convert.ToDouble(bankguarantee);
+                    bpdetails.GetSetcreditlimit = Convert.ToDouble(creditlimit);
+                    bpdetails.GetSetbpstatus = bpstatus;
+
+                    if (oMainCon.updateBusinessPartner(bpdetails).Equals("Y"))
+                    {
+                        sStatus = "Y";
+                        sMessage = bpdetails.GetSetbpid;
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "Kemaskini Tidak Berjaya!";
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "Kemaskini Tidak Berjaya! Internal Server Error...";
+                }
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Kemaskini Tidak Berjaya! No BPId is provided...";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
     public string getMobile_ItemList(String comp, String itemno, String ordercat, String ordertype)
     {
 
@@ -458,6 +1626,333 @@ public class WebService : System.Web.Services.WebService
 
     [WebMethod]
     [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_ItemListing(String comp, String desc, String itemno)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        ArrayList lsItem = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsItem = oMainCon.getItemList(comp, itemno, desc, "");
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsInvoiceHeader);
+        jsonResponse = convertJson(lsItem);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_ItemDetails(String comp, String itemno)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        MainModel modItem = new MainModel();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            modItem = oMainCon.getItemDetails(comp, itemno);
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsInvoiceHeader);
+        jsonResponse = convertJson(modItem);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_ItemDetails(String comp, String itemno, String itemdesc, String itemcat, String itemtype, double purchaseprice, double costprice, double salesprice, String itemstatus)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "Y";
+        String sMessage = "";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (itemno.Length != 0)
+            {
+                MainModel oModHeader = new MainModel();
+                oModHeader.GetSetcomp = comp;
+                oModHeader.GetSetitemno = itemno;
+                oModHeader.GetSetitemdesc = itemdesc;
+                oModHeader.GetSetitemcat = itemcat;
+                oModHeader.GetSetitemtype = itemtype;
+                oModHeader.GetSetpurchaseprice = Convert.ToDouble(purchaseprice);
+                oModHeader.GetSetcostprice = Convert.ToDouble(costprice);
+                oModHeader.GetSetsalesprice = Convert.ToDouble(salesprice);
+                oModHeader.GetSetitemstatus = itemstatus;
+
+                MainModel itemdetails = oMainCon.getItemDetails(comp, itemno);
+                if (itemdetails.GetSetitemno.Trim().Length == 0)
+                {
+                    if (oMainCon.insertItemMaster(oModHeader).Equals("Y"))
+                    {
+                        sStatus = "Y";
+                        sMessage = oModHeader.GetSetitemno;
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "Pendaftaran Tidak Berjaya!";
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "Item/ Produk ini telah didaftarkan!";
+                }
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Pendaftaran Tidak Berjaya! Internal Server Error...";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string updateMobile_ItemDetails(String comp, String itemno, String itemdesc, String itemcat, String itemtype, double purchaseprice, double costprice, double salesprice, String itemstatus)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "Y";
+        String sMessage = "";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (itemno.Length > 0)
+            {
+                MainModel itemdetails = oMainCon.getItemDetails(comp, itemno);
+                if (itemdetails.GetSetitemno.Trim().Length > 0)
+                {
+                    itemdetails.GetSetitemdesc = itemdesc;
+                    itemdetails.GetSetitemcat = itemcat;
+                    itemdetails.GetSetitemtype = itemtype;
+                    itemdetails.GetSetpurchaseprice = Convert.ToDouble(purchaseprice);
+                    itemdetails.GetSetcostprice = Convert.ToDouble(costprice);
+                    itemdetails.GetSetsalesprice = Convert.ToDouble(salesprice);
+                    itemdetails.GetSetbpstatus = itemstatus;
+
+                    if (oMainCon.updateItemMaster(itemdetails).Equals("Y"))
+                    {
+                        sStatus = "Y";
+                        sMessage = itemdetails.GetSetitemno;
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "Kemaskini Tidak Berjaya!";
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "Kemaskini Tidak Berjaya! Internal Server Error...";
+                }
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Kemaskini Tidak Berjaya! No ItemNo is provided...";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_ItemDiscountListing(String comp, String itemno)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        ArrayList lsItem = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsItem = oMainCon.getItemDiscountList(comp, "", "", itemno);
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsInvoiceHeader);
+        jsonResponse = convertJson(lsItem);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_ItemDiscount(String comp, String itemno, String ordercat, String disctype, String disccat, double discvalue, String discstatus)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "Y";
+        String sMessage = "";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (itemno.Length != 0)
+            {
+                MainModel oModLineItem = new MainModel();
+                oModLineItem.GetSetcomp = comp;
+                oModLineItem.GetSetitemno = itemno;
+                oModLineItem.GetSetordercat = ordercat;
+                oModLineItem.GetSetdiscounttype = disctype;
+                oModLineItem.GetSetdisccat = disccat;
+                oModLineItem.GetSetdiscvalue = discvalue;
+                oModLineItem.GetSetstatus = discstatus;
+
+                ArrayList lsItem = oMainCon.getItemDiscountList(comp, ordercat, disctype, itemno);
+                if (lsItem.Count == 0)
+                {
+                    if (oMainCon.insertItemDiscount(oModLineItem).Equals("Y"))
+                    {
+                        sStatus = "Y";
+                        sMessage = "Jadual Harga Item berjaya ditambah!";
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "Jadual Harga Item tidak berjaya ditambah!";
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "Jadual Harga Item tidak berjaya ditambah! Internal Server Error...";
+                }
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Jadual Harga Item tidak berjaya ditambah! No ItemNo is provided...";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string updateMobile_ItemDiscount(String comp, String itemno, String ordercat, String disctype, String disccat, double discvalue, String discstatus)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "Y";
+        String sMessage = "";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            if (itemno.Length > 0)
+            {
+                ArrayList lsItem = oMainCon.getItemDiscountList(comp, ordercat, disctype, itemno);
+                if (lsItem.Count  > 0)
+                {
+                    MainModel oModLineItem = new MainModel();
+                    oModLineItem.GetSetcomp = comp;
+                    oModLineItem.GetSetitemno = itemno;
+                    oModLineItem.GetSetordercat = ordercat;
+                    oModLineItem.GetSetdiscounttype = disctype;
+                    oModLineItem.GetSetdisccat = disccat;
+                    oModLineItem.GetSetdiscvalue = discvalue;
+                    oModLineItem.GetSetstatus = discstatus;
+
+                    if (oMainCon.updateItemDiscount(oModLineItem).Equals("Y"))
+                    {
+                        sStatus = "Y";
+                        sMessage = "Jadual Harga Item berjaya dikemaskini!";
+                    }
+                    else
+                    {
+                        sStatus = "N";
+                        sMessage = "Jadual Harga Item tidak berjaya dikemaskini!";
+                    }
+                }
+                else
+                {
+                    sStatus = "N";
+                    sMessage = "Jadual Harga Item tidak berjaya dikemaskini! Internal Server Error...";
+                }
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Jadual Harga Item tidak berjaya dikemaskini! No ItemNo is provided...";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string deleteMobile_ItemDiscount(String comp, String itemno, String ordercat, String disctype)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            //get item details if exist
+            ArrayList lsItem = oMainCon.getItemDiscountList(comp, ordercat, disctype, itemno);
+            if (lsItem.Count > 0)
+            {
+                MainModel oLineItem = (MainModel)lsItem[lsItem.Count-1];
+                if (oMainCon.deleteItemDiscount(oLineItem).Equals("Y"))
+                {
+                    sStatus = "Y";
+                    sMessage = "";
+                }
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
     public string getMobile_YearMonthList(String comp)
     {
 
@@ -474,6 +1969,12 @@ public class WebService : System.Web.Services.WebService
         objYear = new { yearid = "2019", yearval = "2019" };
         lsYear.Add(objYear);
         objYear = new { yearid = "2020", yearval = "2020" };
+        lsYear.Add(objYear);
+        objYear = new { yearid = "2021", yearval = "2021" };
+        lsYear.Add(objYear);
+        objYear = new { yearid = "2022", yearval = "2022" };
+        lsYear.Add(objYear);
+        objYear = new { yearid = "2023", yearval = "2023" };
         lsYear.Add(objYear);
 
         ArrayList lsMonth = new ArrayList();
@@ -669,9 +2170,35 @@ public class WebService : System.Web.Services.WebService
                 sDateTo = "31" + "-" + "12" + "-" + selectyear + " 23:59:59";
             }
 
-            additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME') or (invoice_header.invoicecat = 'JOURNAL_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
+            //additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME') or (invoice_header.invoicecat = 'JOURNAL_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
+            //lsArrayRevenue = oMainCon.getInvoiceHeaderListSum(comp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
+
+            ArrayList lsParamType = oMainCon.getParametertype("INCOME");
+            ArrayList revenuetype = new ArrayList();
+            for (int i = 0; i < lsParamType.Count; i++)
+            {
+                MainModel modParam = (MainModel)lsParamType[i];
+                revenuetype.Add(modParam.GetSetparamttype);
+            }
+
+            additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat in ('RECEIPT_VOUCHER','JOURNAL_VOUCHER') ";
+            String revtyp = "";
+            for (int i = 0; i < revenuetype.Count; i++)
+            {
+                String str = (String)revenuetype[i];
+                if (i.Equals(0))
+                {
+                    revtyp = "'" + str + "'";
+                }
+                else
+                {
+                    revtyp = revtyp + ",'" + str + "'";
+                }
+            }
+            additionalquery = additionalquery + " and  invoice_header.invoicetype in (" + revtyp + "))) ";
             lsArrayRevenue = oMainCon.getInvoiceHeaderListSum(comp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
 
+            /*
             ArrayList expensestype = new ArrayList();
             expensestype.Add("SUPPLY_EXPENSES");
             expensestype.Add("SALARIES_WAGES");
@@ -708,6 +2235,36 @@ public class WebService : System.Web.Services.WebService
                                                         where expenses_header.expensesno = expenses_details.expensesno and expenses_header.comp = expenses_details.comp and expenses_header.expensescat = 'PURCHASE_INVOICE'
                                                         and expenses_details.itemno = item.itemno and expenses_details.comp = item.comp
                                                         and item.itemcat = 'INVENTORY')";
+            lsArrayExpenses = oMainCon.getExpensesHeaderListSum(comp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
+            */
+
+            ArrayList lsParamType2 = oMainCon.getParametertype("EXPENSES");
+            ArrayList expensestype = new ArrayList();
+            for (int i = 0; i < lsParamType2.Count; i++)
+            {
+                MainModel modParam = (MainModel)lsParamType2[i];
+                expensestype.Add(modParam.GetSetparamttype);
+            }
+
+            additionalquery = " and  (expenses_header.expensescat = 'PURCHASE_INVOICE' or expenses_header.expensescat = 'TRANSFER_INVOICE' or (expenses_header.expensescat in ('PAYMENT_VOUCHER','JOURNAL_VOUCHER') ";
+            String exptyp = "";
+            for (int i = 0; i < expensestype.Count; i++)
+            {
+                String str = (String)expensestype[i];
+                if (i.Equals(0))
+                {
+                    exptyp = "'" + str + "'";
+                }
+                else
+                {
+                    exptyp = exptyp + ",'" + str + "'";
+                }
+            }
+            additionalquery = additionalquery + " and  expenses_header.expensestype in (" + exptyp + "))) ";
+            additionalquery = additionalquery + @"  and  NOT EXISTS (select item.itemno from item, expenses_details 
+                                                        where expenses_header.expensesno = expenses_details.expensesno and expenses_header.comp = expenses_details.comp and expenses_header.expensescat = 'PURCHASE_INVOICE'
+                                                        and expenses_details.itemno = item.itemno and expenses_details.comp = item.comp
+                                                        and item.itemcat in ('INVENTORY','ASSET'))";
             lsArrayExpenses = oMainCon.getExpensesHeaderListSum(comp, "", "", sDateFrom, sDateTo, additionalquery, "CONFIRMED");
 
             var lsStockTransSOHList = oMainCon.getItemStockTransactionsListing(comp, "", "", "", sDateFrom, sDateTo, "");
@@ -793,7 +2350,7 @@ public class WebService : System.Web.Services.WebService
         if (TokenNumber.Equals(TokenNumberConfig))
         {
 
-            ArrayList lsCashFlowHeader = oMainCon.getCashFlowHeaderList(comp, "", "", "", "", "", "");
+            ArrayList lsCashFlowHeader = oMainCon.getCashFlowHeaderList(comp, cashflowno, openingdate, openingtype, closingdate, closingtype, status);
             for (int i = 0; i < lsCashFlowHeader.Count; i++)
             {
                 MainModel oModCashFlow = (MainModel)lsCashFlowHeader[i];
@@ -1582,7 +3139,6 @@ public class WebService : System.Web.Services.WebService
         return jsonResponse;
         //HttpContext.Current.Response.Write(jsonResponse);
     }
-
 
     [WebMethod]
     [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
@@ -2544,6 +4100,52 @@ public class WebService : System.Web.Services.WebService
 
     [WebMethod]
     [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_RevenueList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String additionalquery = "";
+
+        ArrayList lsRevenuDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            ArrayList lsParamType = oMainCon.getParametertype("INCOME");
+            ArrayList revenuetype = new ArrayList();
+            for (int i = 0; i < lsParamType.Count; i++)
+            {
+                MainModel modParam = (MainModel)lsParamType[i];
+                revenuetype.Add(modParam.GetSetparamttype);
+            }
+            additionalquery = " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat in ('RECEIPT_VOUCHER','JOURNAL_VOUCHER') ";
+            String revtyp = "";
+            for (int i = 0; i < revenuetype.Count; i++)
+            {
+                String str = (String)revenuetype[i];
+                if (i.Equals(0))
+                {
+                    revtyp = "'" + str + "'";
+                }
+                else
+                {
+                    revtyp = revtyp + ",'" + str + "'";
+                }
+            }
+            additionalquery = additionalquery + " and  invoice_header.invoicetype in (" + revtyp + "))) ";
+            lsRevenuDetails = oMainCon.getRevenueListDetails(comp, selyear, selmonth, selday, status, additionalquery);
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsRevenuDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
     public string getMobile_InvoiceList(String comp, String searchtype, String searchitem, String datefrom, String dateto, String invoicecat, String invoicetype)
     {
 
@@ -3411,6 +5013,56 @@ public class WebService : System.Web.Services.WebService
     }
 
     //for expenses - matzul 24/06/2019
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_SpendingList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String additionalquery = "";
+
+        ArrayList lsExpensesDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            ArrayList lsParamType2 = oMainCon.getParametertype("EXPENSES");
+            ArrayList expensestype = new ArrayList();
+            for (int i = 0; i < lsParamType2.Count; i++)
+            {
+                MainModel modParam = (MainModel)lsParamType2[i];
+                expensestype.Add(modParam.GetSetparamttype);
+            }
+
+            additionalquery = " and  (expenses_header.expensescat = 'PURCHASE_INVOICE' or expenses_header.expensescat = 'TRANSFER_INVOICE' or (expenses_header.expensescat in ('PAYMENT_VOUCHER','JOURNAL_VOUCHER') ";
+            String exptyp = "";
+            for (int i = 0; i < expensestype.Count; i++)
+            {
+                String str = (String)expensestype[i];
+                if (i.Equals(0))
+                {
+                    exptyp = "'" + str + "'";
+                }
+                else
+                {
+                    exptyp = exptyp + ",'" + str + "'";
+                }
+            }
+            additionalquery = additionalquery + " and  expenses_header.expensestype in (" + exptyp + "))) ";
+            additionalquery = additionalquery + @"  and  NOT EXISTS (select item.itemno from item, expenses_details 
+                                                        where expenses_header.expensesno = expenses_details.expensesno and expenses_header.comp = expenses_details.comp and expenses_header.expensescat = 'PURCHASE_INVOICE'
+                                                        and expenses_details.itemno = item.itemno and expenses_details.comp = item.comp
+                                                        and item.itemcat in ('INVENTORY','ASSET'))";
+            lsExpensesDetails = oMainCon.getExpensesListDetails(comp, selyear, selmonth, selday, status, additionalquery);
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsExpensesDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
 
     [WebMethod]
     [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
@@ -4284,6 +5936,75 @@ public class WebService : System.Web.Services.WebService
 
     [WebMethod]
     [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_COGSList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        ArrayList lsCOGSDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsCOGSDetails = oMainCon.getItemStockTransactionsList(comp, "", "", "", selyear, selmonth, selday, "OUT");
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsCOGSDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_StockInList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        ArrayList lsCOGSDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsCOGSDetails = oMainCon.getItemStockTransactionsList(comp, "", "", "", selyear, selmonth, selday, "IN");
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsCOGSDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_StockOutList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        ArrayList lsCOGSDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsCOGSDetails = oMainCon.getItemStockTransactionsList(comp, "", "", "", selyear, selmonth, selday, "OUT");
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsCOGSDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
     public string getMobile_StockList(String comp, String searchitem)
     {
 
@@ -4295,7 +6016,7 @@ public class WebService : System.Web.Services.WebService
         if (TokenNumber.Equals(TokenNumberConfig))
         {
 
-            lsStockListing = oMainCon.getItemStockListSummary2(comp, searchitem);
+            lsStockListing = oMainCon.getItemStockListSummary3(comp, searchitem);
         }
 
         //jsonResponse = new JavaScriptSerializer().Serialize(lsStockListing);
@@ -4791,6 +6512,672 @@ public class WebService : System.Web.Services.WebService
 
         //jsonResponse = new JavaScriptSerializer().Serialize(lsClosingStockValue);
         jsonResponse = convertJson(lsClosingStockValue);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    //For Buku Tunai
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_PaymentReportSummary2(String comp, String selectyear, String selectmonth, String selectday)
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";        
+
+        String jsonResponse = "";
+        String sDateFrom = "", sDateTo = "";
+
+        double totalcashopeningamount = 0;
+        double totalcashpayrcptamount = 0;
+        double totalcashpaypaidamount = 0;
+        double totalcashclosingamount = 0;
+
+
+        if (selectyear.Length > 0 && selectmonth.Length > 0 && selectday.Length > 0)
+        {
+            sDateFrom = selectday + "-" + selectmonth + "-" + selectyear + " 00:00:00";
+            sDateTo = selectday + "-" + selectmonth + "-" + selectyear + " 23:59:59";
+        }
+        else if (selectyear.Length > 0 && selectmonth.Length > 0 && selectday.Length == 0)
+        {
+            sDateFrom = "01" + "-" + selectmonth + "-" + selectyear + " 00:00:00";
+            DateTime datetimeFrom = Convert.ToDateTime(sDateFrom, oMainCon.ukDtfi);
+            int maxdt = (new DateTime(datetimeFrom.Year, datetimeFrom.Month, 1).AddMonths(1).AddDays(-1)).Day;
+            sDateTo = maxdt + "-" + selectmonth + "-" + selectyear + " 23:59:59";
+        }
+        else if (selectyear.Length > 0 && selectmonth.Length == 0 && selectday.Length == 0)
+        {
+            sDateFrom = "01" + "-" + "01" + "-" + selectyear + " 00:00:00";
+            sDateTo = "31" + "-" + "12" + "-" + selectyear + " 23:59:59";
+        }
+
+        MainModel modLastCashFlow = oMainCon.getCashFlowLastHeaderDetails(comp, sDateFrom, "CLOSED");
+
+        MainModel modCashFlow = new MainModel();
+        modCashFlow.GetSetcomp = comp;
+        modCashFlow.GetSetopeningdate = sDateFrom;
+        modCashFlow.GetSetbankopeningamount = modLastCashFlow.GetSetbankclosingamount;
+        modCashFlow.GetSetcashopeningamount = modLastCashFlow.GetSetcashclosingamount;
+
+        ArrayList lsPayRcptHeaderDetails = oMainCon.getPaymentReceiptCashFlowList(comp, modLastCashFlow.GetSetclosingdate, sDateFrom, "CONFIRMED");
+        for (int i = 0; i < lsPayRcptHeaderDetails.Count; i++)
+        {
+            MainModel oPayRcptDet = (MainModel)lsPayRcptHeaderDetails[i];
+
+            modCashFlow.GetSetbankopeningamount = modCashFlow.GetSetbankopeningamount + (oPayRcptDet.GetSetpaytype.Equals("CASH") ? 0 : oPayRcptDet.GetSetpayamount);
+            modCashFlow.GetSetcashopeningamount = modCashFlow.GetSetcashopeningamount + (oPayRcptDet.GetSetpaytype.Equals("CASH") ? oPayRcptDet.GetSetpayamount : 0);
+        }
+
+        ArrayList lsPayPaidHeaderDetails = oMainCon.getPaymentPaidCashFlowList(comp, modLastCashFlow.GetSetclosingdate, sDateFrom, "CONFIRMED");
+        for (int i = 0; i < lsPayPaidHeaderDetails.Count; i++)
+        {
+            MainModel oPayPaidDet = (MainModel)lsPayPaidHeaderDetails[i];
+
+            modCashFlow.GetSetbankopeningamount = modCashFlow.GetSetbankopeningamount - (oPayPaidDet.GetSetpaytype.Equals("CASH") ? 0 : oPayPaidDet.GetSetpayamount);
+            modCashFlow.GetSetcashopeningamount = modCashFlow.GetSetcashopeningamount - (oPayPaidDet.GetSetpaytype.Equals("CASH") ? oPayPaidDet.GetSetpayamount : 0);
+        }
+
+        ArrayList lsPaymentReceipt = oMainCon.getPaymentReceiptCashFlowList(comp, sDateFrom, sDateTo, "CONFIRMED");
+        for (int i = 0; i < lsPaymentReceipt.Count; i++)
+        {
+            MainModel oPayRcptDet = (MainModel)lsPaymentReceipt[i];
+
+            modCashFlow.GetSetbankpaymentreceiptamount = modCashFlow.GetSetbankpaymentreceiptamount + (oPayRcptDet.GetSetpaytype.Equals("CASH") ? 0 : oPayRcptDet.GetSetpayamount);
+            modCashFlow.GetSetcashpaymentreceiptamount = modCashFlow.GetSetcashpaymentreceiptamount + (oPayRcptDet.GetSetpaytype.Equals("CASH") ? oPayRcptDet.GetSetpayamount : 0);
+        }
+
+        ArrayList lsPaymentPaid = oMainCon.getPaymentPaidCashFlowList(comp, sDateFrom, sDateTo, "CONFIRMED");
+        for (int i = 0; i < lsPaymentPaid.Count; i++)
+        {
+            MainModel oPayPaidDet = (MainModel)lsPaymentPaid[i];
+
+            modCashFlow.GetSetbankpaymentpaidamount = modCashFlow.GetSetbankpaymentpaidamount + (oPayPaidDet.GetSetpaytype.Equals("CASH") ? 0 : oPayPaidDet.GetSetpayamount);
+            modCashFlow.GetSetcashpaymentpaidamount = modCashFlow.GetSetcashpaymentpaidamount + (oPayPaidDet.GetSetpaytype.Equals("CASH") ? oPayPaidDet.GetSetpayamount : 0);
+        }
+
+        modCashFlow.GetSetbankclosingamount = modCashFlow.GetSetbankopeningamount + modCashFlow.GetSetbankpaymentreceiptamount - modCashFlow.GetSetbankpaymentpaidamount;
+        modCashFlow.GetSetcashclosingamount = modCashFlow.GetSetcashopeningamount + modCashFlow.GetSetcashpaymentreceiptamount - modCashFlow.GetSetcashpaymentpaidamount;
+        modCashFlow.GetSetclosingdate = sDateTo;
+
+        totalcashopeningamount = modCashFlow.GetSetbankopeningamount + modCashFlow.GetSetcashopeningamount;
+        totalcashpayrcptamount = modCashFlow.GetSetbankpaymentreceiptamount + modCashFlow.GetSetcashpaymentreceiptamount;
+        totalcashpaypaidamount = modCashFlow.GetSetbankpaymentpaidamount + modCashFlow.GetSetcashpaymentpaidamount;
+        totalcashclosingamount = modCashFlow.GetSetbankclosingamount + modCashFlow.GetSetcashclosingamount;
+
+        object objStockReportSummary = new { datefrom = sDateFrom, dateto = sDateTo, totalcashopeningamount = totalcashopeningamount, totalcashpayrcptamount = totalcashpayrcptamount, totalcashpaypaidamount = totalcashpaypaidamount * -1, totalcashclosingamount = totalcashclosingamount };
+        //jsonResponse = convertJson(objStockReportSummary);
+
+        jsonResponse = convertJson(objStockReportSummary);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_ListCashInOut2(String comp, String selectyear, String selectmonth, String selectday)
+    {
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sDateFrom = "", sDateTo = "";
+
+        ArrayList lsInvoiceHeader = new ArrayList();
+
+        if (selectyear.Length > 0 && selectmonth.Length > 0 && selectday.Length > 0)
+        {
+            sDateFrom = selectyear + "-" + selectmonth + "-" + selectday + " 00:00:00";
+            sDateTo = selectyear + "-" + selectmonth + "-" + selectday + " 23:59:59";
+        }
+        else if (selectyear.Length > 0 && selectmonth.Length > 0 && selectday.Length == 0)
+        {
+            sDateFrom = selectyear + "-" + selectmonth + "-" + "01" + " 00:00:00";
+
+            DateTime datetimeFrom = Convert.ToDateTime(sDateFrom, oMainCon.ukDtfi);
+            int maxdt = (new DateTime(datetimeFrom.Year, datetimeFrom.Month, 1).AddMonths(1).AddDays(-1)).Day;
+            sDateTo = selectyear + "-" + selectmonth + "-" + maxdt + " 23:59:59";
+        }
+        else if (selectyear.Length > 0 && selectmonth.Length == 0 && selectday.Length == 0)
+        {
+            sDateFrom = selectyear + "-" + "01" + "-" + "01" + " 00:00:00";
+            sDateTo = selectyear + "-" + "12" + "-" + "31" + " 23:59:59";
+        }
+
+        lsInvoiceHeader = oMainCon.getCashInOut2(comp, sDateFrom, sDateTo);
+
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsInvoiceHeader);
+        jsonResponse = convertJson(lsInvoiceHeader);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_parametertype(String paramtcategory)
+    {
+        HttpContext.Current.Response.ContentType = "text/json";
+        //HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        ArrayList lsPendInvoiceList = new ArrayList();
+
+
+        lsPendInvoiceList = oMainCon.getParametertype(paramtcategory, "ACTIVE");
+
+        //jsonResponse = new JavaScriptSerializer().Serialize(lsPendInvoiceList);
+        jsonResponse = convertJson(lsPendInvoiceList);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_ExpensesDetails2(String comp, String paypaidno, String receiptno)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        MainModel modExpensesHeaderDetails = new MainModel();
+
+
+        modExpensesHeaderDetails = oMainCon.getExpensesHeaderDetails2(comp, paypaidno, receiptno);
+
+
+        //jsonResponse = new JavaScriptSerializer().Serialize(modExpensesHeaderDetails);
+        jsonResponse = convertJson(modExpensesHeaderDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_IncomeDetails(String comp, String paypaidno, String receiptno)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        MainModel modInvoiceHeaderDetails = new MainModel();
+
+        modInvoiceHeaderDetails = oMainCon.getIncomeDetails(comp, paypaidno, receiptno);
+
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(modInvoiceHeaderDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_InvoiceInvoice2(String comp, String bpid, double inc_amount, String invoicecat, String inc_type, String  inc_remarks,String datecreation, String userid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+        //get comp bp if exist
+        MainModel oModBP = oMainCon.getBPDetails(comp, bpid);
+        if (oModBP.GetSetbpid.Trim().Length > 0)
+        {
+            MainModel oModInvoice = new MainModel();
+            oModInvoice.GetSetcomp = comp;
+            oModInvoice.GetSetinvoicedate = datecreation;
+            oModInvoice.GetSetinvoicecat = invoicecat;
+            oModInvoice.GetSetinvoicetype = inc_type;
+            oModInvoice.GetSetinvoiceterm = "NOT_APPLICABLE";
+            String sInvoiceNo = oMainCon.getNextRunningNo(comp, "INVOICE", "ACTIVE");
+            oModInvoice.GetSetinvoiceno = sInvoiceNo;
+            oModInvoice.GetSetbpid = oModBP.GetSetbpid;
+            oModInvoice.GetSetbpdesc = oModBP.GetSetbpdesc;
+            oModInvoice.GetSetbpaddress = oModBP.GetSetbpaddress;
+            oModInvoice.GetSetbpcontact = oModBP.GetSetbpcontact;
+            oModInvoice.GetSetsalesamount = inc_amount;
+            oModInvoice.GetSetinvoiceamount = inc_amount;
+            oModInvoice.GetSettotalamount = inc_amount;
+            oModInvoice.GetSetpayrcptamount = inc_amount;
+            oModInvoice.GetSetremarks = inc_remarks;
+            oModInvoice.GetSetstatus = "CONFIRMED";
+            oModInvoice.GetSetcreatedby = userid;
+            oModInvoice.GetSetcreateddate = datecreation;
+            oModInvoice.GetSetconfirmedby = userid;
+            oModInvoice.GetSetconfirmeddate = datecreation;
+
+            if (oMainCon.insertInvoiceHeader2(oModInvoice).Equals("Y"))
+            {
+                oMainCon.updateNextRunningNo(oModInvoice.GetSetcomp, "INVOICE", "ACTIVE");
+                sStatus = "Y";
+                sMessage = oModInvoice.GetSetinvoiceno;
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string addMobile_InvoiceItemDetails2(String comp, String invoiceno, String inc_item, String inc_itemdesc, double inc_amount)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+
+        MainModel oModLineItem = new MainModel();
+        oModLineItem.GetSetcomp = comp;
+        oModLineItem.GetSetinvoiceno = invoiceno;
+        oModLineItem.GetSetlineno = oMainCon.getInvoiceDetailsList(comp, invoiceno, 0, "").Count + 1;
+        oModLineItem.GetSetitemno = inc_item;
+        oModLineItem.GetSetitemdesc = inc_itemdesc;
+        oModLineItem.GetSetunitprice = inc_amount;
+        oModLineItem.GetSetquantity = 1;
+        oModLineItem.GetSetinvoiceprice = inc_amount;
+        oModLineItem.GetSettaxcode = "N/A";
+        oModLineItem.GetSettotalinvoice = inc_amount;
+
+        MainModel modExistent = oMainCon.getInvoiceDetailsDetails(oModLineItem.GetSetcomp, "", 0, oModLineItem.GetSetshipmentno, oModLineItem.GetSetshipment_lineno, inc_item, "NEW");
+        if (modExistent.GetSetinvoiceno.Length > 0)
+        {
+            sStatus = "N";
+            sMessage = "Invoice item already assigned, Please contact System Admin!";
+        }
+        else
+        {
+            //insert new line item
+            if (oMainCon.insertInvoiceDetails(oModLineItem).Equals("Y"))
+            {
+                //update invoice header information
+                sStatus = oMainCon.updateInvoiceHeaderInfo(comp, invoiceno);
+                sMessage = "";
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Unable to add invoice item, Please contact System Admin!";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_PayRcptInvoice2(String comp, String invoiceno, String datecreation, double inc_amount, String userid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+        //get invoice header if exist
+        MainModel oModInvoice = oMainCon.getInvoiceHeaderDetails(comp, invoiceno);
+        if (oModInvoice.GetSetinvoiceno.Trim().Length > 0 && oModInvoice.GetSetstatus.Equals("CONFIRMED"))
+        {
+            MainModel oModHeader = new MainModel();
+            oModHeader.GetSetcomp = comp;
+            oModHeader.GetSetpayrcptdate = datecreation;
+            oModHeader.GetSetpayrcpttype = "INVOICE";
+            String sPayRcptNo = oMainCon.getNextRunningNo(comp, "PAYMENT_RECEIPT", "ACTIVE");
+            oModHeader.GetSetpayrcptno = sPayRcptNo;
+            oModHeader.GetSetbpid = oModInvoice.GetSetbpid;
+            oModHeader.GetSetbpdesc = oModInvoice.GetSetbpdesc;
+            oModHeader.GetSetbpaddress = oModInvoice.GetSetbpaddress;
+            oModHeader.GetSetbpcontact = oModInvoice.GetSetbpcontact;
+            oModHeader.GetSetinvoiceamount = inc_amount;
+            oModHeader.GetSetpayrcptamount = inc_amount;
+            oModHeader.GetSetremarks = oModInvoice.GetSetremarks;
+            oModHeader.GetSetstatus = "CONFIRMED";
+            oModHeader.GetSetcreatedby = userid;
+            oModHeader.GetSetcreateddate = datecreation;
+            oModHeader.GetSetconfirmedby = userid;
+            oModHeader.GetSetconfirmeddate = datecreation;
+
+            if (oMainCon.insertPaymentReceiptHeader2(oModHeader).Equals("Y"))
+            {
+                oMainCon.updateNextRunningNo(comp, "PAYMENT_RECEIPT", "ACTIVE");
+                sStatus = "Y";
+                sMessage = oModHeader.GetSetpayrcptno;
+            }
+        }
+
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string addMobile_PayRcptItemInvoice2(String comp, String payrcptno, String invoiceno, String datecreation, double inc_amount, String inc_paytype)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+        //get invoice header if exist
+        MainModel oModInvoice = oMainCon.getInvoiceHeaderDetails(comp, invoiceno);
+        if (oModInvoice.GetSetinvoiceno.Trim().Length > 0 && oModInvoice.GetSetstatus.Equals("CONFIRMED"))
+        {
+            MainModel oModLineItem = new MainModel();
+            oModLineItem.GetSetcomp = comp;
+            oModLineItem.GetSetpayrcptno = payrcptno;
+            oModLineItem.GetSetlineno = 1;
+            oModLineItem.GetSetinvoiceno = invoiceno;
+            oModLineItem.GetSetinvoicedate = datecreation;
+            oModLineItem.GetSetinvoiceprice = inc_amount;
+            oModLineItem.GetSetpaytype = inc_paytype;
+            oModLineItem.GetSetpayrcptprice = inc_amount;
+
+            //check whether already exist in Other Line Item that is not confirm yet or not
+            MainModel modExistent = oMainCon.getPaymentReceiptDetailsDetails(oModLineItem.GetSetcomp, "", 0, oModLineItem.GetSetinvoiceno, "NEW");
+            if (modExistent.GetSetpayrcptno.Length > 0)
+            {
+                sStatus = "Y";
+                sMessage = "Item tersebut telah ditambah pada Bayaran Terima: " + modExistent.GetSetpayrcptno;
+            }
+            else
+            {
+                //insert new line item
+                if (oMainCon.insertPaymentReceiptDetails(oModLineItem).Equals("Y"))
+                {
+                    //update payment receipt header information
+                    sStatus = oMainCon.updatePaymentReceiptHeaderInfo(comp, payrcptno);
+                    sMessage = "";
+                }
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_ExpensesHeader2(String comp, String bpid, String expensescat, String expensestype, Double exp_amount, String exp_remarks, String datecreation, String userid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+        //get comp bp if exist
+        MainModel oModBP = oMainCon.getBPDetails(comp, bpid);
+        if (oModBP.GetSetbpid.Trim().Length > 0)
+        {
+            MainModel oModExpenses = new MainModel();
+            oModExpenses.GetSetcomp = comp;
+            oModExpenses.GetSetexpensesdate = datecreation;
+            oModExpenses.GetSetexpensescat = expensescat;
+            oModExpenses.GetSetexpensestype = expensestype;
+            String sExpensesNo = oMainCon.getNextRunningNo(comp, "EXPENSES", "ACTIVE");
+            oModExpenses.GetSetexpensesno = sExpensesNo;
+            oModExpenses.GetSetbpid = oModBP.GetSetbpid;
+            oModExpenses.GetSetbpdesc = oModBP.GetSetbpdesc;
+            oModExpenses.GetSetbpaddress = oModBP.GetSetbpaddress;
+            oModExpenses.GetSetbpcontact = oModBP.GetSetbpcontact;
+            oModExpenses.GetSetremarks = exp_remarks;
+            oModExpenses.GetSetstatus = "CONFIRMED";
+            oModExpenses.GetSetexpensesamount = exp_amount;
+            oModExpenses.GetSettotalamount = exp_amount;
+            oModExpenses.GetSetpaypaidamount = exp_amount;
+            oModExpenses.GetSetpurchaseamount = exp_amount;
+            oModExpenses.GetSetcreatedby = userid;
+            oModExpenses.GetSetcreateddate = datecreation;
+            oModExpenses.GetSetconfirmedby = userid;
+            oModExpenses.GetSetconfirmeddate = datecreation;
+
+            //oMainCon.WriteToLogFile("WebService-createMobile_ExpensesHeader2: Remarks [" + oModExpenses.GetSetremarks + "]");
+
+            if (oMainCon.insertExpensesHeader2(oModExpenses).Equals("Y"))
+            {
+                oMainCon.updateNextRunningNo(oModExpenses.GetSetcomp, "EXPENSES", "ACTIVE");
+                sStatus = "Y";
+                sMessage = oModExpenses.GetSetexpensesno;
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string addMobile_ExpensesReceiptItemDetails2(String comp, String expensesno, String expensescat, String exp_item, String exp_itemdesc, Double exp_amount, String userid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+
+        MainModel oModLineItem = new MainModel();
+        oModLineItem.GetSetcomp = comp;
+        oModLineItem.GetSetexpensesno = expensesno;
+        oModLineItem.GetSetlineno = oMainCon.getExpensesDetailsList(comp, expensesno, 0, "").Count + 1;
+        oModLineItem.GetSetitemno = exp_item;
+        oModLineItem.GetSetitemdesc = exp_itemdesc;
+        oModLineItem.GetSetunitprice = exp_amount;
+        oModLineItem.GetSetdiscamount = 0;
+        oModLineItem.GetSetquantity = 1;
+        oModLineItem.GetSettaxcode = "N/A";
+        oModLineItem.GetSetexpensesprice = exp_amount;
+        oModLineItem.GetSettotalexpenses = exp_amount;
+
+        MainModel modExistent = oMainCon.getExpensesDetailsDetails(oModLineItem.GetSetcomp, "", 0, oModLineItem.GetSetreceiptno, oModLineItem.GetSetreceipt_lineno, exp_item, "NEW");
+        if (modExistent.GetSetinvoiceno.Length > 0)
+        {
+            sStatus = "N";
+            sMessage = "Expenses item already assigned, Please contact System Admin!";
+        }
+        else
+        {
+            //insert new line item
+            if (oMainCon.insertExpensesDetails(oModLineItem).Equals("Y"))
+            {
+                //update expenses header information
+                sStatus = oMainCon.updateExpensesHeaderInfo(comp, expensesno);
+                sMessage = "";
+            }
+            else
+            {
+                sStatus = "N";
+                sMessage = "Unable to add expenses item, Please contact System Admin!";
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string createMobile_PayPaidExpenses2(String comp, String expensesno, Double exp_amount, String datecreation, String userid)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+
+        //get expenses header if exist
+        MainModel oModExpenses = oMainCon.getExpensesHeaderDetails(comp, expensesno);
+        if (oModExpenses.GetSetexpensesno.Trim().Length > 0 && oModExpenses.GetSetstatus.Equals("CONFIRMED"))
+        {
+            MainModel oModHeader = new MainModel();
+            oModHeader.GetSetcomp = comp;
+            oModHeader.GetSetpaypaiddate = datecreation;
+            oModHeader.GetSetpaypaidtype = "EXPENSES";
+            String sPayPaidNo = oMainCon.getNextRunningNo(comp, "PAYMENT_PAID", "ACTIVE");
+            oModHeader.GetSetpaypaidno = sPayPaidNo;
+            oModHeader.GetSetbpid = oModExpenses.GetSetbpid;
+            oModHeader.GetSetbpdesc = oModExpenses.GetSetbpdesc;
+            oModHeader.GetSetbpaddress = oModExpenses.GetSetbpaddress;
+            oModHeader.GetSetbpcontact = oModExpenses.GetSetbpcontact;
+            oModHeader.GetSetremarks = oModExpenses.GetSetremarks;
+            oModHeader.GetSetstatus = "CONFIRMED";
+            oModHeader.GetSetexpensesamount = exp_amount;
+            oModHeader.GetSetpaypaidamount = exp_amount;
+            oModHeader.GetSetcreatedby = userid;
+            oModHeader.GetSetcreateddate = datecreation;
+            oModHeader.GetSetconfirmedby = userid;
+            oModHeader.GetSetconfirmeddate = datecreation;
+
+            if (oMainCon.insertPaymentPaidHeader2(oModHeader).Equals("Y"))
+            {
+                oMainCon.updateNextRunningNo(comp, "PAYMENT_PAID", "ACTIVE");
+                sStatus = "Y";
+                sMessage = oModHeader.GetSetpaypaidno;
+            }
+        }
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string addMobile_PayPaidItemExpenses2(String comp, String paypaidno, String expensesno, Double exp_amount, String exp_paytype, String datecreation)
+    {
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+        String sStatus = "N";
+        String sMessage = "Internal Server Error, Please contact System Admin!";
+
+
+        //get expenses header if exist
+        MainModel oModExpenses = (MainModel)oMainCon.getExpensesHeaderDetails(comp, expensesno);
+        if (oModExpenses.GetSetexpensesno.Trim().Length > 0 && oModExpenses.GetSetstatus.Equals("CONFIRMED"))
+        {
+            MainModel oModLineItem = new MainModel();
+            oModLineItem.GetSetcomp = comp;
+            oModLineItem.GetSetpaypaidno = paypaidno;
+            oModLineItem.GetSetlineno = 1;
+            oModLineItem.GetSetexpensesno = expensesno;
+            oModLineItem.GetSetexpensesdate = datecreation;
+            oModLineItem.GetSetexpensesprice = exp_amount;
+            oModLineItem.GetSetpaytype = exp_paytype;
+            oModLineItem.GetSetpayrefno = "";
+            oModLineItem.GetSetpaypaidprice = exp_amount;
+            oModLineItem.GetSetpayremarks = "";
+
+            //check whether already exist in Other Line Item that is not confirm yet or not
+            MainModel modExistent = oMainCon.getPaymentPaidDetailsDetails(oModLineItem.GetSetcomp, "", 0, oModLineItem.GetSetexpensesno, "NEW");
+            if (modExistent.GetSetpaypaidno.Length > 0)
+            {
+                sStatus = "Y";
+                sMessage = "Item tersebut telah ditambah pada Bayaran Belanja: " + modExistent.GetSetpayrcptno;
+            }
+            else
+            {
+                //insert new line item
+                if (oMainCon.insertPaymentPaidDetails(oModLineItem).Equals("Y"))
+                {
+                    //update payment paid header information
+                    sStatus = oMainCon.updatePaymentPaidHeaderInfo(comp, paypaidno);
+                    sMessage = "";
+                }
+            }
+        }
+
+
+        object objData = new { status = sStatus, message = sMessage };
+        //jsonResponse = new JavaScriptSerializer().Serialize(objData);
+        jsonResponse = convertJson(objData);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_CashInList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        ArrayList lsCashDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsCashDetails = oMainCon.getPaymentReceiptCashInList(comp, selyear, selmonth, selday, status);
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsCashDetails);
+
+        return jsonResponse;
+        //HttpContext.Current.Response.Write(jsonResponse);
+    }
+
+    [WebMethod]
+    [ScriptMethod(UseHttpGet = false, ResponseFormat = ResponseFormat.Json)]
+    public string getMobile_CashOutList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+
+        //HttpContext.Current.Response.ContentType = "text/json";
+        HttpContext.Current.Response.ContentType = "application/json; charset=utf-8";
+        String jsonResponse = "";
+
+        ArrayList lsCashDetails = new ArrayList();
+
+        if (TokenNumber.Equals(TokenNumberConfig))
+        {
+            lsCashDetails = oMainCon.getPaymentPaidCashOutList(comp, selyear, selmonth, selday, status);
+
+        }
+        //jsonResponse = new JavaScriptSerializer().Serialize(modInvoiceHeaderDetails);
+        jsonResponse = convertJson(lsCashDetails);
 
         return jsonResponse;
         //HttpContext.Current.Response.Write(jsonResponse);

@@ -493,7 +493,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                 if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                    $('#bpaddress').text("<%=modBP.GetSetbpaddress%>");
+                                    $('#bpaddress').text("<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>");
                                     $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                     $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                 }

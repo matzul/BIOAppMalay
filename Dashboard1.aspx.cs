@@ -27,7 +27,7 @@ public partial class Dashboard1 : System.Web.UI.Page
     public MainModel oModRevenuePlan = new MainModel();
     public MainModel oModRevenueActual = new MainModel();
     public MainModel oModRevenueActualSummary = new MainModel();
-
+    
     public MainModel oModExpensesPlan = new MainModel();
     public MainModel oModExpensesActual = new MainModel();
     
@@ -185,9 +185,11 @@ public partial class Dashboard1 : System.Web.UI.Page
         oModOtherCollectionActual = oMainCon.getReportFYRDetails(sCurrComp, sCurrFyr, "OTHERCOLLECTION_ACTUAL", "dashboard_collection");
         */
         //oModRevenueActualSummary = oMainCon.getReportFYRDetailsSummary(sCurrComp, sCurrFyr, "REVENUE_ACTUAL", "dashboard_revenue");
-        oModRevenueActualSummary.GetSetTODATE = oMainCon.getReportRevenueExcludeJV(sCurrComp, oModFYR.GetSetactualyear, "", "CONFIRMED");
+        //oModRevenueActualSummary.GetSetTODATE = oMainCon.getReportRevenueExcludeJV(sCurrComp, oModFYR.GetSetactualyear, "", "CONFIRMED");
+        oModRevenueActualSummary.GetSetTODATE = oMainCon.getReportRevenueExcludeJV(sCurrComp, sCurrFyr, "", "CONFIRMED");
         //oModCollectionActualSummary = oMainCon.getReportFYRDetailsSummary(sCurrComp, sCurrFyr, "COLLECTION_ACTUAL", "dashboard_collection");
-        oModCollectionActualSummary.GetSetTODATE = oMainCon.getReportCollection(sCurrComp, oModFYR.GetSetactualyear, "", "CONFIRMED");
+        //oModCollectionActualSummary.GetSetTODATE = oMainCon.getReportCollectionBasedOnInvoice(sCurrComp, oModFYR.GetSetactualyear, "", "CONFIRMED");
+        oModCollectionActualSummary.GetSetTODATE = oMainCon.getReportCollectionBasedOnInvoice(sCurrComp, sCurrFyr, "", "CONFIRMED");
         lsPayRcptHeaderByBP = oMainCon.getInvoicePaymentReceiptHeaderListSumByBP(sCurrComp, "", "", sCurrFyr, "CONFIRMED");
 
         //4. For SalesOrder

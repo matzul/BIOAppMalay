@@ -1,0 +1,325 @@
+﻿body { 
+margin:0; 
+padding:0; 
+height:100%; 
+}
+
+.allofthem 
+{
+    
+}
+.ResitFont
+{		font-size: 10pt; 
+		font-family: Times New Roman;
+		color:black;	
+}
+.ButtonFont
+{		font-size: 7pt; 
+		font-family: Tahoma,Verdana,Arial;
+		color:black;	
+}
+.BigTitle
+{		font-size: 14pt; 
+		font-family: Tahoma,Verdana,Arial;
+		color:black;	
+}
+.ReportTitle
+{		font-size: 18pt; 
+		font-family: Times New Roman;
+		color:black;	
+}
+.Report
+{		font-size: 12pt; 
+		font-family: Times New Roman;
+		color:black;	
+}
+.SuratTitle
+{		font-size: 18pt; 
+		font-family: Arial Narrow;
+		color:black;	
+}
+.Surat
+{		font-size: 12pt; 
+		font-family: Arial Narrow;
+		color:black;	
+		text-align:justify;		
+}
+.AgreeTitle
+{		font-size: 18pt; 
+		font-family: Times New Roman;
+		color:black;	
+		text-align:center;		
+		font-weight:bold;
+}
+.Agree
+{		font-size: 12pt; 
+		font-family: Times New Roman;
+		color:black;	
+		text-align:justify;		
+}
+.Title
+{		font-size: 8pt; 
+ 		font-family : Tahoma,Verdana,Arial;
+		color:black;
+		font-weight:bold;
+}
+.kecil
+{		font-size: 8pt; 
+ 		font-family:Arial, Helvetica, sans-serif;
+		color:black;		
+}
+.breadcrumb
+{		font-size: 11pt; 
+ 		font-family: Trebuchet MS;
+ 		font-weight:  normal;
+		color:black;		
+}
+
+.Titleblue
+{		font-size: 8pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		color:blue;	
+}
+.TitleBlack
+{		font-size: 10pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		color:black;	
+}.Titlewhite
+{		font-size: 8pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		font-weight:bold;
+		color:white;	
+}
+.Titlered
+{		font-size: 8pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		font-weight:bold;
+		color:red;	
+}
+.Titleform
+{		font-size: 10pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		color:black;	
+}
+.Titlegrey
+{		font-size: 10pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		color:#919292;	
+}
+.TitlegreyX
+{		font-size: 8pt; 
+		font-family: verdana, arial, helvetica, sans-serif;
+		color:#919292;	
+}.TitleX
+{		font-size: 8pt; 
+ 		font-family : Tahoma,Verdana,Arial;
+		color:black;
+		font-weight:bold;
+}
+
+input {
+	color : black;
+	font-size : 11px;
+	font-family : Tahoma,Verdana,Arial;
+	font-weight: bold;
+}
+
+textarea,select {
+	color : #919292;
+	font-size : 11px;
+	font-family : Tahoma,Verdana,Arial;
+	font-weight: bold;
+}
+div {
+	margin-top : 0px;
+	margin-bottom : 0px;
+	margin-left : 0px;
+	margin-right : 0px;
+}
+.px {
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding-left : 0px;
+	padding-right : 0px;
+	margin-top : 2px;
+	margin-bottom : 0px;
+	margin-left : 0px;
+	margin-right : 0px;
+}
+.right {
+	color : #003C5E;
+	margin-top : 5px;
+	padding-bottom : 10px;
+	margin-bottom : 0px;
+	margin-left : 10px;
+	margin-right : 10px;
+	font-size : 11px;
+	font-family : Tahoma,Verdana,Arial;
+	font-weight: bold;
+}
+.right b {
+	color : #EF6D00;
+}
+.right a {
+	color : #003C5E;
+}
+.right a:hover {
+	color : #000000;
+}
+.left {
+	color : #FFFFFF;
+	margin-top : 0px;
+	padding-bottom : 10px;
+	margin-bottom : 0px;
+	margin-left : 10px;
+	margin-right : 10px;
+	font-size : 11px;
+	font-family : Tahoma,Verdana,Arial;
+	font-weight: bold;
+}
+.left a {
+	color : #FFFFFF;
+}
+.left a:hover {
+	color : #000000;
+}
+p {
+	color : #000000;
+	margin-top : 5px;
+	padding-bottom : 10px;
+	margin-bottom : 0px;
+	margin-left : 10px;
+	margin-right : 10px;
+	font-size : 11px;
+	font-family : Tahoma,Verdana,Arial;
+}
+p a {
+	color : #294A7B;
+}
+p a:hover {
+	color : red;
+}
+.bot {
+	color : #000000;
+	margin-top : 5px;
+	padding-bottom : 10px;
+	margin-bottom : 0px;
+	margin-left : 10px;
+	margin-right : 10px;
+	font-size : 11px;
+	font-family : Tahoma,Verdana,Arial;
+}
+.bot a {
+	color : #000000;
+	text-decoration: none;
+}
+.bot a:hover {
+	color : #294A7B;
+}
+
+a.nodec
+{
+		font-size: 8pt;
+		text-decoration: none;
+		font-family: Tahoma,Verdana,Arial;
+		color:blue;
+}
+a.nodeb
+{
+		font-size: 8pt;
+		text-decoration: none;
+		font-family: Tahoma,Verdana,Arial;
+		color:blue;
+}
+a.noder
+{
+		font-size: 8pt;
+		text-decoration: none;
+		font-family: Tahoma,Verdana,Arial;
+		color:red;
+}
+a.nodey
+{
+		font-size: 8pt;
+		text-decoration: none;
+		font-family:Arial, Helvetica, sans-serif;
+		color:#3333FF;
+}
+
+.alltext 
+{ 	
+	font-family:Cambria;
+	font-size:small;
+}
+
+.allheader 
+{
+	font-family:Cambria;
+	font-size:large;
+	color:Gray
+}
+.alltable table
+{ border-collapse:collapse }
+.alltable
+{ border-collapse:collapse }
+.alldivspace
+{ padding:10px }
+.allsubmenu
+{ font-size:10px}
+
+.allsubmenutab {
+	font-size:11px;
+	background-image:url(../images/submenustub_off.gif); 
+	float:left; 
+	height:25px; 
+	width:115px;
+	text-align:center;  
+	}
+#innerallsubmenu {position: relative; top:40%}	
+
+.allsubmenutabon {
+	font-size:11px;
+	font-weight:bold;
+	background-image:url(../images/submenustub_on.gif); 
+	float:left; 
+	height:25px; 
+	width:115px;
+	text-align:center;
+	
+	
+	}
+#innerallsubmenuon {position: relative; top:25%}
+
+.linktopmenu {
+	color:#FFFFFF;
+	padding:5px;
+	font-family:Tahoma, Geneva, sans-serif;
+	font-size:12px;
+	letter-spacing:1px
+	
+}
+
+
+
+.linktopmenu a:link {
+	color:#FFFFFF;
+	
+}
+.linktopmenu a:visited {
+	color:#F2F2F2;
+	
+}
+
+.bottomwhite { color:#FFF }
+
+.contentplaceholder { padding:5px; background-color:white;}
+
+/*.contentfolder { padding:10px; background-color:#e6e7e8; height:500px}*/
+.contentfolder { padding:10px; background-color:White; border: 1px solid #bbb; }
+
+.SystemTitle 
+{
+    padding: 7px; 
+    font-size:12px
+}
+

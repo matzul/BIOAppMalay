@@ -50,6 +50,12 @@ public partial class PurchaseReport : System.Web.UI.Page
         }
         lsBP = oMainCon.getBPList(sCurrComp, "", "", "");
         lsItem = oMainCon.getItemList(sCurrComp, "", "", "");
+        sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+        sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
+    }
+    private DateTime FirstDayOfMonth()
+    {
+        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
     }
 
     private void getValues()
@@ -86,8 +92,8 @@ public partial class PurchaseReport : System.Web.UI.Page
             sOrderNo = "";
             sBPID = "";
             sStatus = "";
-            sStartDate = "";
-            sEndDate = "";
+            sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+            sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
             sItemNo = "";
             receiptStatus = "";
             expensesStatus = "";

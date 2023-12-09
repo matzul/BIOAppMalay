@@ -1,0 +1,17 @@
+﻿
+.fixed_header thead {
+    display: inline-block;
+    width: 100%;
+}
+
+.fixed_header tbody {
+    height: 250px;
+    display: inline-block;
+    width: 100%;
+    overflow: auto;
+}
+
+.fixed_header tr:first-child > td {
+    position: sticky;
+    top: 0;
+}

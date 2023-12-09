@@ -265,7 +265,7 @@ public partial class ReceiveDetails : System.Web.UI.Page
             if (sOrderNo.Length > 0 && oModLineItem.GetSetlineno > 0)
             {
                 //check whether already exist in Purchase Order Line Item that is not confirm yet or not
-                MainModel modExistent = oMainCon.getPurchaseOrderDetailsDetails(oModLineItem.GetSetcomp, oModLineItem.GetSetorderno, 0, oModLineItem.GetSetitemno);
+                MainModel modExistent = oMainCon.getPurchaseOrderDetailsDetails(oModLineItem.GetSetcomp, oModLineItem.GetSetorderno, 0, oModLineItem.GetSetitemno, "");
                 if (modExistent.GetSetorderno.Length > 0)
                 {
                     sAlertMessage = "ERROR|Item Terimaan tidak berjaya ditambah. Item tersebut telah ditambah pada Pesanan Terimaan [Line No: " + modExistent.GetSetlineno + "]";

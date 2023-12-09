@@ -3,7 +3,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
-            <div class="col-md-12 col-sm-12 col-xs-12">
+            <div id="printableArea" class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Penyata Pendapatan <small>MAKLUMAT</small></h2>
@@ -85,6 +85,45 @@
                       </thead>
 
                       <tbody>
+                            <tr>
+                                <td colspan="5"><h4 class="dark">PEROLEHAN ASET & BAHAN MODAL</h4></td>
+                                <td></td>
+                                <td style="text-align:right;"><h4 id="totalassetprocurement" class="dark">0.00</h4></td>
+                            </tr>
+                            <%
+                                totalassetcapitalamount = 0;
+                                if (lsAssetCapitalHeader.Count > 0)
+                                {
+                                    for (int i = 0; i < lsAssetCapitalHeader.Count; i++) 
+                                    {
+                                        MainModel oAssetCapital = (MainModel)lsAssetCapitalHeader[i];
+                                        totalassetcapitalamount = totalassetcapitalamount + oAssetCapital.GetSettotalamount;
+                            %>
+                                    <tr>
+                                        <td></td>
+                                        <td><i class="glyphicon glyphicon-play"></i></td>
+                                        <td><%=oAssetCapital.GetSetconfirmeddate%></td>
+                                        <td><%=oAssetCapital.GetSetexpensescat%></td>
+                                        <td><%=oAssetCapital.GetSetexpensestype%></td>
+                                        <td style="text-align:right;display:none;"><%=String.Format("{0:#,##0.00}",oAssetCapital.GetSetexpensesamount)%></td>
+                                        <td style="text-align:right;display:none;"><%=String.Format("{0:#,##0.00}",oAssetCapital.GetSettaxamount)%></td>
+                                        <td style="text-align:right;"><%=String.Format("{0:#,##0.00}",oAssetCapital.GetSettotalamount)%></td>
+                                        <td></td>
+                                    </tr>
+                            <%
+                                    }
+                                }else{
+                            %>
+                            <tr>
+                                <td></td>
+                                <td><i class="glyphicon glyphicon-play"></i></td>
+                                <td colspan="3">Rekod tiada...</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                            <%
+                                }
+                            %>
                             <tr>
                                 <td colspan="5"><h4 class="green">PENDAPATAN / HASIL</h4></td>
                                 <td></td>
@@ -331,6 +370,7 @@
             $('#totalrevenueamount').text('<%=String.Format("{0:#,##0.00}",totalrevenueamount)%>'); 
             $('#totalinventoryamount').text('<%=String.Format("{0:#,##0.00}",totalinventoryamount)%>');
             $('#totalexpensesamount').text('<%=String.Format("{0:#,##0.00}",totalexpensesamount)%>');
+            $('#totalassetprocurement').text('<%=String.Format("{0:#,##0.00}",totalassetcapitalamount)%>');
 
         });
 
@@ -351,6 +391,31 @@
             }
         }
 
+        function openprintpage() {
+            printPartOfPage();
+        }
+
+        function printPartOfPage() {
+            //Works with Chome, Firefox, IE, Safari
+            //Get the HTML of div
+            var title = document.title;
+            var divElements = document.getElementById('printableArea').innerHTML;
+            var printWindow = window.open("", "_blank", "");
+            //open the window
+            printWindow.document.open();
+            //write the html to the new window, link to css file
+            printWindow.document.write('<html><head><title>' + title + '</title><link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css"><style> .topright { position: absolute; top: 5px; right: 5px; text-align: right; } </style></head><body>');
+            printWindow.document.write('<center><div style="width:750px !important;height:100px; align:center;"><span style="text-align:center"><img src="../image/logoblack.jpg" /></span></div>');
+            printWindow.document.write(divElements);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+
+            setTimeout(function () {
+                printWindow.print();
+                printWindow.close();
+            }, 100);
+        }
     </script>
 </asp:Content>
 

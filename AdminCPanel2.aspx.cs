@@ -84,12 +84,12 @@ public partial class AdminCPanel2 : System.Web.UI.Page
 
         if (sAction.Equals("SAVE"))
         {
-            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "01");
+            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "");
             oUserProfile.GetSetusername = oMainCon.replaceNull(Request.Params.Get("username"));
             oUserProfile.GetSetuseradd = oMainCon.replaceNull(Request.Params.Get("useradd"));
             oUserProfile.GetSetusertelno = oMainCon.replaceNull(Request.Params.Get("usertelno"));
             oUserProfile.GetSetuserpwd = oMainCon.replaceNull(Request.Params.Get("userpassword"));
-
+            oUserProfile.GetSetusertype = oMainCon.replaceNull(Request.Params.Get("usertype"));
         }
     }
 
@@ -101,11 +101,11 @@ public partial class AdminCPanel2 : System.Web.UI.Page
         }
         else if (sAction.Equals("OPEN"))
         {
-            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "01");
+            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "");
         }
         else if (sAction.Equals("EDIT"))
         {
-            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "01");
+            oUserProfile = oMainCon.getUserProfile(sCurrComp, sUserId, "", "");
         }
         else if (sAction.Equals("SAVE"))
         {
@@ -151,7 +151,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -211,7 +211,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -219,7 +219,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
         if (TokenNumber.Equals(TokenNumberConfig))
         {
 
-            modUser = oMainCon.getUserProfile("", userid, "", "");
+            modUser = oMainCon.getUserProfile2("", userid, "", "");
 
             Object objRptData = new
             {
@@ -230,6 +230,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
                 useradd = modUser.GetSetuseradd,
                 usertelno = modUser.GetSetusertelno,
                 usertype = modUser.GetSetusertype,
+                userroleid = modUser.GetSetuserroleid,
                 userstatus = modUser.GetSetuserstatus,
                 screenid = modUser.GetSetscreenid
             };
@@ -270,7 +271,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sUserId = HttpContext.Current.Session["userid"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
         if (TokenNumber.Equals(TokenNumberConfig))
@@ -293,10 +294,10 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             }
             else if (flag.Equals("U") && modUser.GetSetuserid.Trim().Length > 0)
             {
-                int i = oMainCon.updateUserDetails(modUser.GetSetcomp, usercomp, userid, userpwd, username, useradd, usertelno, modUser.GetSetusertype, userstatus, screenid);
+                int i = oMainCon.updateUserDetails(modUser.GetSetcomp, usercomp, userid, userpwd, username, useradd, usertelno, usertype, userstatus, screenid);
                 if (i == 1)
                 {
-                    int j = oMainCon.createUser(usercomp, userid, userpwd, username, useradd, usertelno, modUser.GetSetusertype, userstatus, screenid, userroleid, createdby);
+                    int j = oMainCon.createUser(usercomp, userid, userpwd, username, useradd, usertelno, usertype, userstatus, screenid, userroleid, createdby);
                     sStatus = "Y";
                     sMessage = "user updated successfully";
                 }
@@ -335,7 +336,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -395,7 +396,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sCurrComp = HttpContext.Current.Session["comp"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
         HttpContext.Current.Response.ContentType = "text/json";
         String jsonResponse = "";
@@ -463,7 +464,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sUserId = HttpContext.Current.Session["userid"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
         if (TokenNumber.Equals(TokenNumberConfig))
@@ -504,7 +505,7 @@ public partial class AdminCPanel2 : System.Web.UI.Page
             sUserId = HttpContext.Current.Session["userid"].ToString();
         }
 
-        String TokenNumber = "00000000";
+        String TokenNumber = "M05kit0@1";
         String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
         if (TokenNumber.Equals(TokenNumberConfig))

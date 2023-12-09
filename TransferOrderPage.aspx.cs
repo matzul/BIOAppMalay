@@ -4,12 +4,11 @@ using MigraDoc.DocumentObjectModel.Tables;
 using MigraDoc.Rendering;
 using System;
 using System.Collections;
-using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Web;
+using System.Net;
+using System.Web.Script.Serialization;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 
 public partial class TransferOrderPage : System.Web.UI.Page
 {
@@ -54,15 +53,63 @@ public partial class TransferOrderPage : System.Web.UI.Page
         oModOrder = oMainCon.getTransferOrderHeaderDetails(sOpenComp, "", "", sOrderNo);
         lsOrderLineItem = oMainCon.getTransferOrderDetailsList(oModOrder.GetSetCompFromDetails.GetSetcomp, sOrderNo, 0, "");
         modCompInfo = oMainCon.getCompInfoDetails(oModOrder.GetSetCompFromDetails.GetSetcomp);
+        GenerateQRCode();
         generatePDFFile();
     }
+
+    private void GenerateQRCode()
+    {
+		
+		object objQRCode = new
+        {
+            comp = sCurrComp,
+            orderno = oModOrder.GetSetorderno,
+            ordercat = "TRANSFER_ORDER"
+        };
+		String jsonResponse = convertJson(objQRCode);
+		
+        string urlQR = "https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=" + jsonResponse + "&choe=UTF-8";
+        WebResponse response = default(WebResponse);
+        Stream remoteStream = default(Stream);
+        StreamReader readStream = default(StreamReader);
+        WebRequest request = WebRequest.Create(urlQR);
+        response = request.GetResponse();
+        remoteStream = response.GetResponseStream();
+        readStream = new StreamReader(remoteStream);
+        System.Drawing.Image img = System.Drawing.Image.FromStream(remoteStream);
+        byte[] imageArray = imageToByteArray(img);
+        string imageFilename2 = "base64:" + Convert.ToBase64String(imageArray);
+        img.Save(Server.MapPath("~/Attachment/QRCode.png"));
+        response.Close();
+        remoteStream.Close();
+        readStream.Close();
+    }
+	
+    public static byte[] imageToByteArray(System.Drawing.Image imageIn)
+    {
+        MemoryStream ms = new MemoryStream();
+        imageIn.Save(ms, ImageFormat.Png);
+        return ms.ToArray();
+    }
+	
+	private string convertJson(object objItem)
+    {
+        String jsonResponse = "";
+
+        JavaScriptSerializer serializer = new JavaScriptSerializer();
+        serializer.MaxJsonLength = Int32.MaxValue;
+        jsonResponse = serializer.Serialize(objItem);
+
+        return jsonResponse;
+    }
+
     private void generatePDFFile()
     {
         // Create a MigraDoc document
         Document doc = new Document();
         doc.Info.Title = "PESANAN PINDAHAN";
         doc.Info.Subject = "No. Pesanan:" + oModOrder.GetSetorderno;
-        doc.Info.Author = "ZMartPartner System";
+        doc.Info.Author = "BIOApp System";
 
         //set page orientation
         doc.DefaultPageSetup.Orientation = MigraDoc.DocumentObjectModel.Orientation.Portrait;
@@ -91,7 +138,8 @@ public partial class TransferOrderPage : System.Web.UI.Page
         // Put 1st logo in the header
         string logo_lima = Server.MapPath("~/images/"+modCompInfo.GetSetcomp_logo1);
         MigraDoc.DocumentObjectModel.Shapes.Image image = section.Headers.Primary.AddImage(logo_lima);
-        image.Height = "1cm";
+        image.Height = "2cm";
+        image.Width = "2cm";
         image.LockAspectRatio = true;
         image.RelativeVertical = RelativeVertical.Line;
         image.RelativeHorizontal = RelativeHorizontal.Margin;
@@ -100,14 +148,15 @@ public partial class TransferOrderPage : System.Web.UI.Page
         image.WrapFormat.Style = WrapStyle.Through;
 
         // Put 2nd logo in the header
-        string logo_mod = Server.MapPath("~/images/"+modCompInfo.GetSetcomp_logo2);
-        MigraDoc.DocumentObjectModel.Shapes.Image image2 = section.Headers.Primary.AddImage(logo_mod);
-        image2.Height = "1cm";
+        string qrcode_logo = Server.MapPath("~/Attachment/QRCode.png");
+        MigraDoc.DocumentObjectModel.Shapes.Image image2 = section.Headers.Primary.AddImage(qrcode_logo);
+        image2.Height = "3cm";
+        image2.Width = "3cm";
         image2.LockAspectRatio = true;
         image2.RelativeVertical = RelativeVertical.Line;
         image2.RelativeHorizontal = RelativeHorizontal.Margin;
         image2.Top = ShapePosition.Top;
-        image2.Left = ShapePosition.Left;
+        image2.Left = ShapePosition.Right;
         image2.WrapFormat.Style = WrapStyle.Through;
 
         // Create Header
@@ -118,15 +167,14 @@ public partial class TransferOrderPage : System.Web.UI.Page
         header.Format.Alignment = ParagraphAlignment.Center;
 
         // Create main section for Purchase Order 
-        //Paragraph main = section.AddParagraph();
-        // main = section.AddParagraph();
-        //main.Format.SpaceBefore = 1;
+        Paragraph main = section.Headers.Primary.AddParagraph();
+        main = section.AddParagraph();
 
         // Create the item table for header
         //MigraDoc.DocumentObjectModel.Tables.Table tableTop = section.AddTable();
         MigraDoc.DocumentObjectModel.Tables.Table tableTop = section.Headers.Primary.AddTable();
         tableTop.Style = "Table";
-        tableTop.Borders.Color = MigraDoc.DocumentObjectModel.Colors.Blue;
+        tableTop.Borders.Color = MigraDoc.DocumentObjectModel.Colors.Black;
         tableTop.Borders.Width = 0.25;
         tableTop.Borders.Left.Width = 0.5;
         tableTop.Borders.Right.Width = 0.5;
@@ -135,34 +183,24 @@ public partial class TransferOrderPage : System.Web.UI.Page
         // Before you can add a row, you must define the columns
         Column columnTop = tableTop.AddColumn("8cm");
         columnTop.Format.Alignment = ParagraphAlignment.Left;
+        columnTop = tableTop.AddColumn("2cm");
+        columnTop = tableTop.AddColumn("2cm");
         columnTop = tableTop.AddColumn("3cm");
         columnTop.Format.Alignment = ParagraphAlignment.Left;
-        columnTop = tableTop.AddColumn("7cm");
+        columnTop = tableTop.AddColumn("3cm");
         columnTop.Format.Alignment = ParagraphAlignment.Left;
 
         Row rowTop = tableTop.AddRow();
-        rowTop.Borders.Left.Visible = false;
-        rowTop.Borders.Right.Visible = false;
-        rowTop.Borders.Top.Visible = false;
-        rowTop.Borders.Bottom.Visible = false;
+        rowTop.Borders.Visible = false;
 
         rowTop = tableTop.AddRow();
-        rowTop.Borders.Left.Visible = false;
-        rowTop.Borders.Right.Visible = false;
-        rowTop.Borders.Top.Visible = false;
-        rowTop.Borders.Bottom.Visible = false;
+        rowTop.Borders.Visible = false;
 
         rowTop = tableTop.AddRow();
-        rowTop.Borders.Left.Visible = false;
-        rowTop.Borders.Right.Visible = false;
-        rowTop.Borders.Top.Visible = false;
-        rowTop.Borders.Bottom.Visible = false;
+        rowTop.Borders.Visible = false;
 
         rowTop = tableTop.AddRow();
-        rowTop.Borders.Left.Visible = false;
-        rowTop.Borders.Right.Visible = false;
-        rowTop.Borders.Top.Visible = false;
-        //rowTop.Borders.Bottom.Visible = false;
+        rowTop.Borders.Visible = false;
         rowTop.Cells[0].AddParagraph();
         rowTop.Cells[0].Borders.Bottom.Visible = false;
         rowTop.Cells[1].AddParagraph();
@@ -170,82 +208,59 @@ public partial class TransferOrderPage : System.Web.UI.Page
 
 
         rowTop = tableTop.AddRow();
+        rowTop.Borders.Visible = false;
         rowTop.Cells[0].AddParagraph("Daripada:");
         rowTop.Cells[0].AddParagraph(modCompInfo.GetSetcomp_name);
         rowTop.Cells[0].AddParagraph(modCompInfo.GetSetcomp_address);
         rowTop.Cells[0].AddParagraph(modCompInfo.GetSetcomp_website);
-        rowTop.Cells[0].Borders.Left.Visible = false;
-        rowTop.Cells[0].Borders.Right.Visible = false;
-        rowTop.Cells[0].Borders.Top.Visible = false;
-        rowTop.Cells[0].Borders.Bottom.Visible = false;
-        rowTop.Cells[0].MergeDown = 5;
-        rowTop.Cells[1].AddParagraph("No. Pesanan");
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[2].AddParagraph(": " + oModOrder.GetSetorderno);
-        rowTop.Cells[2].Borders.Left.Visible = false;
+        rowTop.Cells[3].Borders.Visible = false;
 
         rowTop = tableTop.AddRow();
-        rowTop.Cells[1].AddParagraph("Tarikh");
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[2].AddParagraph(": " + oModOrder.GetSetorderdate);
-        rowTop.Cells[2].Borders.Left.Visible = false;
-
-        rowTop = tableTop.AddRow();
-        rowTop.Cells[1].AddParagraph("Jenis");
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[2].AddParagraph(": " + oModOrder.GetSetordertype);
-        rowTop.Cells[2].Borders.Left.Visible = false;
-
-        rowTop = tableTop.AddRow();
-        rowTop.Cells[1].AddParagraph("Pejabat Operasi");
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[2].AddParagraph(": " + modCompInfo.GetSetcomp_name);
-        rowTop.Cells[2].Borders.Left.Visible = false;
-
-        rowTop = tableTop.AddRow();
-        rowTop.Cells[1].AddParagraph("Pegawai Operasi");
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[2].AddParagraph(": " + modCompInfo.GetSetcomp_contact);
-        rowTop.Cells[2].Borders.Left.Visible = false;
-
-        rowTop = tableTop.AddRow();
-        rowTop.Cells[0].Borders.Bottom.Visible = false; 
-        rowTop.Cells[1].AddParagraph("No. Dihubungi");
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[2].AddParagraph(": " + modCompInfo.GetSetcomp_contactno);
-        rowTop.Cells[2].Borders.Left.Visible = false;
-
-        rowTop = tableTop.AddRow();
-        rowTop.Cells[0].AddParagraph("");
-        rowTop.Cells[0].MergeRight = 2;
-        rowTop.Cells[0].Borders.Left.Visible = false;
-        rowTop.Cells[0].Borders.Right.Visible = false;
-        rowTop.Cells[0].Borders.Top.Visible = false;
-        rowTop.Cells[0].Borders.Bottom.Visible = false;
-        rowTop.Cells[2].Borders.Right.Visible = false;
-
-        rowTop = tableTop.AddRow();
+        rowTop.Borders.Visible = false;
         rowTop.Cells[0].AddParagraph("Kepada: ");
         rowTop.Cells[0].AddParagraph(oModOrder.GetSetCompToDetails.GetSetcomp_name);
         rowTop.Cells[0].AddParagraph(oModOrder.GetSetCompToDetails.GetSetcomp_address);
-        rowTop.Cells[0].AddParagraph("Hubungi: " + oModOrder.GetSetCompToDetails.GetSetcomp_contact);
-        rowTop.Cells[0].Borders.Left.Visible = false;
+        rowTop.Cells[0].AddParagraph(oModOrder.GetSetCompToDetails.GetSetcomp_contact);
+        rowTop.Cells[0].MergeDown = 2;
         rowTop.Cells[0].Borders.Right.Visible = false;
-        rowTop.Cells[0].Borders.Bottom.Visible = false;
-        rowTop.Cells[1].AddParagraph("Support: ");
-        rowTop.Cells[1].AddParagraph(modCompInfo.GetSetcomp_contact);
-        rowTop.Cells[1].AddParagraph("ADMIN & SUPPORT");
-        rowTop.Cells[1].AddParagraph("Hubungi: " + modCompInfo.GetSetcomp_contactno);
-        rowTop.Cells[1].Borders.Left.Visible = false;
-        rowTop.Cells[1].Borders.Right.Visible = false;
-        rowTop.Cells[1].Borders.Bottom.Visible = false;
-        rowTop.Cells[1].MergeRight = 1;
-        rowTop.Cells[2].Borders.Right.Visible = false;
+        rowTop.Cells[1].Borders.Visible = false;
+        rowTop.Cells[2].Borders.Visible = false;
+        rowTop.Cells[3].Borders.Visible = true;
+        rowTop.Cells[3].AddParagraph("No. Pesanan");
+        rowTop.Cells[3].Borders.Left.Visible = true;
+        rowTop.Cells[3].Borders.Right.Visible = true;
+        rowTop.Cells[3].VerticalAlignment = VerticalAlignment.Center;
+        rowTop.Cells[4].AddParagraph(oModOrder.GetSetorderno);
+        rowTop.Cells[4].Borders.Visible = true;
+        rowTop.Cells[4].VerticalAlignment = VerticalAlignment.Center;
+
+        rowTop = tableTop.AddRow();
+        rowTop.Cells[1].Borders.Visible = false;
+        rowTop.Cells[2].Borders.Visible = false;
+        rowTop.Cells[3].AddParagraph("Tarikh");
+        rowTop.Cells[3].VerticalAlignment = VerticalAlignment.Center;
+        rowTop.Cells[4].AddParagraph(oModOrder.GetSetorderdate);
+        rowTop.Cells[4].VerticalAlignment = VerticalAlignment.Center;
+		
+		String orderType = "";
+		if(oModOrder.GetSetordertype == "PUSAT_BEKALAN"){
+			orderType = "PUSAT BEKALAN";
+		}
+		else{
+			orderType = oModOrder.GetSetordertype;
+		}
+        rowTop = tableTop.AddRow();
+        rowTop.Cells[1].Borders.Visible = false;
+        rowTop.Cells[2].Borders.Visible = false;
+        rowTop.Cells[3].AddParagraph("Jenis");
+        rowTop.Cells[3].VerticalAlignment = VerticalAlignment.Center;
+        rowTop.Cells[4].AddParagraph(orderType);
+        rowTop.Cells[4].VerticalAlignment = VerticalAlignment.Center;
 
         // Create the item table
         MigraDoc.DocumentObjectModel.Tables.Table table = section.AddTable();
         table.Style = "Table";
-        table.Borders.Color = MigraDoc.DocumentObjectModel.Colors.Blue;
+        table.Borders.Color = MigraDoc.DocumentObjectModel.Colors.Black;
         table.Borders.Width = 0.25;
         table.Borders.Left.Width = 0.5;
         table.Borders.Right.Width = 0.5;
@@ -319,8 +334,8 @@ public partial class TransferOrderPage : System.Web.UI.Page
 
             // Each item fills two rows
             Row row1 = table.AddRow();
-            row1.Height = "2cm";
-            row1.TopPadding = 1.5;
+            row1.Height = "1cm";
+            row1.TopPadding = 1;
             //row1.Cells[0].VerticalAlignment = VerticalAlignment.Center;
             row1.Cells[0].Format.Alignment = ParagraphAlignment.Center;
             row1.Cells[1].Format.Alignment = ParagraphAlignment.Left;
@@ -342,135 +357,63 @@ public partial class TransferOrderPage : System.Web.UI.Page
             row1.Cells[7].AddParagraph(modOrdDet.GetSettaxamount.ToString("#,##0.00"));
             row1.Cells[8].AddParagraph(modOrdDet.GetSettotalprice.ToString("#,##0.00"));
 
-            if (i>0 && ((i+1)%6)==0)
+            if (i>0 && ((i+1)%10)==0)
             {
-                row1.Cells[0].Borders.Bottom.Visible = true;
-                row1.Cells[1].Borders.Bottom.Visible = true;
-                row1.Cells[2].Borders.Bottom.Visible = true;
-                row1.Cells[3].Borders.Bottom.Visible = true;
-                row1.Cells[4].Borders.Bottom.Visible = true;
-                row1.Cells[5].Borders.Bottom.Visible = true;
-                row1.Cells[6].Borders.Bottom.Visible = true;
-                row1.Cells[7].Borders.Bottom.Visible = true;
-                row1.Cells[8].Borders.Bottom.Visible = true;
+                row1.Borders.Bottom.Visible = true;
             }
             else
             {
-                row1.Cells[0].Borders.Bottom.Visible = false;
-                row1.Cells[1].Borders.Bottom.Visible = false;
-                row1.Cells[2].Borders.Bottom.Visible = false;
-                row1.Cells[3].Borders.Bottom.Visible = false;
-                row1.Cells[4].Borders.Bottom.Visible = false;
-                row1.Cells[5].Borders.Bottom.Visible = false;
-                row1.Cells[6].Borders.Bottom.Visible = false;
-                row1.Cells[7].Borders.Bottom.Visible = false;
-                row1.Cells[8].Borders.Bottom.Visible = false;
+                row1.Borders.Bottom.Visible = false;
             }
         }
-        if ((lsOrderLineItem.Count % 6) > 0)
+        if ((lsOrderLineItem.Count % 10) > 0)
         {
-            int totalremainingrow = 6 - (lsOrderLineItem.Count % 6);
+            int totalremainingrow = 10 - (lsOrderLineItem.Count % 10);
             for (int j = 0; j < totalremainingrow; j++)
             {
                 Row rowRemain = table.AddRow();
-                rowRemain.Height = "2cm";
-                rowRemain.Cells[0].AddParagraph();
-                rowRemain.Cells[1].AddParagraph();
-                rowRemain.Cells[2].AddParagraph();
-                rowRemain.Cells[3].AddParagraph();
-                rowRemain.Cells[4].AddParagraph();
-                rowRemain.Cells[5].AddParagraph();
-                rowRemain.Cells[6].AddParagraph();
-                rowRemain.Cells[7].AddParagraph();
-                rowRemain.Cells[8].AddParagraph();
+                rowRemain.Height = "1cm";
 
                 if (j == (totalremainingrow-1))
                 {
-                    rowRemain.Cells[0].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[1].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[2].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[3].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[4].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[5].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[6].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[7].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[8].Borders.Bottom.Visible = true;
+                    rowRemain.Borders.Bottom.Visible = true;
                 }
                 else if (j > 0 && (j % (totalremainingrow-1)) == 0)
                 {
-                    rowRemain.Cells[0].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[1].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[2].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[3].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[4].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[5].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[6].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[7].Borders.Bottom.Visible = true;
-                    rowRemain.Cells[8].Borders.Bottom.Visible = true;
+                    rowRemain.Borders.Bottom.Visible = false;
                 }
                 else
                 {
-                    rowRemain.Cells[0].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[1].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[2].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[3].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[4].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[5].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[6].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[7].Borders.Bottom.Visible = false;
-                    rowRemain.Cells[8].Borders.Bottom.Visible = false;
+                    rowRemain.Borders.Bottom.Visible = false;
                 }
             }
         }
 
-        /*
-        Row rowTax = table.AddRow();
-        //rowTax.Height = "1cm";
-        rowTax.Cells[0].AddParagraph();
-        rowTax.Cells[0].Borders.Left.Visible = false;
-        rowTax.Cells[0].Borders.Right.Visible = false;
-        rowTax.Cells[0].Borders.Bottom.Visible = false;
-        rowTax.Cells[0].MergeRight = 6;
-        rowTax.Cells[7].AddParagraph("TAX");
-        rowTax.Cells[7].Format.Alignment = ParagraphAlignment.Left;
-        rowTax.Cells[8].AddParagraph(oModOrder.GetSettaxamount.ToString("#,##0.00"));
-        rowTax.Cells[8].Format.Alignment = ParagraphAlignment.Right;
-        */
 
         Row rowTot = table.AddRow();
         rowTot.Height = "1cm";
         rowTot.Format.Font.Bold = true;
         rowTot.Cells[0].AddParagraph();
-        rowTot.Cells[0].Borders.Left.Visible = false;
-        rowTot.Cells[0].Borders.Right.Visible = false;
-        rowTot.Cells[0].Borders.Bottom.Visible = false;
+        rowTot.Borders.Visible = false;
         rowTot.Cells[0].MergeRight = 6;
-        /*
-        rowTot.Cells[1].AddParagraph();
-        rowTot.Cells[1].Borders.Left.Visible = false;
-        rowTot.Cells[2].AddParagraph();
-        rowTot.Cells[2].Borders.Left.Visible = false;
-        rowTot.Cells[3].AddParagraph();
-        rowTot.Cells[3].Borders.Left.Visible = false;
-        rowTot.Cells[4].AddParagraph();
-        rowTot.Cells[4].Borders.Left.Visible = false;
-        rowTot.Cells[5].AddParagraph();
-        rowTot.Cells[5].Borders.Left.Visible = false;
-        rowTot.Cells[6].AddParagraph();
-        rowTot.Cells[6].Borders.Left.Visible = false;
-        */
+		
         rowTot.Cells[6].Borders.Right.Visible = false;
 
         rowTot.Cells[7].AddParagraph("JUMLAH BESAR");
         rowTot.Cells[7].Format.Alignment = ParagraphAlignment.Left;
         rowTot.Cells[7].VerticalAlignment = VerticalAlignment.Center;
-        rowTot.Cells[7].Borders.Left.Visible = false;
-        //rowTot.Cells[7].Borders.Right.Visible = false;
-        rowTot.Cells[7].Borders.Bottom.Visible = false;
+        rowTot.Cells[7].Borders.Left.Visible = true;
+        rowTot.Cells[7].Borders.Right.Visible = true;
+        rowTot.Cells[7].Borders.Top.Visible = true;
+        rowTot.Cells[7].Borders.Bottom.Visible = true;
 
         rowTot.Cells[8].AddParagraph(oModOrder.GetSettotalamount.ToString("#,##0.00"));
         rowTot.Cells[8].Format.Alignment = ParagraphAlignment.Right;
         rowTot.Cells[8].VerticalAlignment = VerticalAlignment.Center;
+        rowTot.Cells[8].Borders.Left.Visible = true;
+        rowTot.Cells[8].Borders.Right.Visible = true;
+        rowTot.Cells[8].Borders.Top.Visible = true;
+        rowTot.Cells[8].Borders.Bottom.Visible = true;
 
         //footer.AddText("Footer");
         //footer.Format.Font.Size = 9;
@@ -481,7 +424,7 @@ public partial class TransferOrderPage : System.Web.UI.Page
         MigraDoc.DocumentObjectModel.Tables.Table tblBtm = section.Footers.Primary.AddTable();
         //MigraDoc.DocumentObjectModel.Tables.Table tblBtm = section.AddTable();
         tblBtm.Style = "Table";
-        tblBtm.Borders.Color = MigraDoc.DocumentObjectModel.Colors.Blue;
+        tblBtm.Borders.Color = MigraDoc.DocumentObjectModel.Colors.Black;
         tblBtm.Borders.Width = 0.25;
         tblBtm.Borders.Left.Width = 0.5;
         tblBtm.Borders.Right.Width = 0.5;
@@ -533,7 +476,7 @@ public partial class TransferOrderPage : System.Web.UI.Page
         rowTblBtm.Borders.Right.Visible = false;
         rowTblBtm.Borders.Top.Visible = false;
         rowTblBtm.Borders.Bottom.Visible = false;
-        rowTblBtm.Cells[0].AddParagraph("2. Sila pastikan Pesanan Pindahan ini ditandatangani sebelum salinan dikembalikan ke Pejabat Operasi.");
+        rowTblBtm.Cells[0].AddParagraph("2. Sila pastikan Pesanan Pindahan ini ditandatangani sebelum salinan dikembalikan ke "+System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(modCompInfo.GetSetcomp_name.ToLower())+".");
         rowTblBtm.Cells[0].MergeRight = 2;
 
         /*
@@ -545,69 +488,52 @@ public partial class TransferOrderPage : System.Web.UI.Page
         rowTblBtm.Cells[0].AddParagraph("3. Jabatan Kewangan hanya akan memproses bayaran ke atas Pesanan Pindahan ini jika Invois disertakan bersama.");
         rowTblBtm.Cells[0].MergeRight = 2; 
         */
-
+        
         rowTblBtm = tblBtm.AddRow();
         rowTblBtm.Borders.Left.Visible = false;
         rowTblBtm.Borders.Right.Visible = false;
         rowTblBtm.Borders.Top.Visible = false;
+        rowTblBtm.Borders.Bottom.Visible = false;
         //rowTblBtm.Borders.Bottom.Visible = false;
         rowTblBtm.Cells[0].AddParagraph();
         rowTblBtm.Cells[0].MergeRight = 1;
-        rowTblBtm.Cells[2].AddParagraph();
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
-        
+        rowTblBtm.Cells[1].AddParagraph("");
+        rowTblBtm.Cells[2].AddParagraph("");
+
         rowTblBtm = tblBtm.AddRow();
-        rowTblBtm.Format.Font.Bold = true;
-        rowTblBtm.Cells[0].AddParagraph("Disediakan Oleh:");
-        //rowTblBtm.Cells[0].Borders.Top.Visible = true;
-        rowTblBtm.Cells[1].AddParagraph("Disahkan Oleh:");
-        rowTblBtm.Cells[2].AddParagraph();
-        rowTblBtm.Cells[2].Borders.Left.Visible = false;
-        rowTblBtm.Cells[2].Borders.Right.Visible = false;
-        rowTblBtm.Cells[2].Borders.Top.Visible = false;
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
-        rowTblBtm = tblBtm.AddRow();
-        rowTblBtm.Borders.Bottom.Visible = false;
+        rowTblBtm.Borders.Visible = false;
         rowTblBtm.Cells[0].AddParagraph();
         rowTblBtm.Cells[1].AddParagraph();
         rowTblBtm.Cells[2].AddParagraph();
-        rowTblBtm.Cells[2].Borders.Left.Visible = false;
-        rowTblBtm.Cells[2].Borders.Right.Visible = false;
-        rowTblBtm.Cells[2].Borders.Top.Visible = false;
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
         rowTblBtm = tblBtm.AddRow();
         rowTblBtm.Borders.Bottom.Visible = false;
-        rowTblBtm.Cells[2].Borders.Left.Visible = false;
-        rowTblBtm.Cells[2].Borders.Right.Visible = false;
-        rowTblBtm.Cells[2].Borders.Top.Visible = false;
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
+        rowTblBtm.Format.Font.Bold = true;
+        rowTblBtm.Cells[0].AddParagraph("Disediakan Oleh:");
+        rowTblBtm.Cells[0].Borders.Top.Visible = true;
+        rowTblBtm.Cells[1].AddParagraph();
+        rowTblBtm.Cells[1].Borders.Visible = false;
+        rowTblBtm.Cells[2].AddParagraph("Disahkan Oleh:");
+        rowTblBtm = tblBtm.AddRow();
+        rowTblBtm.Borders.Bottom.Visible = false;
+        rowTblBtm.Cells[1].Borders.Visible = false;
         rowTblBtm.Height = "2cm";
         rowTblBtm = tblBtm.AddRow();
         rowTblBtm.Borders.Bottom.Visible = false;
         rowTblBtm.Cells[0].AddParagraph("Nama:");
-        rowTblBtm.Cells[1].AddParagraph("Nama:");
-        rowTblBtm.Cells[2].AddParagraph();
-        rowTblBtm.Cells[2].Borders.Left.Visible = false;
-        rowTblBtm.Cells[2].Borders.Right.Visible = false;
-        rowTblBtm.Cells[2].Borders.Top.Visible = false;
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
+        rowTblBtm.Cells[1].AddParagraph();
+        rowTblBtm.Cells[1].Borders.Visible = false;
+        rowTblBtm.Cells[2].AddParagraph("Nama:");
         rowTblBtm = tblBtm.AddRow();
         rowTblBtm.Borders.Bottom.Visible = false;
         rowTblBtm.Cells[0].AddParagraph("Jawatan:");
-        rowTblBtm.Cells[1].AddParagraph("Jawatan:");
-        rowTblBtm.Cells[2].AddParagraph();
-        rowTblBtm.Cells[2].Borders.Left.Visible = false;
-        rowTblBtm.Cells[2].Borders.Right.Visible = false;
-        rowTblBtm.Cells[2].Borders.Top.Visible = false;
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
+        rowTblBtm.Cells[1].AddParagraph();
+        rowTblBtm.Cells[1].Borders.Visible = false;
+        rowTblBtm.Cells[2].AddParagraph("Jawatan:");
         rowTblBtm = tblBtm.AddRow();
         rowTblBtm.Cells[0].AddParagraph("Tarikh:");
-        rowTblBtm.Cells[1].AddParagraph("Tarikh:");
-        rowTblBtm.Cells[2].AddParagraph();
-        rowTblBtm.Cells[2].Borders.Left.Visible = false;
-        rowTblBtm.Cells[2].Borders.Right.Visible = false;
-        rowTblBtm.Cells[2].Borders.Top.Visible = false;
-        rowTblBtm.Cells[2].Borders.Bottom.Visible = false;
+        rowTblBtm.Cells[1].AddParagraph();
+        rowTblBtm.Cells[1].Borders.Visible = false;
+        rowTblBtm.Cells[2].AddParagraph("Tarikh:");
 
         // Create a renderer for PDF that uses Unicode font encoding
         PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer(true);

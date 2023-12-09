@@ -9,7 +9,7 @@ using System.Configuration;
 
 public class GeneralHandler : IHttpHandler {
 
-    private String TokenNumber = "00000000";
+    private String TokenNumber = "M05kit0@1";
     private String TokenNumberConfig = ConfigurationSettings.AppSettings["TokenNumber"];
 
     public MainController oMainCon = new MainController();

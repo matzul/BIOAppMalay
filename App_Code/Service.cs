@@ -35,6 +35,26 @@ public class Service : IService
         return DateTime.Now.ToString("dd-MM-yyyy");
     }
 
+    public List<MainModel> getOrderTypeList(String comp, String status, String ordertype)
+    {
+        return oMainCon.getOrderTypeList(comp, status, ordertype).Cast<MainModel>().ToList<MainModel>();
+    }
+
+    public List<MainModel> getOrderCategoryList(String comp, String status, String ordercat)
+    {
+        return oMainCon.getOrderCategoryList(comp, status, ordercat).Cast<MainModel>().ToList<MainModel>();
+    }
+
+    public List<MainModel> getPaymentTypeList(String comp, String status, String paymentype)
+    {
+        return oMainCon.getPaymentTypeList(comp, status, paymentype).Cast<MainModel>().ToList<MainModel>();
+    }
+
+    public List<MainModel> getBPInfoList(String comp, String status, String bpid, String bpdesc, String bpcat)
+    {
+        return oMainCon.getBPList(comp, bpid, bpdesc, bpcat, "Y").Cast<MainModel>().ToList<MainModel>();
+    }
+
     public List<MainModel> getOrderItemDiscountList(String comp, String ordercat, String ordertype, String itemno)
     {
         return oMainCon.getItemDiscountList(comp, ordercat, ordertype, itemno).Cast<MainModel>().ToList<MainModel>();
@@ -62,7 +82,7 @@ public class Service : IService
 
     public List<CounterModel> getCounterTransList(String comp, String counterno, String id, String userid, String status)
     {
-        return oMainCon.getCounterTransList(comp, counterno, id, userid, status).Cast<CounterModel>().ToList<CounterModel>();
+        return oMainCon.getCounterTransList(comp, counterno, id, userid, status).Cast<CounterModel>().OrderBy(obj => obj.GetSetrowno).ToList<CounterModel>();
     }
 
     public CounterModel getCounterTrans(String comp, String counterno, String id, String userid, String status)
@@ -82,7 +102,7 @@ public class Service : IService
 
     public List<MainModel> getCounterTransDetailsList(String sComp, String sCounterNo, String sCounterTransId, String sOrderNo, String sInvoiceNo, String sRowInclude)
     {
-        return oMainCon.getCounterTransDetailsList(sComp, sCounterNo, sCounterTransId, sOrderNo, sInvoiceNo, sRowInclude).Cast<MainModel>().ToList<MainModel>();
+        return oMainCon.getCounterTransDetailsList(sComp, sCounterNo, sCounterTransId, sOrderNo, sInvoiceNo, sRowInclude).Cast<MainModel>().OrderBy(obj => obj.GetSetrowno).ToList<MainModel>();
     }
 
     public MainModel getCounterTransDetails(String sComp, String sCounterNo, String sCounterTransId, String sOrderNo)
@@ -92,7 +112,7 @@ public class Service : IService
 
     public UserProfileModel getUserProfile(String comp, String userid)
     {
-        return oMainCon.getUserProfile(comp, userid, "", "");
+        return oMainCon.getUserProfile3(comp, userid, "", "");
     }
 
     public String getNextRunningNo(String comp, String type, String status)
@@ -199,6 +219,11 @@ public class Service : IService
         return oMainCon.getOrderDetailsDetails(comp, orderno, lineno, itemno);
     }
 
+    public List<MainModel> getInvoiceDetailsList(String comp, String invoiceno, int lineno, String itemno)
+    {
+        return oMainCon.getInvoiceDetailsList(comp, invoiceno, lineno, itemno).Cast<MainModel>().ToList<MainModel>();
+    }
+
     public String insertOrderDetails(MainModel oModOrderDet)
     {
         oModOrderDet.GetSetorderprice = Math.Round(oModOrderDet.GetSetorderprice, 2, MidpointRounding.AwayFromZero);
@@ -219,7 +244,34 @@ public class Service : IService
 
     public String deleteOrderDetails(MainModel oModOrderDet)
     {
-        return oMainCon.deleteOrderDetails(oModOrderDet);
+        String sFlag = oMainCon.deleteOrderDetails(oModOrderDet);
+        if (sFlag.Equals("Y"))
+        {
+            //rearrange the line no
+            ArrayList lsLineItemNew = new ArrayList();
+            ArrayList lsLineItem = oMainCon.getOrderDetailsList(oModOrderDet.GetSetcomp, oModOrderDet.GetSetorderno, 0, "");
+            for (int x = 0; x < lsLineItem.Count; x++)
+            {
+                MainModel oLineItem = (MainModel)lsLineItem[x];
+                if (!oLineItem.GetSetlineno.Equals(oModOrderDet.GetSetlineno))
+                {
+                    lsLineItemNew.Add(oLineItem);
+                }
+                String flag = oMainCon.deleteOrderDetails(oLineItem);
+            }
+            for (int y = 0; y < lsLineItemNew.Count; y++)
+            {
+                MainModel oLineItem = (MainModel)lsLineItemNew[y];
+                oLineItem.GetSetlineno = y + 1;
+                String flag2 = oMainCon.insertOrderDetails(oLineItem);
+            }
+        }
+        return sFlag;
+    }
+
+    public String cancelSalesOrderDetails(MainModel oModCounterTransDet)
+    {
+        return oMainCon.cancelSalesOrderDetails(oModCounterTransDet);
     }
 
     public MainModel getItemStockSummary2(String comp, String itemno)
@@ -378,7 +430,8 @@ public class Service : IService
                 oModInvoice.GetSetcomp = oModShipment.GetSetcomp;
                 //let system define the invoice date
                 //oModInvoice.GetSetinvoicedate = oModShipment.GetSetshipmentdate;
-                oModInvoice.GetSetinvoicetype = "SALES_INVOICE";
+                oModInvoice.GetSetinvoicecat = "SALES_INVOICE";
+                oModInvoice.GetSetinvoicetype = "NOT_APPLICABLE";
                 oModInvoice.GetSetinvoiceterm = "COD";
                 oModInvoice.GetSetinvoiceno = oMainCon.getNextRunningNo(oModCounTransDet.GetSetcomp, "INVOICE", "ACTIVE");
                 oModInvoice.GetSetbpid = oModShipment.GetSetbpid;
@@ -612,6 +665,9 @@ public class Service : IService
                         oModCounTransDet.GetSetpayrcptstatus = oModPayRcpt.GetSetstatus;
                         String result4 = oMainCon.updateCounterTransDetails(oModCounTransDet);
 
+                        //to update Invoice & receipt Amount
+                        oModInvoice.GetSetpayrcptamount = oModPayRcpt.GetSetpayrcptamount;
+                        String result5 = oMainCon.updateInvoiceHeader(oModInvoice);
                     }
 
                     CounterModel oModCounTrans = oMainCon.getCounterTrans(oModCounTransDet.GetSetcomp, oModCounTransDet.GetSetcounterno, oModCounTransDet.GetSetcountertranid, "", "");

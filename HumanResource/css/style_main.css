@@ -1,0 +1,1025 @@
+/* ^^^^^^^^ BELOW IS THE CODE FOR THE MENU ^^^^^^^^^^ */
+#foxmenucontainer{height:24px;background:#000;display:block;padding:45px 0 0 15px;}
+#foxmenu{position:absolute;top: 20px;right: 35px;display:block;height:25px;font-size:11px;font-weight:bold;font-family:Arial,Helvetica, sans-serif;}
+#foxmenu ul{margin:0px;padding:0;list-style-type:none;width:auto;}
+#foxmenu ul li{display:block;float:left;margin:0 1px 0 0;}
+#foxmenu ul li a{display:block;float:left;color:#FFFFFF;text-decoration:none;padding:8px 10px 0 10px;height:20px;background:transparent url(images/hpa2u_menu_off.png) no-repeat top left;}
+#foxmenu ul li a:hover{display:block;float:left;color:#fff;background:transparent url(images/hpa2u_menu_on.png) no-repeat top right;}
+#foxmenu ul li a.current,#foxmenu ul li a.current:hover{color:#fff;background:#FF9900;}
+
+#leftmenu{position:relative;display:block;height:10px;font-size:11px;font-weight:bold;font-family:Arial,Verdana,Helvitica,sans-serif;}
+#leftmenu ul{margin:0px;padding:0;list-style-type:none;width:0;}
+#leftmenu ul li{display:block;float:inherit;margin:0 0 0 0;}
+#leftmenu ul li a{display:block;float:none;color:#fff;text-decoration:none;padding:0 70px 0 10px;height:0;background:transparent url(images/system_menu_off.png) no-repeat top left;}
+#leftmenu ul li a:hover{color:#fff;background:transparent url(images/system_menu_on.png) no-repeat top right;}
+#leftmenu ul li a.current,#leftmenu ul li a.current:hover{color:#fff;background:#FFCC00;}
+/* ^^^^^^^^ ABOVE IS THE CODE FOR THE MENU ^^^^^^^^^^ */
+
+/*-->==== css for the glossy accordion menu =============*/
+.glossymenu{
+margin: 5px 0;
+padding: 0;
+width: 220px; /*width of menu*/
+/*border: 1px solid #9A9A9A;*/
+border: 0;
+border-bottom-width: 0;
+}
+
+.glossymenu a.menuitem{
+/*background: black url(images/silvergradient.gif) repeat-x bottom left;*/
+background: #93B3D2;
+font: bold 14px Arial,Helvetica, sans-serif;
+color: white;
+display: block;
+position: relative; /*To help in the anchoring of the ".statusicon" icon image*/
+width: auto;
+padding: 4px 0;
+padding-left: 10px;
+text-decoration: none;
+}
+
+
+.glossymenu a.menuitem:visited, .glossymenu .menuitem:active{
+color: white;
+}
+
+.glossymenu a.menuitem .statusicon{ /*CSS for icon image that gets dynamically added to headers*/
+position: absolute;
+top: 5px;
+right: 5px;
+border: none;
+}
+
+.glossymenu a.menuitem:hover{
+/*background-image: url(images/silvergradientover.gif);*/
+background-color:#333333;
+}
+
+.glossymenu div.submenu{ /*DIV that contains each sub menu*/
+background-color:#CCCCCC;
+}
+
+.glossymenu div.submenu ul{ /*UL of each sub menu*/
+list-style-type: none;
+margin: 0;
+/*margin-left: 10px;*/
+padding: 0;
+}
+
+.glossymenu div.submenu ul li{
+/*border-bottom: 1px solid blue;*/
+border-bottom: 1px solid #CCCCCC;
+/*border-bottom-width: 0;*/
+}
+
+.glossymenu div.submenu ul li a{
+display: block;
+font: normal 11px Arial,Helvetica, sans-serif;
+color: black;
+text-decoration: none;
+padding: 2px 0;
+padding-left: 10px;
+}
+
+.glossymenu div.submenu ul li a:hover{
+background: #FFCC00;
+color: white;
+}
+/*------------------------------------------------*/
+.float-left {/* header element float */
+  float: right;
+  width: 100px;
+  margin: 0 0 0 5px;
+  background: #eee8aa;
+  border-left: 1px dotted #cd853f;
+  border-bottom: 1px dotted #cd853f;
+  }
+.float-right {/* header element float */
+  float: left;
+  width: 100px;
+  margin: 0 5px 0 0;
+  background: #eee8aa;
+  border-right: 1px dotted #cd853f;
+  border-bottom: 1px dotted #cd853f;
+  }
+/*-------------------------------------------------*/
+.intro { 
+background : #a2b0f5 url(../img/bg_intro.gif) no-repeat 100% 0; 
+padding-top : 1px; 
+padding-bottom : 1px; 
+} 
+.dark { 
+background : #96ee55; 
+padding-bottom : 1px; 
+padding-top : 1px; 
+} 
+.blue { 
+background : #c6ddff; 
+} 
+.orange { 
+background : #ffb546; 
+} 
+.h1 { 
+color : #d7d7fd; 
+font : normal 2.2em/1em Georgia, "Times New Roman", Times, serif; 
+letter-spacing : -1px; 
+padding : 12px; 
+} 
+.h2 { 
+color : #4e4c5d; 
+font-family : Times New Roman, Times, serif; 
+font-size: 18px;
+letter-spacing : -1px; 
+} 
+
+/*---------------------------------------------------*/
+#footer { 
+clear : both; 
+height : 1%; 
+padding-top : 1px; 
+background-color:#FFFFFF; 
+padding-bottom : 30px; 
+overflow : visible; 
+position : relative; 
+} 
+#footer ul { 
+list-style : none; 
+font-size : 1em; 
+line-height : 1.6em; 
+display : block; 
+text-align : right; 
+} 
+#footer ul.validate { 
+list-style : none; 
+font-size : 1em; 
+line-height : 1em; 
+display : block; 
+text-align : right; 
+padding-top : 10px; 
+} 
+#footer li { 
+display : inline; 
+} 
+#footer li a { 
+color:#3366CC; 
+text-decoration : underline; 
+margin-left : 5px; 
+display : inline; 
+} 
+#footer li a:hover { 
+color:#333333; 
+text-decoration : none; 
+} 
+#footer .validate li a { 
+color : #ffcc00; 
+text-decoration : none; 
+display : inline; 
+font-size : 0.9em; 
+background : url(../img/bg_li_validate.gif) no-repeat 0 50%; 
+padding-left : 14px; 
+} 
+#footer .validate li a:hover { 
+color : #fff; 
+} 
+#footer p { 
+text-align : right; 
+font: 1em Verdana, Arial, Helvetica, sans-serif; 
+font-size : 11px; 
+color:#333333; 
+margin:-20px 0 0 0; 
+} 
+.p1 { 
+text-align : right; 
+font: 1em Verdana, Arial, Helvetica, sans-serif; 
+font-size : 11px; 
+color:#333333; 
+margin:3px 0 0 0; 
+} 
+#footer p.etondigital { 
+position : absolute; 
+top : -4.5em; 
+left : 25px; 
+font-size : 1.1em; 
+color : #b9c1d9; 
+} 
+#footer a.etondigital { 
+position : absolute; 
+top : -30px; 
+left : 0; 
+height : 53px; 
+width : 185px; 
+display : block; 
+/*background : url(../img/logos/etondigital.gif) no-repeat 0 0; */
+text-indent : -999999px; 
+} 
+#footer a:hover.etondigital { 
+background : url(../img/logos/etondigital.gif) no-repeat 0 -53px; 
+} 
+/*---------------------------------------------------*/
+/* Title */
+.titleExtra {
+	font-family: Arial,Helvetica, sans-serif;
+	font-size: 18pt;
+}
+/* Common font */
+.txt1 {
+	font-family: Helvetica,Arial,sans-serif;
+	font-size: 11px;
+	color: #666666;
+}
+/* Small font */
+.txt2 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #666666;
+}
+/* Tiny font */
+.txt3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #333333;
+}
+.txt4 {
+	font: Arial, Helvetica, sans-serif; 
+	font-size: 11px;
+	color: #333333;
+}
+.txt5 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #666666;
+}
+.txtTitle {
+	font-family: Arial,Helvetica, sans-serif;
+	font-size: 13pt;
+	font-weight: bold;
+}
+/* Common font */
+.txtCommon {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #003399;
+}
+.txtSmallColor {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #003399;
+	font-weight:bold;
+}
+/* Small font */
+.txtSmall {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.txtSmallBold {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight:bold;
+}
+/* Tiny font */
+.txtTiny {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+.txtNumber {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	text-align:right;
+	padding-right:15px;
+}
+.txtNumberPR25 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	text-align:right;
+	padding-right:25px;
+}
+.txtNumberSubTotal {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	text-align:right;
+	padding-right:15px;
+	/*background-color: #B3CBE5;*/
+	background-color: #999999;
+	color:#FFFFFF;
+}
+.txtNumberTotal {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	text-align:right;
+	padding-right:15px;
+	/*background-color: #B3CBE5;*/
+	background-color: #666666;
+	color:#FFFFFF;
+}
+/* White color font 1 */
+.txtWhite {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+/* White color font 2 */
+.txtWhiteSmall {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+.txtWhiteSmallNormal {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	color: #FFFFFF;
+}
+/* White color font 3 */
+.txtWhiteSmaller {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	color: #FFFFFF;
+}
+/* Title on table */
+.tblTitle1 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #FFFFFF;
+	background-color: #0066CC;
+	text-align:center;
+}
+.tblTitle1Tab {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+  	color: #FFFFFF;
+  	background-color: #3366FF;
+	text-align:center;
+}
+.tblTitle1left {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #FFFFFF;
+	background-color: #0066CC;
+	text-align:left;
+}
+/* Title on table 2 */
+.tblTitle2 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #0066FF;
+	background-color: #B3CBE5;
+}
+.tblTitle2Mod {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: lighter;
+	color: #333333;
+	background-color: #FFFFE6;
+}
+.tblTitle11TxtNoColor {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+/*	color: #000000; */
+	background-color: #B3CBE5;
+}
+.tblTitle3Old {
+	FONT-WEIGHT: bold; FONT-SIZE: 11px; FONT-FAMILY: Arial, Helvetica, sans-serif; BACKGROUND-COLOR: #93b3d2;color: #000000;
+}
+/* Title on table 3 */
+.tblTitle3Mod {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: normal;
+	color: #333333;
+	background-color: #93B3D2}
+.tblTitle3ModBold {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #333333;
+	background-color: #93B3D2;
+}
+/* Title on table 3 */
+.tblTitle3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #666666; 
+	background-color: #3366CC;
+}
+/* Title on table 4 */
+.tblTitle4 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+/*	color: #000000; */
+	background-color: #B7CCE1;
+}
+.tblTitle4New {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+/*	color: #000000; */
+	background-color: #ffffa5;
+}
+.tblTitle4NewBig {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 15px;
+	font-weight: bold;
+/*	color: #000000; */
+	background-color: #ffffa5;
+}
+
+/* TD for Button */
+.tblButton {
+	background-color: #B9B9B9;
+	height: 25px;
+	z-index: auto;
+	text-align:center;
+}
+.tblButtonMod {
+	background-color: #B9B9B9;
+	height: 16px;
+	z-index: auto;
+	font-weight:bold;
+	text-align:left;
+}
+.tblButtonModLighter {
+	background-color: #B9B9B9;
+	height: 16px;
+	z-index: auto;
+	font-weight:lighter;
+	text-align:left;
+}
+/* Text on table (common) */
+.tblTextCommon {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #E8EFF7;
+}
+.tblTextMod {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #E8EFF7;
+}
+/* Navigation Bar */
+.navBar {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #F1F5F9;
+	border: 1px solid #DEE3E7;
+	padding: 2px 1em 2px 1em;
+	position: relative;
+	text-decoration: none;
+	top: -1px;
+	z-index: 100;
+}
+/* Text on table (blank background) */
+.tblTextBlank {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+/* Text on table 1 (alternate background) */
+.tblText1 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	height: 18px;
+	background-color: #EBEBF5;
+}
+.tblText1Bold {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight:bold;
+	background-color: #EBEBF5;
+}
+.tblText1New {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FFFFCC;
+}
+/* Text on table 2 (alternate background) */
+.tblText2 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #F5F5FA;
+}
+.tblText2New {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FFFFE6;
+}
+.tblText2NewBold {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #e1b76e;
+	font-weight:bold;
+}
+/* Text on table 2 (alternate background) */
+.tblText3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #D4DCF5;
+}
+.tblText11BgWhite {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FFFFFF;
+}
+.tblText11BgWhiteBold {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	background-color: #FFFFFF;
+}
+.tblText11BgBlack {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #000000;
+}
+.tblText11Highlight {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	background-color: #ffffa5;
+}
+/* Text on mandatory input */
+.manText {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	text-decoration: underline;
+}
+/* Drop-down menu */
+.select {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;	
+	background-color: #FDFDFD;
+	color:Black;
+	font-weight:lighter;
+	border: 1px solid #7F9BC9;
+}
+.selectMod {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;	
+	background-color: #FDFDFD;
+	color:Black;
+	font-weight:lighter;
+	border: 0px solid #7F9BC9;
+}
+/* Textfield multi-line */
+.textarea {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FDFDFD;
+	color:Black;
+	font-weight:lighter;	
+	border: 1px solid #7F9BC9;	
+}
+/* Textfield */
+.input {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size:11px; 
+	background-color: #FDFDFD;
+	font-weight:lighter;
+	border: 1px solid #7F9BC9;
+}
+/* Button */
+.button {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #E1E1E1;
+	cursor: pointer;
+	border: 1px solid #23375A;
+}
+.button_success {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FFCC00;
+	cursor: pointer;
+	border: 1px solid #23375A;
+}
+.button_primary {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FFCC00;
+	cursor: pointer;
+	border: 1px solid #23375A;
+}
+.button_warning {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #FFCC00;
+	cursor: pointer;
+	border: 1px solid #23375A;
+}
+/* Button for Reporting module */
+.button1
+{    
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight:lighter;
+	background-color: #E1E1E1;
+	border: 1px solid #7F9BC9;
+	cursor: pointer;
+	width: 75px;  
+}
+.button1a {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: lighter;
+	background-color: #E1E1E1;
+	border: 1px solid #7F9BC9;
+	cursor: pointer;
+	letter-spacing: 0px;
+}
+.button2 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #E1E1E1;
+	border: 1px solid #7F9BC9;
+	cursor: pointer;
+	width: 100px;
+}
+.button3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	background-color: #E1E1E1;
+	border: 1px solid #7F9BC9;
+	cursor: pointer;
+	width: 200px;
+}
+.error {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: #FF0000;
+}
+.bak2top {
+	font-family: Arial;
+	font-size: 11px;
+	font-weight: bold;
+	color: blue;
+	background-color: #FFCC00;
+	border: 1px solid;
+	border-color: #DEE3E7;
+	padding: 2px;
+	text-align:center;
+}
+.txtBlinkRed {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:11px;
+	font-weight:bold;
+	color:#FFFFFF;
+	background-color:#FF0000;
+	text-decoration:blink;
+}
+.hilite1 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	background-color: #FFCC00;
+}
+
+/* classes for form validator */
+.tfvHighlight {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold; 
+	color: red;
+}
+.tfvNormal {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: normal; 
+	color: black;
+}
+.inputHighlighted {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+	color: red;
+}
+.inputNormal {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+}
+.txtWhite1 {
+	FONT-SIZE: 12px; COLOR: #ffffff; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.txtBoldWhite1 {
+	FONT-SIZE: 12px; COLOR: #ffffff; FONT-FAMILY: Arial, Helvetica, sans-serif; font-weight:bold
+}
+.txtWhite2 {
+	FONT-SIZE: 11px; COLOR: #ffffff; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+.txtWhite3 {
+	FONT-SIZE: 10px; COLOR: #ffffff; FONT-FAMILY: Arial, Helvetica, sans-serif
+}
+/* Table border (background color) */
+.tblBg {
+	background-color: #D4DCF5;
+	FONT-SIZE:11px;
+	font-weight:lighter;
+	COLOR: Black; 
+	FONT-FAMILY: Arial, Helvetica, sans-serif;
+}
+.tblBg1 {
+	background-color: #999999;
+}
+.tblBg2 {
+	background-color: #FFFFFF;
+}
+.tblBg3 {
+	background-color: #003366;
+}
+.tbltd1Normal {
+	background-color:#003366;
+	border-color:#003366;
+	color:#CCCCCC;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+.tbltd1Highlight {
+	background-color:#003366;
+	border-color:#003366;
+	color:#FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-weight: bold;
+}
+.tbltd2Normal {
+	background-color:#696969;
+	border-color:#696969;
+	color:#FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.tbltd2Highlight {
+	background-color:#FF3300;
+	border-color:#FF3300;
+	color:#FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-weight: bold;
+}
+.tbltd2 {
+	background-color:#666666;
+	border-color:#CCCCCC;
+	color:#FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+.tbltd3 {
+	background-color:#CCCCCC;
+	border-color:#999999;
+	color:#FFFFFF;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+}
+
+a:link {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: normal;
+	color: #0000FF;
+	text-decoration: none;
+}
+a:visited {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: normal;
+	color: #0000FF;
+	text-decoration: none;
+}
+a:hover {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 11px;
+	font-style: normal;
+	font-weight: normal;
+	color: #FF0000;
+	text-decoration:underline;
+}
+
+.txtWhiteGraBoldItalic15px{
+	font-family: GaramondBoldItalic;
+	font-size: 15px;
+	color: #FFFFFF;
+}
+.txtWhiteGraBoldItalic15px{
+	font-family: "Times New Roman", Times, serif;
+	font-size: 15px;
+	font-style: italic;
+	color: #FFFFFF;
+}
+.txtWhiteGraBoldItalic13px{
+	font-family: "Times New Roman", Times, serif;
+	font-size: 13px;
+	font-style: italic;
+	color: #FFFFFF;
+}
+.txtWhiteGraBoldItalic12px{
+	font-family: "Times New Roman", Times, serif;
+	font-size: 12px;
+	font-style: italic;
+	color: #CCCCCC;
+}
+.radio{
+	border: 1px none #000000;
+	background-color: transparent;
+	vertical-align: middle;
+}
+
+/*------------------------------------------------------------------
+[6. Widget / .widget]
+*/
+
+.widget {
+	
+	position: relative;
+	clear: both;
+	
+	width: auto;
+	
+	margin-bottom: 2em;
+		
+	overflow: hidden;
+}
+	
+.widget-header {
+	
+	position: relative;
+	
+	height: 40px;
+	line-height: 40px;
+	
+	background: #5ba1e4;
+	background:-moz-linear-gradient(top, #5ba1e4 0%, #90beea 100%); /* FF3.6+ */
+	background:-webkit-gradient(linear, left top, left bottom, color-stop(0%,#5ba1e4), color-stop(100%,#90beea)); /* Chrome,Safari4+ */
+	background:-webkit-linear-gradient(top, #5ba1e4 0%,#90beea 100%); /* Chrome10+,Safari5.1+ */
+	background:-o-linear-gradient(top, #5ba1e4 0%,#90beea 100%); /* Opera11.10+ */
+	background:-ms-linear-gradient(top, #5ba1e4 0%,#90beea 100%); /* IE10+ */
+	background:linear-gradient(top, #5ba1e4 0%,#90beea 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#5ba1e4', endColorstr='#90beea');
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#5ba1e4', endColorstr='#90beea')";
+	
+	
+	border: 1px solid #d6d6d6;
+	
+	
+	-webkit-background-clip: padding-box;
+}	
+	
+	.widget-header h3 {
+		
+		position: relative;
+		top: -5px;
+		left: 10px;
+		
+		display: inline-block;
+		margin-right: 3em;
+		
+		font-size: 14px;
+		font-weight: 800;
+		color: #525252;
+		line-height: 18px;
+		
+		text-shadow: 1px 1px 2px rgba(255,255,255,.5);
+	}
+	.widget-header h4 {
+		position: relative;
+		top: -7px;
+		left: 15px;
+		display: inline-block;
+		margin-right: 3em;
+		font-size: 12px;
+		/*font-weight: 800;*/
+		color: #FFFFFF;
+		line-height: 15px;
+	}
+
+		.widget-header [class^="icon-"], .widget-header [class*=" icon-"] {
+			
+			display: inline-block;
+			margin-left: 13px;
+			margin-right: -2px;
+			
+			font-size: 16px;
+			color: #555;
+			vertical-align: middle;
+			
+			
+			
+		}
+
+
+
+
+.widget-content {
+	padding: 20px 15px 15px;
+	background: #FFF;
+	/*border: 1px solid #D5D5D5; --comment out for a while*/
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	/*border-radius: 5px; --comment out for a while*/
+	/*overflow-X: scroll; --comment out for a while*/
+}
+
+.widget-header+.widget-content {
+	border-top: none;
+	
+	-webkit-border-top-left-radius: 0;
+	-webkit-border-top-right-radius: 0;
+	-moz-border-radius-topleft: 0;
+	-moz-border-radius-topright: 0;
+	border-top-left-radius: 0;
+	border-top-right-radius: 0;
+}
+
+.widget-nopad .widget-content {
+	padding: 0;
+}
+
+/* Widget Content Clearfix */
+	.widget-content:before, .widget-content:after {
+    content:"";
+    display:table;
+}
+
+.widget-content:after {
+    clear:both;
+}
+
+/* For IE 6/7 (trigger hasLayout) */
+.widget-content {
+    zoom:1;
+}
+
+/* Widget Table */
+
+.widget-table .widget-content {
+	padding: 0;
+}
+
+.widget-table .table {
+	margin-bottom: 0;
+	
+	border: none;
+}
+
+.widget-table .table tr td:first-child {
+	border-left: none;
+}
+
+.widget-table .table tr th:first-child {
+	border-left: none;
+}
+
+
+/* Widget Plain */
+
+.widget-plain {
+	
+	background: transparent;
+	
+	border: none;
+}
+
+.widget-plain .widget-content {
+	padding: 0;
+	
+	background: transparent;
+	
+	border: none;
+}
+
+
+/* Widget Box */
+
+.widget-box {	
+	
+}
+
+.widget-box .widget-content {	
+	background: #E3E3E3;	
+	background: #FFF;
+}
+
+.disabled {
+	pointer-events: visible;
+	color: #CCCCCC;
+	background: #666666;
+	background-color: #666666;
+	filter: grayscale(1);
+}
+
+.enabled {
+	pointer-events: visible;
+	color: #000;
+	background: #F5F5FA;
+	background-color: #F5F5FA;
+	filter: inherit;
+}

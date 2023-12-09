@@ -65,7 +65,7 @@
                                 <option value="UNIT" <%=oModItem.GetSetitemtype.Equals("UNIT")?"selected":"" %>>UNIT</option>
                                 <option value="PC" <%=oModItem.GetSetitemtype.Equals("PC")?"selected":"" %>>PC</option>
                                 <option value="SET" <%=oModItem.GetSetitemtype.Equals("SET")?"selected":"" %>>SET</option>
-                                <option value="SLOT" <%=oModItem.GetSetitemtype.Equals("SLOT")?"selected":"" %>>SLOT</option>
+                                <option value="LOT" <%=oModItem.GetSetitemtype.Equals("LOT")?"selected":"" %>>LOT</option>
                                 <option value="JOB" <%=oModItem.GetSetitemtype.Equals("JOB")?"selected":"" %>>PERKHIDMATAN</option>
                             </select>
                             <label for="purchaseprice">Harga Belian:</label>

@@ -82,6 +82,7 @@ public partial class HiddenEvent : System.Web.UI.Page
             {
                 Session["comp"] = sCurrComp;
                 oModUser = oMainCon.getUserProfile("", sUserId, "", "");
+                oMainCon.updateUserDetails(oModUser.GetSetcomp, sCurrComp, oModUser.GetSetuserid, oModUser.GetSetuserpwd, oModUser.GetSetusername, oModUser.GetSetuseradd, oModUser.GetSetusertelno, oModUser.GetSetusertype, oModUser.GetSetuserstatus, oModUser.GetSetscreenid);
                 Response.Redirect("HiddenEvent.aspx?event=open_screen&screenid="+ oModUser.GetSetscreenid);
                 /*
                 if (sCurrComp.Equals("CDG"))

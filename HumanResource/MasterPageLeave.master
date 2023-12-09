@@ -1,0 +1,109 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="MasterPageLeave.master.cs" Inherits="HumanResource_MasterPageLeave" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>BIOAppHR - Sistem Pengurusan Sumber Manusia (Pengurusan Cuti)</title>
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/style_main.css" type="text/css" rel="stylesheet" />
+    <link href="css/tab.css" type="text/css" rel="stylesheet" />
+    <link href="css/calendar.css" type="text/css" rel="stylesheet" />
+    <link href="css/tabbable.css" type="text/css" rel="stylesheet" />
+    <link href="css/style_autocomplete.css" rel="stylesheet" />
+    <link href="css/style_table_tree.css" rel="stylesheet" />
+    <link href="css/style_table_scroll.css" rel="stylesheet" />
+    <link href="css/style_modal.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="js/JQuery.WebService.Call.Helper.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <!--<script type="text/javascript" src="js/jquery-1.7.2.min.js"></script>-->
+    <script type="text/javascript" src="js/script.js"></script>
+    <script type="text/javascript" src="js/calendar.js"></script>
+    <script type="text/javascript" src="js/calendar-en.js"></script>
+    <script type="text/javascript" src="js/calendar-setup.js"></script>
+    <script type="text/javascript" src="js/jquery.autocomplete.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
+    <script type="text/javascript">
+        var popupWindow;
+
+        function parent_disable() {
+            var flag = true;
+            if (popupWindow && !popupWindow.closed) {
+                popupWindow.focus();
+                flag = false;
+            }
+            return flag;
+        }
+
+        function fOpenWindow(url) {
+            $('body').css({ 'opacity': 0.3 });
+            popupWindow = window.open(url, "popup_window", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=700");
+            if (popupWindow == null) {
+                alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+            } else {
+                wleft = (screen.width - 900) / 2;
+                wtop = (screen.height - 700) / 2;
+                if (wleft < 0) {
+                    wleft = 0;
+                }
+                if (wtop < 0) {
+                    wtop = 0;
+                }
+                popupWindow.moveTo(wleft, wtop);
+            }
+            checkPopupWindow();
+        }
+
+        function checkPopupWindow() {
+            var popupCheck = setInterval(function () {
+                if (popupWindow.closed) {
+                    clearInterval(popupCheck);
+                    $('body').css({ 'opacity': 1 });
+                    console.log('window closed!');
+                }
+            }, 100);
+        }
+
+    </script>
+    
+    <asp:ContentPlaceHolder id="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body onclick="JavaScript:parent_disable();">
+    <div class="widget">
+        <div class="widget-header">
+            <h4><span style="font-family:Arial, Helvetica, sans-serif; font-size:12px;">SISTEM PENGURUSAN SUMBER MANUSIA (PENGURUSAN CUTI) [<%=sUserId %>] - <%=sUserName %></span></h4>
+            <h4>
+                <span>
+                    <script type="text/javascript" src="js/liveclock.js"></script>
+                </span>
+            </h4>
+        </div>
+        <!-- /widget-header -->
+        <div class="widget-content">
+            <div class="tabbable">
+                <ul class="nav nav-tabs">
+                    <li class="<%=(sTabMenuParent.Equals("1")?"active":"") %>"><a href="LeavePublicHoliday.aspx?sTabMenu=1"><span style="font-family:Arial, Helvetica, sans-serif; font-size:12px;">Hari Perlepasan</span></a></li>
+                    <li class="<%=(sTabMenuParent.Equals("2")?"active":"") %>"><a href="LeaveCategoryGroup.aspx?sTabMenu=2"><span style="font-family:Arial, Helvetica, sans-serif; font-size:12px;">Kategori Cuti</span></a></li>
+                    <li class="<%=(sTabMenuParent.Equals("3")?"active":"") %>"><a href="LeaveCategoryStaff.aspx?sTabMenu=3"><span style="font-family:Arial, Helvetica, sans-serif; font-size:12px;">Penyediaan Kakitangan</span></a></li>
+                    <li class="<%=(sTabMenuParent.Equals("4")?"active":"") %>"><a href="LeaveApplicationStaff.aspx?sTabMenu=4"><span style="font-family:Arial, Helvetica, sans-serif; font-size:12px;">Permohonan Cuti</span></a></li>
+                    <li class="<%=(sTabMenuParent.Equals("6")?"active":"") %>"><a href="LeaveReportPage.aspx?sTabMenu=5"><span style="font-family:Arial, Helvetica, sans-serif; font-size:12px;">Pelaporan</span></a></li>
+                </ul>
+                <fieldset>
+                    <!-- /widget -->
+                    <div class="widget widget-table action-table">
+                        <!-- /widget-header -->
+                        <div>
+                            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+                            </asp:ContentPlaceHolder>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

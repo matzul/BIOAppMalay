@@ -22,24 +22,46 @@
                                     <label for="invoicecat">Kategori:</label>
                                       <select class="form-control" id="invoicecat" name="invoicecat" required="required">
                                         <option value="">-select-</option>
-                                        <option value="SALES_INVOICE" <%=oModInvoice.GetSetinvoicecat.Equals("SALES_INVOICE")?"selected":"" %>>INVOIS JUALAN</option>
+                                        <option value="SALES_INVOICE" <%=oModInvoice.GetSetinvoicecat.Equals("SALES_INVOICE")?"selected":"" %>>INVOIS JUALAN / AGIHAN</option>
                                         <option value="TRANSFER_INVOICE" <%=oModInvoice.GetSetinvoicecat.Equals("TRANSFER_INVOICE")?"selected":"" %>>INVOIS PINDAHAN</option>
                                         <option value="RECEIPT_VOUCHER" <%=oModInvoice.GetSetinvoicecat.Equals("RECEIPT_VOUCHER")?"selected":"" %>>VOUCHER TERIMAAN</option>
+                                        <%
+                                            if (oModInvoice.GetSetstatus.Equals("CONFIRMED") || oModInvoice.GetSetstatus.Equals("CANCELLED"))
+                                            { 
+                                        %>
                                         <option value="JOURNAL_VOUCHER" <%=oModInvoice.GetSetinvoicecat.Equals("JOURNAL_VOUCHER")?"selected":"" %>>VOUCHER PERLARASAN</option>
+                                        <%
+                                            }
+                                        %>
                                       </select>
                                     <label for="invoicetype">Jenis Invois:</label>
                                       <select class="form-control" id="invoicetype" name="invoicetype" required="required">
                                         <option value="">-select-</option>
                                         <option value="NOT_APPLICABLE" <%=oModInvoice.GetSetinvoicetype.Equals("NOT_APPLICABLE")?"selected":"" %>>TIDAK BERKENAAN</option>
-                                        <option value="FINANCIAL_ACQUISITION" <%=oModInvoice.GetSetinvoicetype.Equals("FINANCIAL_ACQUISITION")?"selected":"" %>>PEROLEHAN KEWANGAN</option>
+                                        <%
+                                            for(int x=0; x < lsInvoiceType.Count; x++)
+                                            {
+                                                MainModel modParam = (MainModel)lsInvoiceType[x];
+                                        %>
+                                                <option value="<%=modParam.GetSetparamttype %>" <%=oModInvoice.GetSetinvoicetype.Equals(modParam.GetSetparamttype)?"selected":"" %>><%=modParam.GetSetparamtdesc %></option>
+                                        <%
+                                            }
+                                        %>                                                                                          
+                                        <%
+                                            if (oModInvoice.GetSetstatus.Equals("CONFIRMED") || oModInvoice.GetSetstatus.Equals("CANCELLED"))
+                                            { 
+                                        %>
                                         <option value="BANK_DEPOSIT" <%=oModInvoice.GetSetinvoicetype.Equals("BANK_DEPOSIT")?"selected":"" %>>DEPOSIT BANK</option>
                                         <option value="CASH_WITHDRAWAL" <%=oModInvoice.GetSetinvoicetype.Equals("CASH_WITHDRAWAL")?"selected":"" %>>PENGELUARAN TUNAI</option>
-                                        <option value="OTHER_INCOME" <%=oModInvoice.GetSetinvoicetype.Equals("OTHER_INCOME")?"selected":"" %>>PEROLEHAN LAIN-LAIN</option>
-                                      </select>
+                                        <%
+                                            }
+                                        %>
+
+                                     </select>
                                     <label for="invoiceterm">Terma Invois:</label>
                                       <select class="form-control" id="invoiceterm" name="invoiceterm" required="required">
                                         <option value="">-select-</option>
-                                        <option value="NOT_APPLICABLE" <%=oModInvoice.GetSetinvoiceterm.Equals("NOT_APPLICABLE")?"selected":"" %>>TIDAK BERKENAAN</option>
+                                        <option value="N/A" <%=oModInvoice.GetSetinvoiceterm.Equals("N/A")?"selected":"" %>>TIDAK BERKENAAN</option>
                                         <option value="COD" <%=oModInvoice.GetSetinvoiceterm.Equals("COD")?"selected":"" %>>TUNAI PENGHANTARAN</option>
                                         <option value="7DAYS" <%=oModInvoice.GetSetinvoiceterm.Equals("7DAYS")?"selected":"" %>>7 HARI</option>
                                         <option value="15DAYS" <%=oModInvoice.GetSetinvoiceterm.Equals("15DAYS")?"selected":"" %>>15 HARI</option>
@@ -512,8 +534,8 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                 if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                    //$('#bpaddress').text("<%=modBP.GetSetbpaddress%>");
-                                    document.getElementById("bpaddress").value = "<%=modBP.GetSetbpaddress%>";
+                                    //$('#bpaddress').text("");
+                                    document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>";
                                     $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                     $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                 }
@@ -570,7 +592,7 @@
                                         $('#hidOrderLineNo').val('<%=oPendInvLine.GetSetorder_lineno%>');
                                         $('#hidUnitCost').val('<%=oPendInvLine.GetSetunitcost%>');
                                         $('#hidCostPrice').val('<%=oPendInvLine.GetSetcostprice%>');
-                                        $('#additemdesc').text("<%=oModInvoice.GetSetinvoicecat.Equals("SALES_INVOICE") || oModInvoice.GetSetinvoicecat.Equals("TRANSFER_INVOICE")?oPendInvLine.GetSetitemdesc:oPendInvLine.GetSetparamdesc%>");
+                                        $('#additemdesc').text("<%=oModInvoice.GetSetinvoicecat.Equals("SALES_INVOICE") || oModInvoice.GetSetinvoicecat.Equals("TRANSFER_INVOICE")?oPendInvLine.GetSetitemdesc:""%>");
                                         $('#addunitprice').val('<%=oPendInvLine.GetSetunitprice%>');
                                         $('#adddiscamount').val('<%=oPendInvLine.GetSetdiscamount%>');
                                         $('#addquantity').val('<%=oPendInvLine.GetSetquantity%>');
@@ -969,7 +991,7 @@
                                     %>
                                             if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                             {
-                                                document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                                 $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                             }
                                     <%
@@ -979,7 +1001,7 @@
                                     %>
                                             else if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                             {
-                                                document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                                 $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                             }
                                     <%
@@ -1010,7 +1032,7 @@
                         %>
                                 if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                 {
-                                    document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                    document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                     $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                 }
                         <%
@@ -1020,7 +1042,7 @@
                         %>
                                 else if($('#bpdesc').val() == '<%=modOthBP.GetSetobpdesc%>')
                                 {
-                                    document.getElementById("bpaddress").value = "<%=modOthBP.GetSetobpaddress%>";
+                                    document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modOthBP.GetSetobpaddress, ", ")%>";
                                     $('#bpcontact').val('<%=modOthBP.GetSetobpcontact%>');
                                 }
                         <%

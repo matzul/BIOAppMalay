@@ -3,7 +3,7 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="head" Runat="Server">
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server">
-            <div class="col-md-12 col-sm-12 col-xs-12">
+            <div id="printableArea" class="col-md-12 col-sm-12 col-xs-12">
                 <div class="x_panel">
                   <div class="x_title">
                     <h2>Aliran Kewangan <small>MAKLUMAT</small></h2>
@@ -288,6 +288,12 @@
                         <input type="hidden" name="hidBankClosingAmount" id="hidBankClosingAmount" value="<%=oModCashFlow.GetSetbankclosingamount %>" />
                         <input type="hidden" name="hidCashClosingAmount" id="hidCashClosingAmount" value="<%=oModCashFlow.GetSetcashclosingamount %>" />
                     </div>
+                    </form>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
                     <!-- BEGIN FOR DIALOG MODAL --> 
                     <div class="modal fade modal-begincashflow" tabindex="-1" role="dialog" aria-hidden="true">
                         <div class="modal-dialog modal-sm">
@@ -525,11 +531,6 @@
                         </div>
                     </div>
                     <!-- END FOR DIALOG MODAL --> 
-                    </form>
-                    </div>
-                  </div>
-                </div>
-            </div>
 
     <script type="text/javascript">
 
@@ -763,6 +764,32 @@
                 }
             %>
         });
+
+        function openprintpage() {
+            printPartOfPage();
+        }
+
+        function printPartOfPage() {
+            //Works with Chome, Firefox, IE, Safari
+            //Get the HTML of div
+            var title = document.title;
+            var divElements = document.getElementById('printableArea').innerHTML;
+            var printWindow = window.open("", "_blank", "");
+            //open the window
+            printWindow.document.open();
+            //write the html to the new window, link to css file
+            printWindow.document.write('<html><head><title>' + title + '</title><link rel="stylesheet" type="text/css" href="../css/bootstrap.min.css"><style> .topright { position: absolute; top: 5px; right: 5px; text-align: right; } </style></head><body>');
+            printWindow.document.write('<center><div style="width:750px !important;height:100px; align:center;"><span style="text-align:center"><img src="../image/logoblack.jpg" /></span></div>');
+            printWindow.document.write(divElements);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            printWindow.focus();
+
+            setTimeout(function () {
+                printWindow.print();
+                printWindow.close();
+            }, 100);
+        }
 
     </script>
 </asp:Content>

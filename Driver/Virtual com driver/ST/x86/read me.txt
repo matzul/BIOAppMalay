@@ -1,0 +1,2 @@
+Note: 
+If the file dpinst_x86.exe can't install success, double-click and install the file VCP-V1.3.1-Setup.exe

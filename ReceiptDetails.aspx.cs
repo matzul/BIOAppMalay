@@ -361,7 +361,7 @@ public partial class ReceiptDetails : System.Web.UI.Page
                         if (oModHeader.GetSetreceiptcat.Equals("PURCHASE_ORDER") || oModHeader.GetSetreceiptcat.Equals("RECEIVE_ORDER"))
                         {
                             //to update received quantity order item
-                            oModOrderLineItem = oMainCon.getPurchaseOrderDetailsDetails(modReceiptDet.GetSetcomp, modReceiptDet.GetSetorderno, modReceiptDet.GetSetorder_lineno, modReceiptDet.GetSetitemno);
+                            oModOrderLineItem = oMainCon.getPurchaseOrderDetailsDetails(modReceiptDet.GetSetcomp, modReceiptDet.GetSetorderno, modReceiptDet.GetSetorder_lineno, modReceiptDet.GetSetitemno, modReceiptDet.GetSetreceiptno);
                             oModOrderLineItem.GetSetreceiptqty = oModOrderLineItem.GetSetreceiptqty + modReceiptDet.GetSetreceipt_quantity;
                             String result1 = oMainCon.updatePurchaseOrderDetails(oModOrderLineItem);
                         }
@@ -385,6 +385,7 @@ public partial class ReceiptDetails : System.Web.UI.Page
                             oModItemStock.GetSetlocation = modReceiptDet.GetSetlocation;
                             oModItemStock.GetSetdatesoh = modReceiptDet.GetSetdatesoh;
                             oModItemStock.GetSetqtysoh = modReceiptDet.GetSetreceipt_quantity;
+                            /** Modified by Zul - 17.7.2021
                             if (oModOrderLineItem.GetSetordercat.Equals("RECEIVE_ORDER"))
                             {
                                 oModItemStock.GetSetcostsoh = Math.Round(oModItemDet.GetSetcostprice * modReceiptDet.GetSetreceipt_quantity, 2, MidpointRounding.AwayFromZero);
@@ -393,6 +394,8 @@ public partial class ReceiptDetails : System.Web.UI.Page
                             {
                                 oModItemStock.GetSetcostsoh = Math.Round(Math.Round(oModOrderLineItem.GetSettotalprice / oModOrderLineItem.GetSetquantity, 2, MidpointRounding.AwayFromZero) * (modReceiptDet.GetSetreceipt_quantity), 2, MidpointRounding.AwayFromZero);
                             }
+                            **/
+                            oModItemStock.GetSetcostsoh = Math.Round(Math.Round(oModOrderLineItem.GetSettotalprice / oModOrderLineItem.GetSetquantity, 2, MidpointRounding.AwayFromZero) * (modReceiptDet.GetSetreceipt_quantity), 2, MidpointRounding.AwayFromZero);
                             String result2 = oMainCon.insertItemStock(oModItemStock);
 
                             MainModel oModItemStockTrans = new MainModel();
@@ -408,6 +411,7 @@ public partial class ReceiptDetails : System.Web.UI.Page
                             oModItemStockTrans.GetSetorderno = modReceiptDet.GetSetorderno;
                             oModItemStockTrans.GetSetorder_lineno = modReceiptDet.GetSetorder_lineno;
                             oModItemStockTrans.GetSettransqty = modReceiptDet.GetSetreceipt_quantity;
+                            /** Modified by Zul - 17.7.2021
                             if (oModOrderLineItem.GetSetordercat.Equals("RECEIVE_ORDER"))
                             {
                                 oModItemStockTrans.GetSettransprice = Math.Round(oModItemDet.GetSetcostprice, 2, MidpointRounding.AwayFromZero);
@@ -416,6 +420,8 @@ public partial class ReceiptDetails : System.Web.UI.Page
                             {
                                 oModItemStockTrans.GetSettransprice = Math.Round(oModOrderLineItem.GetSettotalprice / oModOrderLineItem.GetSetquantity, 2, MidpointRounding.AwayFromZero);
                             }
+                            **/
+                            oModItemStockTrans.GetSettransprice = Math.Round(oModOrderLineItem.GetSettotalprice / oModOrderLineItem.GetSetquantity, 2, MidpointRounding.AwayFromZero);
                             oModItemStockTrans.GetSetqtysoh = oModItemStock.GetSetqtysoh;
                             oModItemStockTrans.GetSetcostsoh = oModItemStock.GetSetcostsoh;
                             String result3 = oMainCon.insertItemStockTransactions(oModItemStockTrans);

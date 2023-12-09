@@ -22,7 +22,8 @@
                                     <label for="paypaidtype">Jenis Bayaran Belanja:</label>
                                       <select class="form-control" id="paypaidtype" name="paypaidtype" required="required">
                                         <option value="">-select-</option>
-                                        <option value="VOUCHER" <%=oModPayPaid.GetSetpaypaidtype.Equals("VOUCHER")?"selected":"" %>>BIL & BELANJA</option>
+                                        <option value="VOUCHER" <%=oModPayPaid.GetSetpaypaidtype.Equals("VOUCHER")?"selected":"" %>>BIL</option>
+                                        <option value="EXPENSES" <%=oModPayPaid.GetSetpaypaidtype.Equals("EXPENSES")?"selected":"" %>>BELANJA</option>
                                       </select>
                                     <label for="remarks">Catatan:</label>
                                     <textarea id="remarks" class="form-control" rows="3" name="remarks"><%=oModPayPaid.GetSetremarks%></textarea>
@@ -433,7 +434,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                             if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                                document.getElementById("bpaddress").value = "<%=modBP.GetSetbpaddress%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>";
                                                 $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                                 $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                             }

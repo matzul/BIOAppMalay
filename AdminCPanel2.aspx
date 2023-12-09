@@ -23,6 +23,12 @@
                                     <input type="text" id="userid" class="form-control" name="userid" readonly="readonly" value="<%=oUserProfile.GetSetuserid %>" />
                                     <label for="userpassword">Katalaluan/ Password:</label>
                                     <input type="password" id="userpassword" class="form-control" name="userpassword" value="<%=oUserProfile.GetSetuserpwd %>" />
+                                    <label for="usertype">Jenis Pengguna:</label>
+                                    <select id="usertype" name="usertype" class="form-control">
+                                        <option value=''>-Select-</option>
+                                        <option value='01' <%=oUserProfile.GetSetusertype.Equals("01")?"selected":""%>>01 - Super User</option>
+                                        <option value='02' <%=oUserProfile.GetSetusertype.Equals("02")?"selected":""%>>02 - Normal User</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
@@ -108,17 +114,18 @@
                                                 <textarea id="adduseraddress" class="form-control" rows="2" name="adduseraddress"></textarea>
                                                 <label class="control-label">No. Telefon <span class="required">*</span></label>
                                                 <input id="addusercontactno" name="addusercontactno" type="text" class="form-control" value="" />
-                                                <label class="control-label">Email (Id Pengguna) <span class="required">*</span></label>
-                                                <input id="adduserid" name="adduserid" type="text" class="form-control" value="" />
+                                                <label class="control-label">Jenis Pengguna <span class="required">*</span></label>
+                                                <select id="addusertype" name="addusertype" class="form-control">
+                                                    <option value=''>-Select-</option>
+                                                    <option value='01'>01 - Super User</option>
+                                                    <option value='02'>02 - Normal User</option>
+                                                </select>
                                             </div>
                                             <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="control-label">Email (Id Pengguna) <span class="required">*</span></label>
+                                                <input id="adduserid" name="adduserid" type="text" class="form-control" value="" />
                                                 <label class="control-label">Password <span class="required">*</span></label>
                                                 <input id="adduserpassword" name="adduserpassword" type="password" class="form-control" value="" />
-                                                <label class="control-label">Role Id <span class="required">*</span></label>
-                                                <select id="adduserroleid" name="adduserroleid" class="form-control" tabindex="-1" style="width: 100%;">
-                                                    <option value="02" selected="selected">02</option>
-                                                    <option value="05">05</option>
-                                                </select>
                                                 <label class="control-label">Status <span class="required">*</span></label>
                                                 <select id="adduserstatus" name="adduserstatus" class="form-control" tabindex="-1" style="width: 100%;">
                                                     <option value="A">AKTIF</option>
@@ -137,12 +144,21 @@
                                                         }
                                                     %>
                                                 </select>
+                                                <label class="control-label">Default Role Id <span class="required">*</span></label>
+                                                <select id="adduserroleid" name="adduserroleid" class="form-control" tabindex="-1" style="width: 100%;">
+                                                    <option value='01'>SYSADMIN</option>
+                                                    <option value='02'>COMPADMIN</option>
+                                                    <option value='03'>SALES</option>
+                                                    <option value='04'>ACCOUNT</option>
+                                                    <option value='05'>WAREHOUSE</option>
+                                                </select>
                                                 <label class="control-label">Default Dashboard Screen <span class="required">*</span></label>
                                                 <select id="addscreenid" name="addscreenid" class="form-control" tabindex="-1" style="width: 100%;">
                                                     <option value="">-select-</option>                                                    
                                                     <option value="010010">010010 - Dashboard 1</option>
                                                     <option value="010020">010020 - Dashboard 2</option>
                                                     <option value="010030">010030 - Dashboard 3</option>
+                                                    <option value="010040">010040 - Dashboard 3</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -188,8 +204,11 @@
                                             </select>
                                             <label class="control-label">Role Id <span class="required">*</span></label>
                                             <select id="addroleid" name="addroleid" class="form-control" tabindex="-1" style="width: 100%;">
-                                                <option value="02" selected="selected">02</option>
-                                                <option value="05">05</option>
+                                                <option value='01'>SYSADMIN</option>
+                                                <option value='02'>COMPADMIN</option>
+                                                <option value='03'>SALES</option>
+                                                <option value='04'>ACCOUNT</option>
+                                                <option value='05'>WAREHOUSE</option>
                                             </select>
                                         </div>
                                         <div class="modal-footer">
@@ -240,6 +259,16 @@
                                         <a id="adduser" name="adduser" class="btn btn-app" data-toggle="modal" data-target=".modal-add-new-user" onclick="openadduser();">
                                             <i class="fa fa-plus-square green"></i>Tambah Pengguna
                                         </a>
+                                        <%
+                                            if (sUserId.Equals("sysadmin"))
+                                            {
+                                        %>
+                                        <a id="manageaccessibility" name="manageaccessibility" class="btn btn-app" onclick="manageaccessibility();">
+                                            <i class="fa fa-cog green"></i>Kemaskini Capaian Pengguna
+                                        </a>
+                                        <%
+                                            }
+                                        %>
                                     </div>
                                     <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
 
@@ -249,6 +278,7 @@
                                                 <th></th>
                                                 <th>Id Pengguna</th>
                                                 <th>Nama Pengguna</th>
+                                                <th>Jenis Pengguna</th>
                                                 <th>Default Comp</th>
                                                 <th>Status</th>
                                                 <th></th>
@@ -328,6 +358,7 @@
                             '<a href="#" class="btn-link" onclick=";"><i class="glyphicon glyphicon-play"></i></a>',
                             result.userid,
                             result.username,
+                            result.usertype,
                             result.comp,
                             (result.userstatus == 'A' ? 'AKTIF' : 'TIDAK AKTIF'),
                             '<a href="#" class="btn btn-info btn-xs" onclick="openedituser(' + '\'' + result.userid + '\'' + ');" data-toggle="modal" data-target=".modal-add-new-user"><i class="fa fa-pencil"></i> Kemaskini </a>'
@@ -428,7 +459,7 @@
                                           "username", $('#addusername').val(),
                                           "useradd", $('#adduseraddress').val(),
                                           "usertelno", $('#addusercontactno').val(),
-                                          "usertype", "02",
+                                          "usertype", $('#addusertype').val(),
                                           "screenid", $('#addscreenid').val(),
                                           "userroleid", $('#adduserroleid').val(),
                                           "userstatus", $('#adduserstatus').val(),
@@ -446,7 +477,7 @@
                                           "username", $('#addusername').val(),
                                           "useradd", $('#adduseraddress').val(),
                                           "usertelno", $('#addusercontactno').val(),
-                                          "usertype", "02",
+                                          "usertype", $('#addusertype').val(),
                                           "screenid", $('#addscreenid').val(),
                                           "userroleid", $('#adduserroleid').val(),
                                           "userstatus", $('#adduserstatus').val(),
@@ -596,6 +627,8 @@ function openadduser() {
     $('#addusercontactno').val("");
     $('#adduserstatus').val('A');
     $('#addscreenid').val("");
+    $('#adduserroleid').val("");
+    $('#addusertype').val("");
     $('#btnEditUser').prop('disabled', true);
     $('#btnSaveUser').prop('disabled', false);
     showhidepaneladdcomp("none");
@@ -612,6 +645,7 @@ function enabledisableinforform(flag) {
     $('#adduserid').prop('disabled', flag);
     $('#adduserpassword').prop('disabled', flag);    
     $('#adduserroleid').prop('disabled', flag);
+    $('#addusertype').prop('disabled', flag);
     $('#adduserstatus').prop('disabled', flag);
     $('#addusercomp').prop('disabled', flag);
     $('#addscreenid').prop('disabled', flag);
@@ -635,7 +669,8 @@ succeededUserObject = function (data, textStatus, jqXHR) {
         $('#adduserpassword').val(resultJSON.userinfo.userpwd);
         $('#adduseraddress').text(resultJSON.userinfo.useradd);
         $('#addusercontactno').val(resultJSON.userinfo.usertelno);
-        //$('#adduserroleid').val("");
+        $('#adduserroleid').val(resultJSON.userinfo.userroleid);
+        $('#addusertype').val(resultJSON.userinfo.usertype);
         $('#adduserstatus').val(resultJSON.userinfo.userstatus);
         $('#addscreenid').val(resultJSON.userinfo.screenid);
         selectedUserId = $('#adduserid').val();
@@ -691,6 +726,7 @@ failedCompUserListObject = function (jqXHR, textStatus, errorThrown) {
 function enabledisableinputform(flag) {
     $('#username').prop('disabled', flag);
     $('#userpassword').prop('disabled', flag);
+    $('#usertype').prop('disabled', flag);
     $('#useradd').prop('disabled', flag);
     $('#usertelno').prop('disabled', flag);
 }
@@ -724,6 +760,12 @@ function enabledisableinputform(flag) {
             console.log("succeededCompListObject: " + textStatus);
             resultJSON = JSON.parse(data.d);
 
+            var select = document.getElementById("addcompid");
+            for (var option in select) {
+                select.remove(option);
+            }
+            document.getElementById("addcompid").add(new Option("-select-", ""));
+
             if (resultJSON.result == "Y") {
                 var t = $('#datatable').DataTable();
                 $.each(resultJSON.complist, function (i, result) {
@@ -735,6 +777,46 @@ function enabledisableinputform(flag) {
         failedCompListObject = function (jqXHR, textStatus, errorThrown) {
             console.log("failedCompListObject: " + textStatus);
             alert(textStatus);
+        }
+
+        function manageaccessibility() {
+
+            var popupWindow = window.open("UserAccessibilityMgt.aspx?action=OPEN", "manage_accessibility", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+            if (popupWindow == null) {
+
+                alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+
+            } else {
+                wleft = (screen.width - 1000) / 2;
+                wtop = (screen.height - 800) / 2;
+                if (wleft < 0) {
+                    wleft = 0;
+                }
+                if (wtop < 0) {
+                    wtop = 0;
+                }
+                popupWindow.moveTo(wleft, wtop);
+            }
+        }
+
+        function manageaccessibility() {
+
+            var popupWindow = window.open("UserAccessibilityMgt.aspx?action=OPEN", "manage_accessibility", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+            if (popupWindow == null) {
+
+                alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+
+            } else {
+                wleft = (screen.width - 1000) / 2;
+                wtop = (screen.height - 800) / 2;
+                if (wleft < 0) {
+                    wleft = 0;
+                }
+                if (wtop < 0) {
+                    wtop = 0;
+                }
+                popupWindow.moveTo(wleft, wtop);
+            }
         }
 
     </script>

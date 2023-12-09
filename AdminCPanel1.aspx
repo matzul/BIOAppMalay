@@ -23,6 +23,12 @@
                                     <input type="text" id="userid" class="form-control" name="userid" readonly="readonly" value="<%=oUserProfile.GetSetuserid %>" />
                                     <label for="userpassword">Katalaluan/ Password:</label>
                                     <input type="password" id="userpassword" class="form-control" name="userpassword" value="<%=oUserProfile.GetSetuserpwd %>" />
+                                    <label for="usertype">Jenis Pengguna:</label>
+                                    <select id="usertype" name="usertype" class="form-control">
+                                        <option value=''>-Select-</option>
+                                        <option value='01' <%=oUserProfile.GetSetusertype.Equals("01")?"selected":""%>>01 - Super User</option>
+                                        <option value='02' <%=oUserProfile.GetSetusertype.Equals("02")?"selected":""%>>02 - Normal User</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-6 col-sm-6 col-xs-12">
@@ -146,6 +152,9 @@
                                                 <a id="adduser" name="adduser" class="btn btn-app" data-toggle="modal" data-target=".modal-add-new-user" onclick="openadduser();">
                                                     <i class="fa fa-plus-square green"></i>Tambah Pengguna
                                                 </a>
+                                                <a id="addaccessibility" name="addaccessibility" class="btn btn-app" onclick="openaddaccessibility();">
+                                                    <i class="fa fa-cog green"></i>Capaian pengguna
+                                                </a>
                                                 <table id="datatable" class="table">
                                                     <thead>
                                                         <tr>
@@ -179,8 +188,11 @@
                                             </select>
                                             <label class="control-label">Role Id <span class="required">*</span></label>
                                             <select id="adduserroleid" name="adduserroleid" class="form-control" tabindex="-1" style="width: 100%;">
-                                                <option value="02" selected="selected">02</option>
-                                                <option value="05">05</option>
+                                                <%=oUserProfile.GetSetuserid.Equals("sysadmin")?"<option value=01'>SYSADMIN</option>":"" %>
+                                                <option value='02' selected='selected'>COMPADMIN</option>
+                                                <option value='03'>SALES</option>
+                                                <option value='04'>ACCOUNT</option>
+                                                <option value='05'>WAREHOUSE</option>
                                             </select>
                                         </div>
                                         <div class="modal-footer">
@@ -231,6 +243,16 @@
                                         <a id="addcomp" name="addcomp" class="btn btn-app" data-toggle="modal" data-target=".modal-add-new-company" onclick="openaddcomp();">
                                             <i class="fa fa-plus-square green"></i>Tambah Syarikat
                                         </a>
+                                        <%
+                                            if (sUserId.Equals("sysadmin"))
+                                            {
+                                        %>
+                                        <a id="manageaccessibility" name="manageaccessibility" class="btn btn-app" onclick="manageaccessibility();">
+                                            <i class="fa fa-cog green"></i>Kemaskini Capaian Pengguna
+                                        </a>
+                                        <%
+                                            }
+                                        %>
                                     </div>
                                     <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
 
@@ -321,8 +343,19 @@
                             result.comp,
                             result.comp_name,
                             result.comp_id,
-                            (result.status == 'ACTIVE'?'AKTIF':'TIDAK AKTIF'),
-                            (result.comp == 'T01' ? '' : '<a href="#" class="btn btn-info btn-xs" onclick="openeditcomp(' + '\'' + result.comp + '\'' + ');" data-toggle="modal" data-target=".modal-add-new-company"><i class="fa fa-pencil"></i> Kemaskini </a>')
+                            (result.status == 'ACTIVE' ? 'AKTIF' : 'TIDAK AKTIF'),
+                            <%
+                            if (sUserId.Equals("sysadmin"))
+                            {
+                            %>
+                                '<a href="#" class="btn btn-info btn-xs" onclick="openeditcomp(' + '\'' + result.comp + '\'' + ');" data-toggle="modal" data-target=".modal-add-new-company"><i class="fa fa-pencil"></i> Kemaskini </a>'
+                            <%
+                            }else{
+                            %>
+                                (result.comp == 'T01' ? '' : '<a href="#" class="btn btn-info btn-xs" onclick="openeditcomp(' + '\'' + result.comp + '\'' + ');" data-toggle="modal" data-target=".modal-add-new-company"><i class="fa fa-pencil"></i> Kemaskini </a>')
+                            <%
+                            }
+                            %>
                     ]).draw(false);
                 });
             }
@@ -705,7 +738,7 @@ succeededCompUserListObject = function (data, textStatus, jqXHR) {
                         (result.usertype == '01' ? 'System Admin' : result.usertype == '02' ? 'Operasi' : 'Lain-lain'),
                         result.roleid,
                         (result.status == 'A' ? 'AKTIF' : 'TIDAK AKTIF'),
-                        '<a href="#" class="btn btn-warning btn-xs" onclick="confirmdeletelineitem(' + '\'' + result.comp + '\'' + ',' + '\'' + result.userid + '\'' + ');" data-toggle="modal" data-target=".modal-confirm-delete-line-item"><i class="fa fa-pencil"></i> Hapus </a>'
+                        (result.userid != '<%=sUserId%>' ? '<a href="#" class="btn btn-warning btn-xs" onclick="confirmdeletelineitem(' + '\'' + result.comp + '\'' + ',' + '\'' + result.userid + '\'' + ');" data-toggle="modal" data-target=".modal-confirm-delete-line-item"><i class="fa fa-pencil"></i> Hapus </a>' : '')
                 ]).draw(false);
             }
         });
@@ -720,6 +753,7 @@ failedCompUserListObject = function (jqXHR, textStatus, errorThrown) {
 function enabledisableinputform(flag) {
     $('#username').prop('disabled', flag);
     $('#userpassword').prop('disabled', flag);
+    $('#usertype').prop('disabled', flag);
     $('#useradd').prop('disabled', flag);
     $('#usertelno').prop('disabled', flag);
 }
@@ -753,6 +787,12 @@ function enabledisableinputform(flag) {
             console.log("succeededUserListObject: " + textStatus);
             resultJSON = JSON.parse(data.d);
 
+            var select = document.getElementById("adduserid");
+            for (var option in select) {
+                select.remove(option);
+            }
+            document.getElementById("adduserid").add(new Option("-select-", ""));
+
             if (resultJSON.result == "Y") {
                 //var t = $('#datatable').DataTable();
                 $.each(resultJSON.userlist, function (i, result) {
@@ -766,6 +806,46 @@ function enabledisableinputform(flag) {
             alert(textStatus);
         }
 
+        function openaddaccessibility() {
+
+            var popupWindow = window.open("UserAccessibility.aspx?action=OPEN&compid=" + $('#compcode').val(), "add_accessibility", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+            if (popupWindow == null) {
+
+                alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+
+            } else {
+                wleft = (screen.width - 1000) / 2;
+                wtop = (screen.height - 800) / 2;
+                if (wleft < 0) {
+                    wleft = 0;
+                }
+                if (wtop < 0) {
+                    wtop = 0;
+                }
+                popupWindow.moveTo(wleft, wtop);
+            }
+        }		
+
+        function manageaccessibility() {
+
+            var popupWindow = window.open("UserAccessibilityMgt.aspx?action=OPEN", "manage_accessibility", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+            if (popupWindow == null) {
+
+                alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+
+            } else {
+                wleft = (screen.width - 1000) / 2;
+                wtop = (screen.height - 800) / 2;
+                if (wleft < 0) {
+                    wleft = 0;
+                }
+                if (wtop < 0) {
+                    wtop = 0;
+                }
+                popupWindow.moveTo(wleft, wtop);
+            }
+        }
+        
     </script>
 
 </asp:Content>

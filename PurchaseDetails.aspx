@@ -43,8 +43,6 @@
                                         <option value="">-select-</option>
                                         <option value="NORMAL" <%=oModOrder.GetSetordertype.Equals("NORMAL")?"selected":"" %>>NORMAL</option>
                                         <option value="PROMOTION" <%=oModOrder.GetSetordertype.Equals("PROMOTION")?"selected":"" %>>PROMOSI</option>
-                                        <option value="AGENT" <%=oModOrder.GetSetordertype.Equals("AGENT")?"selected":"" %>>AGENT</option>
-                                        <option value="STOCKIST" <%=oModOrder.GetSetordertype.Equals("STOCKIST")?"selected":"" %>>STOCKIST</option>
                                         <!--
                                         <option value="YEAREND" <%=oModOrder.GetSetordertype.Equals("YEAREND")?"selected":"" %>>YEAR END</option>
                                         <option value="SUBSIDIARY" <%=oModOrder.GetSetordertype.Equals("SUBSIDIARY")?"selected":"" %>>SUBSIDIARY</option>
@@ -56,7 +54,6 @@
                                         <option value="">-select-</option>
                                         <option value="CASH" <%=oModOrder.GetSetpaytype.Equals("CASH")?"selected":"" %>>TUNAI</option>
                                         <option value="CREDIT" <%=oModOrder.GetSetpaytype.Equals("CREDIT")?"selected":"" %>>KREDIT</option>
-                                        <option value="NOT_APPLICABLE" <%=oModOrder.GetSetpaytype.Equals("NOT_APPLICABLE")?"selected":"" %>>TIDAK BERKENAAN</option>
                                       </select>
                                     <label for="plandate">Tarikh Penerimaan:</label>
                                     <input type="text" id="plandate" class="date-picker form-control" name="plandate" required="required" value="<%=oModOrder.GetSetplandeliverydate %>"/>
@@ -491,7 +488,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                 if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                    $('#bpaddress').text("<%=modBP.GetSetbpaddress%>");
+                                    $('#bpaddress').text("<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>");
                                     $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                     $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                 }

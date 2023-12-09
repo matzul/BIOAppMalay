@@ -1,0 +1,113 @@
+﻿/*
+table {
+    border-collapse: collapse;
+    margin-bottom: 3em;
+    font-size: 70%;
+    line-height: 1.1;
+}
+*/
+/*
+th, td {
+    padding: .3em .5em;
+}
+/*
+th {
+    font-weight: normal;
+    text-align: left;
+    background: url(../images/tabletree-arrow.gif) no-repeat 2px 50%;
+    padding-left: 15px;
+}
+
+    th.name {
+        width: 12em;
+    }
+
+    th.location {
+        width: 12em;
+    }
+
+    th.color {
+        width: 10em;
+    }
+
+thead th {
+    background: #c6ceda;
+    border-color: #fff #fff #888 #fff;
+    border-style: solid;
+    border-width: 1px 1px 2px 1px;
+    padding-left: .5em;
+}
+*/
+
+tbody td.start {
+    font-weight: normal;
+    text-align: left;
+    
+    background: url(../images/tabletree-arrow.gif) no-repeat 2px 50%;
+    
+    padding-left: 15px;    
+}
+
+tbody td.cont {
+    background: url(../images/tabletree-dots.gif) 18px 54% no-repeat;
+    padding-left: 26px;
+}
+
+tbody td.end {
+    background: url(../images/tabletree-dots2.gif) 18px 54% no-repeat;
+    padding-left: 26px;
+}
+/*
+tr:hover, td.start:hover, td.end:hover {
+    background: #FF9;
+}
+*/
+.level0 td:first-child {
+    padding-left: 5px;
+}
+
+.level1 td:first-child {
+    padding-left: 20px;
+}
+
+.level2 td:first-child {
+    padding-left: 35px;
+}
+
+.level3 td:first-child {
+    padding-left: 50px;
+}
+
+.level4 td:first-child {
+    padding-left: 65px;
+}
+
+.level5 td:first-child {
+    padding-left: 80px;
+}
+
+.level6 td:first-child {
+    padding-left: 95px;
+}
+
+.level7 td:first-child {
+    padding-left: 110px;
+}
+
+.collapse .toggle {
+    /*background: url("../images/tabletree-arrow.gif");*/
+    background: url(../images/collapse.gif) no-repeat 2px 50%;
+    padding-left: 5px;
+}
+
+.expand .toggle {
+    /*background: url("../images/tabletree-arrow2.gif");*/
+    background: url(../images/expand.gif) no-repeat 2px 50%;
+    padding-left: 5px;
+}
+
+.toggle {
+    height: 9px;
+    width: 9px;
+    display: inline-block;
+}

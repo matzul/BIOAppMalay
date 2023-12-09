@@ -49,8 +49,13 @@ public partial class InvoiceReport : System.Web.UI.Page
         }
         lsBP = oMainCon.getBPListIncludeSub(sCurrComp);
         lsItem = oMainCon.getItemList(sCurrComp, "", "", "");
+        sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+        sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
     }
-
+    private DateTime FirstDayOfMonth()
+    {
+        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    }
     private void getValues()
     {
         if (Session["userid"] != null)
@@ -83,8 +88,15 @@ public partial class InvoiceReport : System.Web.UI.Page
         }
         if (sAction.Equals("RESET"))
         {
+            sOrderNo = "";
+            sShipmentNo = "";
             sInvoiceNo = "";
             sBPID = "";
+            sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+            sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
+            sItemNo = "";
+            sStatus = "";
+            paymentStatus = "";
         }
     }
 

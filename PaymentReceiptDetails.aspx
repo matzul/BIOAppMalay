@@ -271,11 +271,9 @@
                     <a id="addlineitem" name="addlineitem" class="btn btn-app" data-toggle="modal" data-target=".modal-add-line-item" onclick="openaddlineitem();">
                       <i class="fa fa-plus-square green"></i>Tambah Item
                     </a>
-                    <!--
-                    <a id="printreceipt" name="printreceipt" class="btn btn-app" onclick="openprintorder();">
-                      <i class="fa fa-print dark"></i>Print Receipt
+                    <a id="printreceipt" name="printreceipt" class="btn btn-app" onclick="openprintreceipt();">
+                      <i class="fa fa-print dark"></i>Cetak Resit
                     </a>
-                    -->
                     <a id="receiptdetails" name="receiptdetails" class="btn btn-app" data-toggle="modal" data-target=".modal-receipt-details">
                       <i class="fa fa-edit dark"></i>Maklumat Tambahan
                     </a>
@@ -434,7 +432,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                             if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                                document.getElementById("bpaddress").value = "<%=modBP.GetSetbpaddress%>";
+                                                document.getElementById("bpaddress").value = "<%=oMainCon.RegExReplace(modBP.GetSetbpaddress, ", ")%>";
                                                 $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                                 $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                             }
@@ -684,11 +682,11 @@
                 $(document).ready(function () {
 
                     $('#addlineitem').prop('disabled', true);
-                    $('#printorder').prop('disabled', true);
+                    $('#printreceipt').prop('disabled', true);
                     $('#receiptdetails').prop('disabled', true);
 
                     $('#addlineitem').attr('disabled', 'disabled');
-                    $('#printorder').attr('disabled', 'disabled');
+                    $('#printreceipt').attr('disabled', 'disabled');
                     $('#receiptdetails').attr('disabled', 'disabled');
 
                 <%
@@ -700,11 +698,11 @@
                             { 
                 %>
                     $('#addlineitem').prop('disabled', false);
-                    $('#printorder').prop('disabled', false);
+                    $('#printreceipt').prop('disabled', false);
                     $('#receiptdetails').prop('disabled', false);
 
                     $('#addlineitem').removeAttr('disabled');
-                    $('#printorder').removeAttr('disabled');
+                    $('#printreceipt').removeAttr('disabled');
                     $('#receiptdetails').removeAttr('disabled');
 
                 <%
@@ -723,8 +721,8 @@
                             if (lsPayRcptLineItem.Count > 0)
                             {
                 %>
-                    $('#printorder').prop('disabled', false);
-                    $('#printorder').removeAttr('disabled');
+                    $('#printreceipt').prop('disabled', false);
+                    $('#printreceipt').removeAttr('disabled');
                     $('#receiptdetails').prop('disabled', false);
                     $('#receiptdetails').removeAttr('disabled');
                 <%
@@ -734,6 +732,23 @@
                 %>
 
                 });
+
+                function openprintreceipt() {
+                    var popupWindow = window.open("PaymentReceiptPage.aspx?payrcptno=<%=sPayRcptNo%>", "open_printpayrcpt", "toolbar=0,location=0,status=1,menubar=0,resizable=1,scrollbars=1,width=1000,height=800");
+                    if (popupWindow == null) {
+                        alert("Error: While Launching Session Expiry screen.\nYour browser maybe blocking up Popup windows.\nPlease check your Popup Blocker Settings");
+                    } else {
+                        wleft = (screen.width - 1000) / 2;
+                        wtop = (screen.height - 800) / 2;
+                        if (wleft < 0) {
+                            wleft = 0;
+                        }
+                        if (wtop < 0) {
+                            wtop = 0;
+                        }
+                        popupWindow.moveTo(wleft, wtop);
+                    }
+                }
 
             </script>            
 

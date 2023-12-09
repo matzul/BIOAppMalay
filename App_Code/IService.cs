@@ -24,6 +24,18 @@ public interface IService
     string getCurrentDateFormatDDMMYYYY();
 
     [OperationContract]
+    List<MainModel> getOrderTypeList(String comp, String status, String ordertype);
+
+    [OperationContract]
+    List<MainModel> getOrderCategoryList(String comp, String status, String ordercat);
+
+    [OperationContract]
+    List<MainModel> getPaymentTypeList(String comp, String status, String paymentype);
+
+    [OperationContract]
+    List<MainModel> getBPInfoList(String comp, String status, String bpid, String bpdesc, String bpcat);
+
+    [OperationContract]
     List<MainModel> getOrderItemDiscountList(String comp, String ordercat, String ordertype, String itemno);
 
     [OperationContract]
@@ -88,6 +100,9 @@ public interface IService
     MainModel getOrderDetailsDetails(String comp, String orderno, int lineno, String itemno);
 
     [OperationContract]
+    List<MainModel> getInvoiceDetailsList(String comp, String invoiceno, int lineno, String itemno);
+
+    [OperationContract]
     String insertOrderDetails(MainModel oModOrderDet);
 
     [OperationContract]
@@ -95,6 +110,9 @@ public interface IService
     
     [OperationContract]
     String deleteOrderDetails(MainModel oModOrderDet);
+
+    [OperationContract]
+    String cancelSalesOrderDetails(MainModel oModCounterTransDet);
 
     [OperationContract]
     MainModel getItemStockSummary2(String comp, String itemno);

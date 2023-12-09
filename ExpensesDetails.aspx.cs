@@ -22,6 +22,7 @@ public partial class ExpensesDetails : System.Web.UI.Page
     public ArrayList lsOtherPayTo = new ArrayList();
     public ArrayList lsPendExpMod = new ArrayList();
     public ArrayList lsExpensesLineItem = new ArrayList();
+    public ArrayList lsExpensesType = new ArrayList();
     public ArrayList lsTax = new ArrayList();
     public String selected_bp = "";
 
@@ -216,7 +217,7 @@ public partial class ExpensesDetails : System.Web.UI.Page
             {
                 oModExpenses = oMainCon.getExpensesHeaderDetails(sCurrComp, sExpensesNo);
                 lsExpensesLineItem = oMainCon.getExpensesDetailsList(sCurrComp, sExpensesNo, 0, "");
-                lsPendExpMod = oMainCon.getLineItemPendingExpenses(sCurrComp, "", oModExpenses.GetSetexpensescat, oModExpenses.GetSetexpensestype);
+                lsPendExpMod = oMainCon.getLineItemPendingExpenses(sCurrComp, oModExpenses.GetSetbpid, oModExpenses.GetSetexpensescat, oModExpenses.GetSetexpensestype);
             }
             else
             {
@@ -438,7 +439,7 @@ public partial class ExpensesDetails : System.Web.UI.Page
             }
         }
         lsTax = oMainCon.getTaxList(sCurrComp);
-
+        lsExpensesType = oMainCon.getParametertype("'CAP-EXPENSES','EXPENSES'", "ACTIVE");
     }
 
     protected void btnAction_Click(object sender, EventArgs e)

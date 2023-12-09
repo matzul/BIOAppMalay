@@ -49,6 +49,12 @@ public partial class ExpensesReport : System.Web.UI.Page
         }
         lsPayTo = oMainCon.getBPListIncludeSub(sCurrComp);
         lsItem = oMainCon.getItemList(sCurrComp, "", "", "");
+        sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+        sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
+    }
+    private DateTime FirstDayOfMonth()
+    {
+        return new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
     }
 
     private void getValues()
@@ -86,8 +92,8 @@ public partial class ExpensesReport : System.Web.UI.Page
             sExpensesNo = "";
             sPayToId = "";
             sStatus = "";
-            sStartDate = "";
-            sEndDate = "";
+            sStartDate = FirstDayOfMonth().ToString("dd-MM-yyyy");
+            sEndDate = DateTime.Now.ToString("dd-MM-yyyy");
             sItemNo = "";
             paymentStatus = "";
             sReceiptNo = "";

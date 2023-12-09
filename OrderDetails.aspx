@@ -55,7 +55,6 @@
                                         <option value="">-select-</option>
                                         <option value="CASH" <%=oModOrder.GetSetpaytype.Equals("CASH")?"selected":"" %>>TUNAI</option>
                                         <option value="CREDIT" <%=oModOrder.GetSetpaytype.Equals("CREDIT")?"selected":"" %>>KREDIT</option>
-                                        <option value="NOT_APPLICABLE" <%=oModOrder.GetSetpaytype.Equals("NOT_APPLICABLE")?"selected":"" %>>TIDAK BERKENAAN</option>
                                       </select>
                                     <label for="plandate">Tarikh Penghantaran:</label>
                                     <input type="text" id="plandate" class="date-picker form-control" name="plandate" required="required" value="<%=oModOrder.GetSetplandeliverydate %>"/>
@@ -489,7 +488,7 @@
                                           MainModel modBP = (MainModel)lsBP[i];
                     %>      
                                 if ($(this).val() == "<%=modBP.GetSetbpid%>") {
-                                    $('#bpaddress').text("<%=modBP.GetSetbpaddress%>");
+                                    $('#bpaddress').text("<%=oMainCon.RegExReplace(modBP.GetSetbpaddress,", ")%>");
                                     $('#bpcontact').val("<%=modBP.GetSetbpcontact%>");
                                     $('#bpdesc').val("<%=modBP.GetSetbpdesc%>");
                                 }

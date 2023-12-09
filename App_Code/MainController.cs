@@ -13,6 +13,8 @@ using System.Text;
 using System.Device.Location;
 using System.Net;
 using System.Xml;
+using System.Text.RegularExpressions;
+using System.Data;
 
 /// <summary>
 /// Summary description for MainController
@@ -1153,6 +1155,63 @@ public class MainController
 
     /*** BEGIN FOR ITEM ***/
 
+    public ArrayList getOrderTypeList(String comp, String status, String ordertype)
+    {
+        ArrayList lsOrderTypeMod = new ArrayList();
+
+        MainModel modItem = new MainModel();
+        modItem.GetSetrowno = 1;
+        modItem.GetSetordertype = "NORMAL";
+        modItem.GetSetordertypedesc = "JUALAN NORMAL";
+        lsOrderTypeMod.Add(modItem);
+
+        modItem = new MainModel();
+        modItem.GetSetrowno = 1;
+        modItem.GetSetordertype = "PROMOTION";
+        modItem.GetSetordertypedesc = "JUALAN PROMOSI";
+        lsOrderTypeMod.Add(modItem);
+
+        modItem = new MainModel();
+        modItem.GetSetrowno = 1;
+        modItem.GetSetordertype = "AGENT";
+        modItem.GetSetordertypedesc = "JUALAN AGENT";
+        lsOrderTypeMod.Add(modItem);
+
+        modItem = new MainModel();
+        modItem.GetSetrowno = 1;
+        modItem.GetSetordertype = "STOCKIST";
+        modItem.GetSetordertypedesc = "JUALAN STOCKIST";
+        lsOrderTypeMod.Add(modItem);
+
+        return lsOrderTypeMod;
+    }
+
+    public ArrayList getOrderCategoryList(String comp, String status, String ordercat)
+    {
+        ArrayList lsOrderCatMod = new ArrayList();
+
+        MainModel modItem = new MainModel();
+        modItem.GetSetrowno = 1;
+        modItem.GetSetordercat = "SALES_ORDER";
+        modItem.GetSetordercatdesc = "PESANAN JUALAN";
+        lsOrderCatMod.Add(modItem);
+
+        return lsOrderCatMod;
+    }
+
+    public ArrayList getPaymentTypeList(String comp, String status, String ordertype)
+    {
+        ArrayList lsPayCatMod = new ArrayList();
+
+        MainModel modItem = new MainModel();
+        modItem.GetSetrowno = 1;
+        modItem.GetSetpaytype = "CASH";
+        modItem.GetSetpaytypedesc = "TUNAI";
+        lsPayCatMod.Add(modItem);
+
+        return lsPayCatMod;
+    }
+
     public ArrayList getItemList(String comp, String itemno, String itemdesc, String itemcat)
     {
         ArrayList lsItemMod = new ArrayList();
@@ -1271,7 +1330,7 @@ public class MainController
                 {
                     query = query + " and  item.itemno = '" + itemno + "' ";
                 }
-                query = query + " order by item.comp, item.itemno, item_discount.ordertype ";
+                query = query + " order by item.comp, item.itemno, item_discount.ordercat, item_discount.ordertype ";
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 int rowno = 0;
@@ -1508,12 +1567,18 @@ public class MainController
                 cmd.Parameters.Add("?itemstatus", MySqlDbType.VarChar).Value = oModItem.GetSetitemstatus;
                 cmd.ExecuteNonQuery();
             }
-            dbConnect.CloseConnection();
         }
         catch (Exception e)
         {
             result = "N";
             WriteToLogFile("MainController-insertItemMaster: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -1549,12 +1614,18 @@ public class MainController
                 cmd.Parameters.Add("?itemstatus", MySqlDbType.VarChar).Value = oModItem.GetSetitemstatus;
                 cmd.ExecuteNonQuery();
             }
-            dbConnect.CloseConnection();
         }
         catch (Exception e)
         {
             result = "N";
             WriteToLogFile("MainController-updateItemMaster: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -1588,6 +1659,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertItemDiscount: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -1623,6 +1701,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateItemDiscount: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -1652,6 +1737,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-deleteItemDiscount: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -1785,6 +1877,7 @@ public class MainController
                 query = query + "        0 sum_qtysoo, 0 sum_qtysod ";
                 query = query + " FROM   item ";
                 query = query + " WHERE  item.comp is not NULL ";
+                query = query + " AND    item.itemcat = 'INVENTORY' ";
                 if (comp.Trim().Length > 0)
                 {
                     query = query + " and  item.comp = '" + comp + "' ";
@@ -1792,6 +1885,59 @@ public class MainController
                 if (itemno.Trim().Length > 0)
                 {
                     query = query + " and  item.itemno = '" + itemno + "' ";
+                }
+                query = query + " group by item.comp, item.itemno, item.itemdesc ";
+                query = query + " order by item.comp, item.itemno, item.itemdesc ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modItem = new MainModel();
+                    modItem.GetSetcomp = replaceNull(dataReader, "comp");
+                    modItem.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modItem.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modItem.GetSetitemcat = replaceNull(dataReader, "itemcat");
+                    modItem.GetSetqtysoh = replaceZero(dataReader, "sum_qtysoh");
+                    modItem.GetSetcostsoh = replaceDoubleZero(dataReader, "sum_costsoh");
+                    modItem.GetSetqtyallocated = replaceZero(dataReader, "sum_qtyallocated");
+                    modItem.GetSetqtyavailable = replaceZero(dataReader, "sum_qtyavailable");
+                    modItem.GetSetqtyorder = replaceZero(dataReader, "sum_qtysoo");
+                    modItem.GetSetqtydemand = replaceZero(dataReader, "sum_qtysod");
+                    lsItemMod.Add(modItem);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getItemStockListSummary2: " + e.Message.ToString());
+        }
+        return lsItemMod;
+    }
+    public ArrayList getItemStockListSummary3(String comp, String searchitem)
+    {
+        ArrayList lsItemMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT item.comp, item.itemno, item.itemdesc, item.itemcat, (select sum(item_stock.qtysoh) from item_stock where item_stock.comp = item.comp and item_stock.itemno = item.itemno) sum_qtysoh, (select sum(item_stock.costsoh) from item_stock where item_stock.comp = item.comp and item_stock.itemno = item.itemno) sum_costsoh, ";
+                query = query + "        ifnull((SELECT sum(shipment_details.shipment_quantity) FROM shipment_details WHERE shipment_details.comp = item.comp AND shipment_details.itemno = item.itemno and shipment_details.shipmentno IN (SELECT shipment_header.shipmentno FROM shipment_header WHERE shipment_header.status = 'NEW' and shipment_header.comp = shipment_details.comp)), 0) sum_qtyallocated, ";
+                query = query + "        (select sum(item_stock.qtysoh) from item_stock where item_stock.comp = item.comp and item_stock.itemno = item.itemno) - ifnull((SELECT sum(shipment_details.shipment_quantity) FROM shipment_details WHERE shipment_details.comp = item.comp AND shipment_details.itemno = item.itemno and shipment_details.shipmentno IN (SELECT shipment_header.shipmentno FROM shipment_header WHERE shipment_header.status = 'NEW' and shipment_header.comp = shipment_details.comp)), 0) sum_qtyavailable, ";
+                query = query + "        0 sum_qtysoo, 0 sum_qtysod ";
+                query = query + " FROM   item ";
+                query = query + " WHERE  item.comp is not NULL ";
+                query = query + " AND    item.itemcat = 'INVENTORY' ";
+                query = query + " and  item.comp = '" + comp + "' ";
+                if (searchitem.Trim().Length > 0)
+                {
+                    query = query + " and  (upper(item.itemno) like upper('%" + searchitem + "%') ";
+                    query = query + " or  upper(item.itemdesc) like upper('%" + searchitem + "%')) ";
                 }
                 query = query + " group by item.comp, item.itemno, item.itemdesc ";
                 query = query + " order by item.comp, item.itemno, item.itemdesc ";
@@ -1916,6 +2062,7 @@ public class MainController
                     query = query + " and item_stock.qtysoh - ifnull((SELECT sum(shipment_details.shipment_quantity) FROM shipment_details WHERE shipment_details.comp = item_stock.comp AND shipment_details.itemno = item_stock.itemno AND shipment_details.location = item_stock.location AND shipment_details.datesoh = item_stock.datesoh and shipment_details.shipmentno IN (SELECT shipment_header.shipmentno FROM shipment_header WHERE shipment_header.status = 'NEW')), 0) > 0 ";
                 }
                 query = query + " order by item_stock.comp, item_stock.itemno ";
+                //WriteToLogFile("MainController-getItemStockList [SQL]: " + query);
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
@@ -2044,6 +2191,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertItemStock: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -2085,6 +2239,58 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updateItemStock: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String deleteItemStock(MainModel oModItem)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM item_stock ";
+                query = query + " WHERE  comp = ?comp AND itemno = ?itemno AND location = ?location AND datesoh = ?datesoh ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModItem.GetSetcomp;
+                cmd.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = oModItem.GetSetitemno;
+                cmd.Parameters.Add("?location", MySqlDbType.VarChar).Value = oModItem.GetSetlocation;
+                if (oModItem.GetSetdatesoh.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModItem.GetSetdatesoh, ukDtfi);
+                    cmd.Parameters.Add("?datesoh", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datesoh", MySqlDbType.DateTime).Value = DateTime.Now;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deleteItemStock: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -2251,6 +2457,114 @@ public class MainController
                     if (modItem.GetSettransqty < 0)
                     {
                         modItem.GetSettransqty = modItem.GetSettransqty * -1;
+                        modItem.GetSettransflow = "OUT";
+                    }
+                    else
+                    {
+                        modItem.GetSettransflow = "IN";
+                    }
+                    modItem.GetSettransprice = replaceDoubleZero(dataReader, "transprice");
+                    lsItemMod.Add(modItem);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getItemStockTransactionsList: " + e.Message.ToString());
+        }
+        return lsItemMod;
+    }
+
+    public ArrayList getItemStockTransactionsList(String comp, String itemno, String location, String datesoh, String selyear, String selmonth, String selday, String transflow)
+    {
+        ArrayList lsItemMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT item_stock_transactions.comp, item_stock_transactions.itemno, item_stock_transactions.itemdesc, item_stock_transactions.location, ";
+                query = query + "        date_format(item_stock_transactions.datesoh,'%d-%m-%Y %H:%i:%s') str_datesoh, item_stock_transactions.qtysoh, item_stock_transactions.costsoh, ";
+                query = query + "        date_format(item_stock_transactions.transdate,'%d-%m-%Y %H:%i:%s') str_transdate, item_stock_transactions.transtype, item_stock_transactions.transno, item_stock_transactions.trans_lineno, ";
+                query = query + "        item_stock_transactions.orderno, item_stock_transactions.order_lineno, item_stock_transactions.transqty, item_stock_transactions.transprice ";
+                query = query + " from   item_stock_transactions ";
+                query = query + " WHERE  item_stock_transactions.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  item_stock_transactions.comp = '" + comp + "' ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  item_stock_transactions.itemno = '" + itemno + "' ";
+                }
+                if (location.Trim().Length > 0)
+                {
+                    query = query + " and  item_stock_transactions.location = '" + location + "' ";
+                }
+                if (datesoh.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(item_stock_transactions.datesoh,'%d-%m-%Y %H:%i:%s') = '" + datesoh + "' ";
+                }
+                if (selyear.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(item_stock_transactions.transdate,'%Y') = '" + selyear + "'";
+                }
+                if (selmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(item_stock_transactions.transdate,'%m') = '" + selmonth + "'";
+                }
+                if (selday.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(item_stock_transactions.transdate,'%d') = '" + selday + "'";
+                }
+                if (transflow.Trim().Length > 0)
+                {
+                    if (transflow.Equals("BEGIN"))
+                    {
+                        query = query + " and  EXISTS (select adjustment_header.adjustmentno from adjustment_header where adjustment_header.comp = item_stock_transactions.comp and adjustment_header.adjustmentno = item_stock_transactions.transno and adjustment_header.adjustmenttype = 'BEGINING_STOCK') ";
+                    }
+                    else if (transflow.Equals("IN"))
+                    {
+                        query = query + " and  item_stock_transactions.transqty > 0 ";
+                        query = query + " and  NOT EXISTS (select adjustment_header.adjustmentno from adjustment_header where adjustment_header.comp = item_stock_transactions.comp and adjustment_header.adjustmentno = item_stock_transactions.transno and adjustment_header.adjustmenttype = 'BEGINING_STOCK') ";
+                    }
+                    else if (transflow.Equals("OUT"))
+                    {
+                        query = query + " and  item_stock_transactions.transqty < 0 ";
+                        query = query + " and  NOT EXISTS (select adjustment_header.adjustmentno from adjustment_header where adjustment_header.comp = item_stock_transactions.comp and adjustment_header.adjustmentno = item_stock_transactions.transno and adjustment_header.adjustmenttype = 'BEGINING_STOCK') ";
+                    }
+                    else if (transflow.Equals("IN_OUT"))
+                    {
+                        query = query + " and  NOT EXISTS (select adjustment_header.adjustmentno from adjustment_header where adjustment_header.comp = item_stock_transactions.comp and adjustment_header.adjustmentno = item_stock_transactions.transno and adjustment_header.adjustmenttype = 'BEGINING_STOCK') ";
+                    }
+                }
+                query = query + " order by item_stock_transactions.comp, item_stock_transactions.transdate, item_stock_transactions.transno, item_stock_transactions.itemno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modItem = new MainModel();
+                    modItem.GetSetcomp = replaceNull(dataReader, "comp");
+                    modItem.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modItem.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modItem.GetSetlocation = replaceNull(dataReader, "location");
+                    modItem.GetSetdatesoh = replaceNull(dataReader, "str_datesoh");
+                    modItem.GetSetqtysoh = replaceZero(dataReader, "qtysoh");
+                    modItem.GetSetcostsoh = replaceDoubleZero(dataReader, "costsoh");
+                    modItem.GetSettransdate = replaceNull(dataReader, "str_transdate");
+                    modItem.GetSettranstype = replaceNull(dataReader, "transtype");
+                    modItem.GetSettransno = replaceNull(dataReader, "transno");
+                    modItem.GetSettrans_lineno = replaceZero(dataReader, "trans_lineno");
+                    modItem.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modItem.GetSetorder_lineno = replaceZero(dataReader, "order_lineno");
+                    modItem.GetSettransqty = replaceZero(dataReader, "transqty");
+                    if (modItem.GetSettransqty < 0)
+                    {
                         modItem.GetSettransflow = "OUT";
                     }
                     else
@@ -2506,6 +2820,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertItemStockTransactions: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -2554,6 +2875,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReportStockTrans: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return dStockTransAmount;
     }
@@ -2607,6 +2935,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReportStockTrans: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return dStockTransQty;
     }
@@ -2674,6 +3009,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-storeBLOBFile: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -2740,6 +3082,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getBLOBFile: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsItemMod;
     }
@@ -2836,6 +3185,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getBPList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsBPMod;
     }
 
@@ -2919,14 +3275,17 @@ public class MainController
                 }
                 if (solidbp.Trim().Length > 0)
                 {
-                    query = query + " and  businesspartner.bpcat <> 'SYSTEM' ";
+                    query = query + " and  (businesspartner.bpcat <> 'SYSTEM' or businesspartner.bpcat <> 'INTERNAL') ";
                 }
                 query = query + " order by businesspartner.comp, businesspartner.bpid ";
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
+                int rowno = 0;
                 while (dataReader.Read())
                 {
                     MainModel modBP = new MainModel();
+                    rowno = rowno + 1;
+                    modBP.GetSetrowno = rowno;
                     modBP.GetSetcomp = replaceNull(dataReader, "comp");
                     modBP.GetSetbpid = replaceNull(dataReader, "bpid");
                     modBP.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
@@ -3095,6 +3454,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertBusinessPartner: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -3134,10 +3500,2490 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateBusinessPartner: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
     /*** END FOR BP ***/
+
+    #region FOR ASSET
+    /*** BEGIN FOR ASSET ***/
+
+    public ArrayList getAssetList(String comp, String assetno, String assetdesc, String assetcat, String assettype, String status)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.assetno, a.assetdesc, a.assettyp, a.assetcat, a.assetowner, a.assetrefno, ";
+                query = query + "        date_format(a.datemfg,'%d-%m-%Y') str_datemfg, a.warranty, date_format(a.datewarend,'%d-%m-%Y') str_datewarend, ";
+                query = query + "        date_format(a.datereg,'%d-%m-%Y') str_datereg, ";
+                query = query + "        (select sum(y.tranqty) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = a.assetno) qtyreg, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = a.assetno) costreg, ";
+                query = query + "        a.deprtyp, a.deprrate, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'DEPCOST' and y.assetno = a.assetno) depraccum, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetno like '%" + assetno + "%' ";
+                }
+                if (assetdesc.Trim().Length > 0)
+                {
+                    query = query + " and  upper(a.assetdesc) like '%" + assetdesc + "%' ";
+                }
+                if (assetcat.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetcat = '" + assetcat + "' ";
+                }
+                if (assettype.Trim().Length > 0)
+                {
+                    query = query + " and  a.assettype = '" + assettype + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.assetdesc ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSetassettyp = replaceNull(dataReader, "assettyp");
+                    modAsset.GetSetassetcat = replaceNull(dataReader, "assetcat");
+                    modAsset.GetSetassetowner = replaceNull(dataReader, "assetowner");
+                    modAsset.GetSetassetrefno = replaceNull(dataReader, "assetrefno");
+                    modAsset.GetSetdatemfg = replaceNull(dataReader, "str_datemfg");
+                    modAsset.GetSetwarranty = replaceNull(dataReader, "warranty");
+                    modAsset.GetSetdatewarend = replaceNull(dataReader, "str_datewarend");
+                    modAsset.GetSetdatereg = replaceNull(dataReader, "str_datereg");
+                    modAsset.GetSetcostreg = replaceDoubleZero(dataReader, "costreg");
+                    modAsset.GetSetdeprtyp = replaceNull(dataReader, "deprtyp");
+                    modAsset.GetSetdeprrate = replaceDoubleZero(dataReader, "deprrate");
+                    modAsset.GetSetdepraccum = replaceDoubleZero(dataReader, "depraccum");
+                    //modAsset.GetSetassetnbv = replaceDoubleZero(dataReader, "assetnbv");
+                    modAsset.GetSetassetnbv = modAsset.GetSetcostreg - modAsset.GetSetdepraccum;
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getAssetList(String comp, String assetno, String assetdesc, String assetcat, String assettype, String status, String currpage)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.assetno, a.assetdesc, a.assettyp, a.assetcat, a.assetowner, a.assetrefno, ";
+                query = query + "        date_format(a.datemfg,'%d-%m-%Y') str_datemfg, a.warranty, date_format(a.datewarend,'%d-%m-%Y') str_datewarend, ";
+                query = query + "        date_format(a.datereg,'%d-%m-%Y') str_datereg, ";
+                query = query + "        (select sum(y.tranqty) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = a.assetno) qtyreg, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = a.assetno) costreg, ";
+                query = query + "        a.deprtyp, a.deprrate, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'DEPCOST' and y.assetno = a.assetno) depraccum, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetno like '%" + assetno + "%' ";
+                }
+                if (assetdesc.Trim().Length > 0)
+                {
+                    query = query + " and  upper(a.assetdesc) like '%" + assetdesc + "%' ";
+                }
+                if (assetcat.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetcat = '" + assetcat + "' ";
+                }
+                if (assettype.Trim().Length > 0)
+                {
+                    query = query + " and  a.assettype = '" + assettype + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.assetdesc ";
+                if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSetassettyp = replaceNull(dataReader, "assettyp");
+                    modAsset.GetSetassetcat = replaceNull(dataReader, "assetcat");
+                    modAsset.GetSetassetowner = replaceNull(dataReader, "assetowner");
+                    modAsset.GetSetassetrefno = replaceNull(dataReader, "assetrefno");
+                    modAsset.GetSetdatemfg = replaceNull(dataReader, "str_datemfg");
+                    modAsset.GetSetwarranty = replaceNull(dataReader, "warranty");
+                    modAsset.GetSetdatewarend = replaceNull(dataReader, "str_datewarend");
+                    modAsset.GetSetdatereg = replaceNull(dataReader, "str_datereg");
+                    modAsset.GetSetqtyreg = replaceZero(dataReader, "qtyreg");
+                    modAsset.GetSetcostreg = replaceDoubleZero(dataReader, "costreg");
+                    modAsset.GetSetdeprtyp = replaceNull(dataReader, "deprtyp");
+                    modAsset.GetSetdeprrate = replaceDoubleZero(dataReader, "deprrate");
+                    modAsset.GetSetdepraccum = replaceDoubleZero(dataReader, "depraccum");
+                    //modAsset.GetSetassetnbv = replaceDoubleZero(dataReader, "assetnbv");
+                    modAsset.GetSetassetnbv = modAsset.GetSetcostreg - modAsset.GetSetdepraccum;
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getAssetListPlacement(String comp, String assetno, String assetdesc, String assetcat, String assettype, String trandate, String status)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT b.id, a.comp, a.assetno, a.assetdesc, a.assettyp, a.assetcat, a.assetowner, a.assetrefno, ";
+                query = query + "        b.country, (select paramdesc from parameters where comp = '000' and paramtype = 'COUNTRY' and paramstatus = 'ACTIVE' and paramid = b.country) str_country, ";
+                query = query + "        b.state, (select paramdesc from parameters where comp = '000' and paramtype = 'STATE' and paramstatus = 'ACTIVE' and paramid = b.state) str_state, ";
+                query = query + "        b.district, (select paramdesc from parameters where comp = '000' and paramtype = 'DISTRICT' and paramstatus = 'ACTIVE' and paramid = b.district) str_district, ";
+                query = query + "        b.location, date_format(b.trandate,'%d-%m-%Y') str_trandate, b.tranqty, ";
+                query = query + "        b.purpose, b.officerid, b.officername, b.contactno, ";
+                query = query + "        b.remarks, b.status, b.createdby, b.createddate, b.confirmedby, b.confirmeddate, b.cancelledby, b.cancelleddate ";
+                query = query + " from   asset a left join asset_placement b on a.comp = b.comp and a.assetno = b.assetno ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetno like '%" + assetno + "%' ";
+                }
+                if (assetdesc.Trim().Length > 0)
+                {
+                    query = query + " and  upper(a.assetdesc) like '%" + assetdesc + "%' ";
+                }
+                if (assetcat.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetcat = '" + assetcat + "' ";
+                }
+                if (assettype.Trim().Length > 0)
+                {
+                    query = query + " and  a.assettype = '" + assettype + "' ";
+                }
+                if (trandate.Trim().Length > 0)
+                {
+                    query = query + " and  b.trandate = ?trandate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  b.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, b.trandate ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (trandate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(trandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSetassettyp = replaceNull(dataReader, "assettyp");
+                    modAsset.GetSetassetcat = replaceNull(dataReader, "assetcat");
+                    modAsset.GetSetassetowner = replaceNull(dataReader, "assetowner");
+                    modAsset.GetSetassetrefno = replaceNull(dataReader, "assetrefno");
+
+                    modAsset.GetSetcountry = replaceNull(dataReader, "country");
+                    modAsset.GetSetcountry_desc = replaceNull(dataReader, "str_country");
+                    modAsset.GetSetstate = replaceNull(dataReader, "state");
+                    modAsset.GetSetstate_desc = replaceNull(dataReader, "str_state");
+                    modAsset.GetSetdistrict = replaceNull(dataReader, "district");
+                    modAsset.GetSetdistrict_desc = replaceNull(dataReader, "str_district");
+                    modAsset.GetSetlocation = replaceNull(dataReader, "location");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+
+                    modAsset.GetSetpurpose = replaceNull(dataReader, "purpose");
+                    modAsset.GetSetofficerid = replaceNull(dataReader, "officerid");
+                    modAsset.GetSetofficername = replaceNull(dataReader, "officername");
+                    modAsset.GetSetcontactno = replaceNull(dataReader, "contactno");
+
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetListPlacement: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getAssetListPlacement(String comp, String assetno, String assetdesc, String assetcat, String assettype, String trandate, String status, String currpage)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT b.id, a.comp, a.assetno, a.assetdesc, a.assettyp, a.assetcat, a.assetowner, a.assetrefno, ";
+                query = query + "        b.country, (select paramdesc from parameters where comp = '000' and paramtype = 'COUNTRY' and paramstatus = 'ACTIVE' and paramid = b.country) str_country, ";
+                query = query + "        b.state, (select paramdesc from parameters where comp = '000' and paramtype = 'STATE' and paramstatus = 'ACTIVE' and paramid = b.state) str_state, ";
+                query = query + "        b.district, (select paramdesc from parameters where comp = '000' and paramtype = 'DISTRICT' and paramstatus = 'ACTIVE' and paramid = b.district) str_district, ";
+                query = query + "        b.location, date_format(b.trandate,'%d-%m-%Y') str_trandate, b.tranqty, ";
+                query = query + "        b.purpose, b.officerid, b.officername, b.contactno, ";
+                query = query + "        b.remarks, b.status, b.createdby, b.createddate, b.confirmedby, b.confirmeddate, b.cancelledby, b.cancelleddate ";
+                query = query + " from   asset a left join asset_placement b on a.comp = b.comp and a.assetno = b.assetno ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetno like '%" + assetno + "%' ";
+                }
+                if (assetdesc.Trim().Length > 0)
+                {
+                    query = query + " and  upper(a.assetdesc) like '%" + assetdesc + "%' ";
+                }
+                if (assetcat.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetcat = '" + assetcat + "' ";
+                }
+                if (assettype.Trim().Length > 0)
+                {
+                    query = query + " and  a.assettype = '" + assettype + "' ";
+                }
+                if (trandate.Trim().Length > 0)
+                {
+                    query = query + " and  b.trandate = ?trandate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, b.trandate ";
+                if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (trandate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(trandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSetassettyp = replaceNull(dataReader, "assettyp");
+                    modAsset.GetSetassetcat = replaceNull(dataReader, "assetcat");
+                    modAsset.GetSetassetowner = replaceNull(dataReader, "assetowner");
+                    modAsset.GetSetassetrefno = replaceNull(dataReader, "assetrefno");
+
+                    modAsset.GetSetcountry = replaceNull(dataReader, "country");
+                    modAsset.GetSetcountry_desc = replaceNull(dataReader, "str_country");
+                    modAsset.GetSetstate = replaceNull(dataReader, "state");
+                    modAsset.GetSetstate_desc = replaceNull(dataReader, "str_state");
+                    modAsset.GetSetdistrict = replaceNull(dataReader, "district");
+                    modAsset.GetSetdistrict_desc = replaceNull(dataReader, "str_district");
+                    modAsset.GetSetlocation = replaceNull(dataReader, "location");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+
+                    modAsset.GetSetpurpose = replaceNull(dataReader, "purpose");
+                    modAsset.GetSetofficerid = replaceNull(dataReader, "officerid");
+                    modAsset.GetSetofficername = replaceNull(dataReader, "officername");
+                    modAsset.GetSetcontactno = replaceNull(dataReader, "contactno");
+
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetListPlacement: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getListPlacement(String comp, String assetno, String trandate, String status)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT b.id, b.comp, b.assetno, ";
+                query = query + "        b.country, (select paramdesc from parameters where comp = '000' and paramtype = 'COUNTRY' and paramstatus = 'ACTIVE' and paramid = b.country) str_country, ";
+                query = query + "        b.state, (select paramdesc from parameters where comp = '000' and paramtype = 'STATE' and paramstatus = 'ACTIVE' and paramid = b.state) str_state, ";
+                query = query + "        b.district, (select paramdesc from parameters where comp = '000' and paramtype = 'DISTRICT' and paramstatus = 'ACTIVE' and paramid = b.district) str_district, ";
+                query = query + "        b.location, date_format(b.trandate,'%d-%m-%Y') str_trandate, b.tranqty, ";
+                query = query + "        b.purpose, b.officerid, b.officername, b.contactno, ";
+                query = query + "        b.remarks, b.status, b.createdby, b.createddate, b.confirmedby, b.confirmeddate, b.cancelledby, b.cancelleddate ";
+                query = query + " from   asset_placement b ";
+                query = query + " WHERE  b.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  b.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  b.assetno = '" + assetno + "' ";
+                }
+                if (trandate.Trim().Length > 0)
+                {
+                    query = query + " and  b.trandate = ?trandate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  b.status = '" + status + "' ";
+                }
+                query = query + " order by b.comp, b.trandate ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (trandate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(trandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+
+                    modAsset.GetSetcountry = replaceNull(dataReader, "country");
+                    modAsset.GetSetcountry_desc = replaceNull(dataReader, "str_country");
+                    modAsset.GetSetstate = replaceNull(dataReader, "state");
+                    modAsset.GetSetstate_desc = replaceNull(dataReader, "str_state");
+                    modAsset.GetSetdistrict = replaceNull(dataReader, "district");
+                    modAsset.GetSetdistrict_desc = replaceNull(dataReader, "str_district");
+                    modAsset.GetSetlocation = replaceNull(dataReader, "location");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+
+                    modAsset.GetSetpurpose = replaceNull(dataReader, "purpose");
+                    modAsset.GetSetofficerid = replaceNull(dataReader, "officerid");
+                    modAsset.GetSetofficername = replaceNull(dataReader, "officername");
+                    modAsset.GetSetcontactno = replaceNull(dataReader, "contactno");
+
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getListPlacement: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public MainModel getPlacementDetails(Int64 id, String comp, String assetno, String trandate, String status)
+    {
+        MainModel modAsset = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT b.id, b.comp, b.assetno, b.country, b.state, b.district, b.location, date_format(b.trandate,'%d-%m-%Y') str_trandate, b.tranqty, ";
+                query = query + "        b.purpose, b.officerid, b.officername, b.contactno, ";
+                query = query + "        b.remarks, b.status, b.createdby, b.createddate, b.confirmedby, b.confirmeddate, b.cancelledby, b.cancelleddate ";
+                query = query + " from   asset_placement b ";
+                query = query + " WHERE  b.comp is not NULL ";
+                if (id > 0)
+                {
+                    query = query + " and  b.id = " + id + " ";
+                }
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  b.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  b.assetno = '" + assetno + "' ";
+                }
+                if (trandate.Trim().Length > 0)
+                {
+                    query = query + " and  b.trandate = ?trandate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  b.status = '" + status + "' ";
+                }
+                query = query + " order by b.comp, b.trandate ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (trandate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(trandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+
+                    modAsset.GetSetcountry = replaceNull(dataReader, "country");
+                    modAsset.GetSetstate = replaceNull(dataReader, "state");
+                    modAsset.GetSetdistrict = replaceNull(dataReader, "district");
+                    modAsset.GetSetlocation = replaceNull(dataReader, "location");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+
+                    modAsset.GetSetpurpose = replaceNull(dataReader, "purpose");
+                    modAsset.GetSetofficerid = replaceNull(dataReader, "officerid");
+                    modAsset.GetSetofficername = replaceNull(dataReader, "officername");
+                    modAsset.GetSetcontactno = replaceNull(dataReader, "contactno");
+
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPlacementDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modAsset;
+    }
+
+    public String insertPlacementDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO asset_placement (comp, assetno, country, state, district, location, trandate, tranqty, purpose, officerid, officername, contactno, remarks, status, createdby, createddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?assetno, ?country, ?state, ?district, ?location, ?trandate, ?tranqty, ?purpose, ?officerid, ?officername, ?contactno, ?remarks, ?status, ?createdby, ?createddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.Parameters.Add("?country", MySqlDbType.VarChar).Value = oModAsset.GetSetcountry;
+                cmd.Parameters.Add("?state", MySqlDbType.VarChar).Value = oModAsset.GetSetstate;
+                cmd.Parameters.Add("?district", MySqlDbType.VarChar).Value = oModAsset.GetSetdistrict;
+                cmd.Parameters.Add("?location", MySqlDbType.VarChar).Value = oModAsset.GetSetlocation;
+                if (oModAsset.GetSettrandate.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSettrandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?tranqty", MySqlDbType.Int16).Value = oModAsset.GetSettranqty;
+                cmd.Parameters.Add("?purpose", MySqlDbType.VarChar).Value = oModAsset.GetSetpurpose;
+                cmd.Parameters.Add("?officerid", MySqlDbType.VarChar).Value = oModAsset.GetSetofficerid;
+                cmd.Parameters.Add("?officername", MySqlDbType.VarChar).Value = oModAsset.GetSetofficername;
+                cmd.Parameters.Add("?contactno", MySqlDbType.VarChar).Value = oModAsset.GetSetcontactno;
+
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModAsset.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModAsset.GetSetcreatedby;
+                if (oModAsset.GetSetcreatedby.Length > 0)
+                {
+                    if (oModAsset.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcreateddate);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModAsset.GetSetconfirmedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetconfirmeddate);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModAsset.GetSetcancelledby;
+                if (oModAsset.GetSetcancelledby.Length > 0)
+                {
+                    if (oModAsset.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcancelleddate);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertPlacementDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updatePlacementDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE asset_placement ";
+                query = query + " SET country = ?country, state = ?state, district = ?district, location = ?location, trandate = ?trandate, tranqty = ?tranqty, purpose = ?purpose, officerid = ?officerid, officername = ?officername, contactno = ?contactno, remarks = ?remarks, status = ?status, createdby = ?createdby, createddate = ?createddate, confirmedby = ?confirmedby, confirmeddate = ?confirmeddate, cancelledby = ?cancelledby, cancelleddate = ?cancelleddate ";
+                query = query + " WHERE id = ?id and comp = ?comp and assetno = ?assetno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?id", MySqlDbType.Int64).Value = oModAsset.GetSetlineno;
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.Parameters.Add("?country", MySqlDbType.VarChar).Value = oModAsset.GetSetcountry;
+                cmd.Parameters.Add("?state", MySqlDbType.VarChar).Value = oModAsset.GetSetstate;
+                cmd.Parameters.Add("?district", MySqlDbType.VarChar).Value = oModAsset.GetSetdistrict;
+                cmd.Parameters.Add("?location", MySqlDbType.VarChar).Value = oModAsset.GetSetlocation;
+                if (oModAsset.GetSettrandate.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSettrandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?tranqty", MySqlDbType.Int16).Value = oModAsset.GetSettranqty;
+                cmd.Parameters.Add("?purpose", MySqlDbType.VarChar).Value = oModAsset.GetSetpurpose;
+                cmd.Parameters.Add("?officerid", MySqlDbType.VarChar).Value = oModAsset.GetSetofficerid;
+                cmd.Parameters.Add("?officername", MySqlDbType.VarChar).Value = oModAsset.GetSetofficername;
+                cmd.Parameters.Add("?contactno", MySqlDbType.VarChar).Value = oModAsset.GetSetcontactno;
+
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModAsset.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModAsset.GetSetcreatedby;
+                if (oModAsset.GetSetcreatedby.Length > 0)
+                {
+                    if (oModAsset.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcreateddate);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModAsset.GetSetconfirmedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetconfirmeddate);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModAsset.GetSetcancelledby;
+                if (oModAsset.GetSetcancelledby.Length > 0)
+                {
+                    if (oModAsset.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcancelleddate);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updatePlacementDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String deletePlacementDetails(Int64 lineno)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM asset_placement ";
+                query = query + " WHERE id = ?id ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?id", MySqlDbType.Int64).Value = lineno;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deletePlacementDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public MainModel getAssetDetails(String comp, String assetno)
+    {
+        MainModel modAsset = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.assetno, a.assetdesc, a.assettyp, a.assetcat, a.assetowner, a.assetrefno, ";
+                query = query + "        date_format(a.datemfg,'%d-%m-%Y') str_datemfg, a.warranty, date_format(a.datewarend,'%d-%m-%Y') str_datewarend, ";
+                query = query + "        date_format(a.datereg,'%d-%m-%Y') str_datereg, ";
+                query = query + "        (select sum(y.tranqty) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = a.assetno) qtyreg, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = a.assetno) costreg, ";
+                query = query + "        a.deprtyp, a.deprrate, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = a.comp and x.tranno = y.tranno and x.status in ('NEW','CONFIRMED') and x.trancode = y.trancode and y.trancode = 'DEPCOST' and y.assetno = a.assetno) depraccum, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  a.assetno = '" + assetno + "' ";
+                }
+                query = query + " order by a.comp, a.assetdesc ";
+                WriteToLogFile("MainController-getAssetDetails: [SQL] " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSetassettyp = replaceNull(dataReader, "assettyp");
+                    modAsset.GetSetassetcat = replaceNull(dataReader, "assetcat");
+                    modAsset.GetSetassetowner = replaceNull(dataReader, "assetowner");
+                    modAsset.GetSetassetrefno = replaceNull(dataReader, "assetrefno");
+                    modAsset.GetSetdatemfg = replaceNull(dataReader, "str_datemfg");
+                    modAsset.GetSetwarranty = replaceNull(dataReader, "warranty");
+                    modAsset.GetSetdatewarend = replaceNull(dataReader, "str_datewarend");
+                    modAsset.GetSetdatereg = replaceNull(dataReader, "str_datereg");
+                    modAsset.GetSetqtyreg = replaceZero(dataReader, "qtyreg");
+                    modAsset.GetSetcostreg = replaceDoubleZero(dataReader, "costreg");
+                    modAsset.GetSetdeprtyp = replaceNull(dataReader, "deprtyp");
+                    modAsset.GetSetdeprrate = replaceDoubleZero(dataReader, "deprrate");
+                    modAsset.GetSetdepraccum = replaceDoubleZero(dataReader, "depraccum");
+                    modAsset.GetSetassetnbv = modAsset.GetSetcostreg - modAsset.GetSetdepraccum;
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modAsset;
+    }
+
+    public String insertAssetDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO asset (comp, assetno, assetdesc, assetcat, assettyp, assetowner, assetrefno, datemfg, warranty, datewarend, datereg, deprtyp, deprrate, remarks, status, createdby, createddate, modifiedby, modifieddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?assetno, ?assetdesc, ?assetcat, ?assettyp, ?assetowner, ?assetrefno, ?datemfg, ?warranty, ?datewarend, ?datereg, ?deprtyp, ?deprrate, ?remarks, ?status, ?createdby, ?createddate, ?modifiedby, ?modifieddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.Parameters.Add("?assetdesc", MySqlDbType.VarChar).Value = oModAsset.GetSetassetdesc;
+                cmd.Parameters.Add("?assetcat", MySqlDbType.VarChar).Value = oModAsset.GetSetassetcat;
+                cmd.Parameters.Add("?assettyp", MySqlDbType.VarChar).Value = oModAsset.GetSetassettyp;
+
+                cmd.Parameters.Add("?assetowner", MySqlDbType.VarChar).Value = oModAsset.GetSetassetowner;
+                cmd.Parameters.Add("?assetrefno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetrefno;
+                if (oModAsset.GetSetdatemfg.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSetdatemfg, ukDtfi);
+                    cmd.Parameters.Add("?datemfg", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datemfg", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?warranty", MySqlDbType.VarChar).Value = oModAsset.GetSetwarranty;
+                if (oModAsset.GetSetdatewarend.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSetdatewarend, ukDtfi);
+                    cmd.Parameters.Add("?datewarend", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datewarend", MySqlDbType.DateTime).Value = null;
+                }
+
+                if (oModAsset.GetSetdatereg.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSetdatereg, ukDtfi);
+                    cmd.Parameters.Add("?datereg", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datereg", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?deprtyp", MySqlDbType.VarChar).Value = oModAsset.GetSetdeprtyp;
+                cmd.Parameters.Add("?deprrate", MySqlDbType.Double).Value = oModAsset.GetSetdeprrate;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModAsset.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModAsset.GetSetcreatedby;
+                if (oModAsset.GetSetcreatedby.Length > 0)
+                {
+                    if (oModAsset.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcreateddate);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?modifiedby", MySqlDbType.VarChar).Value = oModAsset.GetSetmodifiedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetmodifieddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetmodifieddate);
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = null;
+                }
+
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModAsset.GetSetconfirmedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetconfirmeddate);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModAsset.GetSetcancelledby;
+                if (oModAsset.GetSetcancelledby.Length > 0)
+                {
+                    if (oModAsset.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcancelleddate);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertAssetDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updateAssetDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE asset ";
+                query = query + " SET    assetdesc = ?assetdesc, assetcat = ?assetcat, assettyp = ?assettyp, assetowner = ?assetowner, assetrefno = ?assetrefno, ";
+                query = query + "        datemfg = ?datemfg, warranty = ?warranty, datewarend = ?datewarend, datereg = ?datereg, ";
+                query = query + "        deprtyp = ?deprtyp, deprrate = ?deprrate, remarks = ?remarks, status = ?status, createdby = ?createdby, createddate = ?createddate, ";
+                query = query + "        modifiedby = ?modifiedby, modifieddate = ?modifieddate, confirmedby = ?confirmedby, confirmeddate = ?confirmeddate, cancelledby = ?cancelledby, cancelleddate = ?cancelleddate ";
+                query = query + " WHERE  comp = ?comp AND assetno = ?assetno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.Parameters.Add("?assetdesc", MySqlDbType.VarChar).Value = oModAsset.GetSetassetdesc;
+                cmd.Parameters.Add("?assetcat", MySqlDbType.VarChar).Value = oModAsset.GetSetassetcat;
+                cmd.Parameters.Add("?assettyp", MySqlDbType.VarChar).Value = oModAsset.GetSetassettyp;
+
+                cmd.Parameters.Add("?assetowner", MySqlDbType.VarChar).Value = oModAsset.GetSetassetowner;
+                cmd.Parameters.Add("?assetrefno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetrefno;
+                if (oModAsset.GetSetdatemfg.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSetdatemfg, ukDtfi);
+                    cmd.Parameters.Add("?datemfg", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datemfg", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?warranty", MySqlDbType.VarChar).Value = oModAsset.GetSetwarranty;
+                if (oModAsset.GetSetdatewarend.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSetdatewarend, ukDtfi);
+                    cmd.Parameters.Add("?datewarend", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datewarend", MySqlDbType.DateTime).Value = null;
+                }
+
+                if (oModAsset.GetSetdatereg.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSetdatereg, ukDtfi);
+                    cmd.Parameters.Add("?datereg", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?datereg", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?deprtyp", MySqlDbType.VarChar).Value = oModAsset.GetSetdeprtyp;
+                cmd.Parameters.Add("?deprrate", MySqlDbType.Double).Value = oModAsset.GetSetdeprrate;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModAsset.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModAsset.GetSetcreatedby;
+                if (oModAsset.GetSetcreatedby.Length > 0)
+                {
+                    if (oModAsset.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcreateddate);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?modifiedby", MySqlDbType.VarChar).Value = oModAsset.GetSetmodifiedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetmodifieddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetmodifieddate);
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = null;
+                }
+
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModAsset.GetSetconfirmedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetconfirmeddate);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModAsset.GetSetcancelledby;
+                if (oModAsset.GetSetcancelledby.Length > 0)
+                {
+                    if (oModAsset.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcancelleddate);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateAssetDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public ArrayList getAssetTranHeaderList(String comp, String tranno, String trancode, String trancat, String status)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getAssetTranHeaderList(String comp, String tranno, String trancode, String trancat, String status, String currpage)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a  ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate ";
+                if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public MainModel getAssetTranHeaderDetails(String comp, String tranno, String trancode, String trancat, String status)
+    {
+        MainModel modAsset = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modAsset;
+    }
+
+    public ArrayList getAssetTranListBefore(String comp, String tranno, String trancode, String trancat, String assetno, String status)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        b.id, b.assetno, c.assetdesc, b.tranvalue, b.tranqty, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = b.comp and x.tranno = y.tranno and x.status = 'CONFIRMED' and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = b.assetno) costreg, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = b.comp and x.tranno = y.tranno and x.status = 'CONFIRMED' and x.trancode = y.trancode and y.trancode = 'DEPCOST' and y.assetno = b.assetno and x.trandate < a.trandate) depraccum, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a left join asset_tran_details b on a.comp = b.comp and a.tranno = b.tranno and a.trancode = b.trancode ";
+                query = query + " left join asset c on b.comp = c.comp and  b.assetno = c.assetno ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  b.assetno = '" + assetno + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate, b.assetno ";
+                //WriteToLogFile("MainController-getAssetTranList: [SQL] " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+                    modAsset.GetSetcostreg = replaceDoubleZero(dataReader, "costreg");
+                    modAsset.GetSetdepraccum = replaceDoubleZero(dataReader, "depraccum");
+                    modAsset.GetSetassetnbv = modAsset.GetSetcostreg - modAsset.GetSetdepraccum;
+                    modAsset.GetSettranvalue = replaceDoubleZero(dataReader, "tranvalue");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getAssetTranList(String comp, String tranno, String trancode, String trancat, String assetno, String status)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        b.id, b.assetno, c.assetdesc, b.tranvalue, b.tranqty, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = b.comp and x.tranno = y.tranno and x.status = 'CONFIRMED' and x.trancode = y.trancode and y.trancode = 'REGCOST' and y.assetno = b.assetno) costreg, ";
+                query = query + "        (select sum(y.tranvalue) from asset_tran_header x, asset_tran_details y where x.comp = y.comp and y.comp = b.comp and x.tranno = y.tranno and x.status = 'CONFIRMED' and x.trancode = y.trancode and y.trancode = 'DEPCOST' and y.assetno = b.assetno) depraccum, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a left join asset_tran_details b on a.comp = b.comp and a.tranno = b.tranno and a.trancode = b.trancode ";
+                query = query + " left join asset c on b.comp = c.comp and  b.assetno = c.assetno ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  b.assetno = '" + assetno + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate, b.assetno ";
+                //WriteToLogFile("MainController-getAssetTranList: [SQL] " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSetassetdesc = replaceNull(dataReader, "assetdesc");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+                    modAsset.GetSetcostreg = replaceDoubleZero(dataReader, "costreg");
+                    modAsset.GetSetdepraccum = replaceDoubleZero(dataReader, "depraccum");
+                    modAsset.GetSetassetnbv = modAsset.GetSetcostreg - modAsset.GetSetdepraccum; 
+                    modAsset.GetSettranvalue = replaceDoubleZero(dataReader, "tranvalue");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public ArrayList getAssetTranList(String comp, String tranno, String trancode, String trancat, String assetno, String status, String currpage)
+    {
+        ArrayList lsAssetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        b.id, b.assetno, b.tranvalue, b.tranqty, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a left join asset_tran_details b on a.comp = b.comp and a.tranno = b.tranno and a.trancode = b.trancode ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  b.assetno = '" + assetno + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate, b.assetno ";
+                if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modAsset = new MainModel();
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetlineno = replaceZero(dataReader, "id");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+                    modAsset.GetSettranvalue = replaceDoubleZero(dataReader, "tranvalue");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    lsAssetMod.Add(modAsset);
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsAssetMod;
+    }
+
+    public MainModel getAssetTranDetails(String comp, String tranno, String trancode, String trancat, String assetno, String status)
+    {
+        MainModel modAsset = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.tranno, a.trancode, a.trancat, date_format(a.trandate,'%d-%m-%Y') str_trandate, ";
+                query = query + "        b.assetno, b.tranvalue, b.tranqty, ";
+                query = query + "        a.remarks, a.status, a.createdby, a.createddate, a.modifiedby, a.modifieddate, a.confirmedby, a.confirmeddate, a.cancelledby, a.cancelleddate ";
+                query = query + " from   asset_tran_header a left join asset_tran_details b on a.comp = b.comp and a.tranno = b.tranno and a.trancode = b.trancode ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  b.assetno = '" + assetno + "' ";
+                }
+                if (tranno.Trim().Length > 0)
+                {
+                    query = query + " and  a.tranno = '" + tranno + "' ";
+                }
+                if (trancode.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancode = '" + trancode + "' ";
+                }
+                if (trancat.Trim().Length > 0)
+                {
+                    query = query + " and  a.trancat = '" + trancat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.status = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.trandate, b.assetno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modAsset.GetSetcomp = replaceNull(dataReader, "comp");
+                    modAsset.GetSettranno = replaceNull(dataReader, "tranno");
+                    modAsset.GetSettrancode = replaceNull(dataReader, "trancode");
+                    modAsset.GetSettrancat = replaceNull(dataReader, "trancat");
+                    modAsset.GetSettrandate = replaceNull(dataReader, "str_trandate");
+                    modAsset.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modAsset.GetSettranqty = replaceZero(dataReader, "tranqty");
+                    modAsset.GetSettranvalue = replaceDoubleZero(dataReader, "tranvalue");
+                    modAsset.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modAsset.GetSetstatus = replaceNull(dataReader, "status");
+                    modAsset.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modAsset.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modAsset.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modAsset.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    modAsset.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modAsset.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modAsset.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modAsset.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                }
+                dataReader.Close();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getAssetTranDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modAsset;
+    }
+
+    public String insertAssetTranHeader(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO asset_tran_header (comp, tranno, trancode, trandate, remarks, status, createdby, createddate, modifiedby, modifieddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?tranno, ?trancode, ?trandate, ?remarks, ?status, ?createdby, ?createddate, ?modifiedby, ?modifieddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?tranno", MySqlDbType.VarChar).Value = oModAsset.GetSettranno;
+                cmd.Parameters.Add("?trancode", MySqlDbType.VarChar).Value = oModAsset.GetSettrancode;
+                if (oModAsset.GetSettrandate.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSettrandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModAsset.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModAsset.GetSetcreatedby;
+                if (oModAsset.GetSetcreatedby.Length > 0)
+                {
+                    if (oModAsset.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcreateddate);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?modifiedby", MySqlDbType.VarChar).Value = oModAsset.GetSetmodifiedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetmodifieddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetmodifieddate);
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = null;
+                }
+
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModAsset.GetSetconfirmedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetconfirmeddate);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModAsset.GetSetcancelledby;
+                if (oModAsset.GetSetcancelledby.Length > 0)
+                {
+                    if (oModAsset.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcancelleddate);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertAssetTranHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updateAssetTranHeader(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE asset_tran_header ";
+                query = query + " SET    trandate = ?trandate, remarks = ?remarks, status = ?status, createdby = ?createdby, createddate = ?createddate, modifiedby = ?modifiedby, modifieddate = ?modifieddate, confirmedby = ?confirmedby, confirmeddate = ?confirmeddate, cancelledby = ?cancelledby, cancelleddate = ?cancelleddate ";
+                query = query + " WHERE comp = ?comp AND tranno = ?tranno AND trancode = ?trancode ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?tranno", MySqlDbType.VarChar).Value = oModAsset.GetSettranno;
+                cmd.Parameters.Add("?trancode", MySqlDbType.VarChar).Value = oModAsset.GetSettrancode;
+                if (oModAsset.GetSettrandate.Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModAsset.GetSettrandate, ukDtfi);
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?trandate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModAsset.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModAsset.GetSetcreatedby;
+                if (oModAsset.GetSetcreatedby.Length > 0)
+                {
+                    if (oModAsset.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcreateddate);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?modifiedby", MySqlDbType.VarChar).Value = oModAsset.GetSetmodifiedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetmodifieddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetmodifieddate);
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?modifieddate", MySqlDbType.DateTime).Value = null;
+                }
+
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModAsset.GetSetconfirmedby;
+                if (oModAsset.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModAsset.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetconfirmeddate);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModAsset.GetSetcancelledby;
+                if (oModAsset.GetSetcancelledby.Length > 0)
+                {
+                    if (oModAsset.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModAsset.GetSetcancelleddate);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateAssetTranHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String deleteAssetTranHeader(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM asset_tran_header ";
+                query = query + " WHERE comp = ?comp AND tranno = ?tranno AND trancode = ?trancode ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?tranno", MySqlDbType.VarChar).Value = oModAsset.GetSettranno;
+                cmd.Parameters.Add("?trancode", MySqlDbType.VarChar).Value = oModAsset.GetSettrancode;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deleteAssetTranHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String insertListAssetTranDetails(MainModel oModDep)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO asset_tran_details (comp, tranno, trancode, assetno, tranqty, tranvalue) ";
+                query = query + " SELECT '" + oModDep.GetSetcomp + "', '" + oModDep.GetSettranno + "', '" + oModDep.GetSettrancode + "', d.assetno, d.tranqty, 0 FROM asset_tran_details d, asset_tran_header h ";
+                query = query + " WHERE  d.comp = ?comp AND d.trancode = 'REGCOST' ";
+                query = query + " AND    d.comp = h.comp AND d.tranno = h.tranno AND d.trancode = h.trancode ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModDep.GetSetcomp;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertListAssetTranDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String insertAssetTranDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO asset_tran_details (comp, tranno, trancode, assetno, tranqty, tranvalue, remarks) ";
+                query = query + " VALUES (?comp, ?tranno, ?trancode, ?assetno, ?tranqty, ?tranvalue, ?remarks) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?tranno", MySqlDbType.VarChar).Value = oModAsset.GetSettranno;
+                cmd.Parameters.Add("?trancode", MySqlDbType.VarChar).Value = oModAsset.GetSettrancode;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.Parameters.Add("?tranqty", MySqlDbType.Int16).Value = oModAsset.GetSettranqty;
+                cmd.Parameters.Add("?tranvalue", MySqlDbType.Double).Value = oModAsset.GetSettranvalue;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertAssetTranDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updateAssetTranDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE asset_tran_details ";
+                query = query + " SET tranqty = ?tranqty, tranvalue = ?tranvalue, remarks = ?remarks ";
+                query = query + " WHERE comp = ?comp AND tranno = ?tranno AND trancode = ?trancode AND assetno = ?assetno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?tranno", MySqlDbType.VarChar).Value = oModAsset.GetSettranno;
+                cmd.Parameters.Add("?trancode", MySqlDbType.VarChar).Value = oModAsset.GetSettrancode;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.Parameters.Add("?tranqty", MySqlDbType.Int16).Value = oModAsset.GetSettranqty;
+                cmd.Parameters.Add("?tranvalue", MySqlDbType.Double).Value = oModAsset.GetSettranvalue;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModAsset.GetSetremarks;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateAssetTranDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+    
+    public String deleteAssetTranDetails(MainModel oModAsset)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM asset_tran_details ";
+                query = query + " WHERE comp = ?comp AND tranno = ?tranno AND trancode = ?trancode AND assetno = ?assetno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModAsset.GetSetcomp;
+                cmd.Parameters.Add("?tranno", MySqlDbType.VarChar).Value = oModAsset.GetSettranno;
+                cmd.Parameters.Add("?trancode", MySqlDbType.VarChar).Value = oModAsset.GetSettrancode;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = oModAsset.GetSetassetno;
+                cmd.ExecuteNonQuery();
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deleteAssetTranDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public ArrayList getOfficerList(String comp, String officerid, String officername)
+    {
+        ArrayList lsOfficer = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = " SELECT DISTINCT comp, officerid, officername FROM ( ";
+                query = query + " SELECT comp, bpid officerid, bpdesc officername ";
+                query = query + " from   businesspartner ";
+                query = query + " WHERE  comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  comp = '" + comp + "' ";
+                }
+                if (officerid.Trim().Length > 0)
+                {
+                    query = query + " and  bpid = '" + officerid + "' ";
+                }
+                if (officername.Trim().Length > 0)
+                {
+                    query = query + " and  upper(bpdesc) like 'upper(%" + officername + "%') ";
+                }
+                query = query + " UNION ";
+                query = query + " SELECT comp, officerid, officername ";
+                query = query + " from   asset_placement ";
+                query = query + " WHERE  comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  comp = '" + comp + "' ";
+                }
+                if (officerid.Trim().Length > 0)
+                {
+                    query = query + " and  officerid = '" + officerid + "' ";
+                }
+                if (officername.Trim().Length > 0)
+                {
+                    query = query + " and  upper(officername) like 'upper(%" + officername + "%') ";
+                }
+                query = query + " ) as listing ";
+                query = query + " WHERE  comp is not NULL ";
+                query = query + " ORDER BY comp, officerid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    object objOfficer = new { comp = replaceNull(dataReader, "comp"), officerid = replaceNull(dataReader, "officerid"), officername = replaceNull(dataReader, "officername") };
+                    lsOfficer.Add(objOfficer);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getOfficerList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsOfficer;
+    }
+
+    public String storeBLOBFileAsset(String comp, String assetno, String userid, String sFileNameAndPath, String sFileName, String imgwidth = "0", String imgheight = "0")
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        String sNewFileName = "";
+
+        try
+        {
+            ArrayList lsFileName = tokenString(sFileName, "upload_" + userid + "_");
+            if (lsFileName.Count > 1)
+            {
+                sNewFileName = lsFileName[1].ToString();
+            }
+
+            if (sFileNameAndPath.Length > 0 && sNewFileName.Length > 0)
+            {
+                FileStream fls = new FileStream(sFileNameAndPath, FileMode.Open, FileAccess.Read);
+                byte[] blob = new byte[fls.Length];
+                fls.Read(blob, 0, System.Convert.ToInt32(fls.Length));
+                fls.Close();
+
+                byte[] ImageData;
+                FileStream fs = new FileStream(sFileNameAndPath, FileMode.Open, FileAccess.Read);
+                BinaryReader br = new BinaryReader(fs);
+                ImageData = br.ReadBytes((int)fs.Length);
+                br.Close();
+                fs.Close();
+
+                if (dbConnect.OpenConnection() == true)
+                {
+                    query = "";
+                    query = query + " INSERT INTO asset_image (comp, assetno, filename, fileblob, imgwidth, imgheight, createdby, createddate) ";
+                    query = query + " VALUES (?comp, ?assetno, ?filename, ?fileblob, ?imgwidth, ?imgheight, ?createdby, ?createddate) ";
+                    MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                    cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                    cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = assetno;
+                    cmd.Parameters.Add("?filename", MySqlDbType.VarChar).Value = sNewFileName;
+                    cmd.Parameters.Add("?fileblob", MySqlDbType.Blob).Value = ImageData;
+                    cmd.Parameters.Add("?imgwidth", MySqlDbType.Int16).Value = imgwidth;
+                    cmd.Parameters.Add("?imgheight", MySqlDbType.Int16).Value = imgheight;
+                    cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = userid;
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    cmd.ExecuteNonQuery();
+                }
+                else
+                {
+                    result = "N";
+                    WriteToLogFile("MainController-storeBLOBFileAsset: Unable to store BLOB file due to unable to connect to database!");
+                }
+                dbConnect.CloseConnection();
+            }
+            else
+            {
+                result = "N";
+                WriteToLogFile("MainController-storeBLOBFileAsset: Unable to store BLOB file due to FileNameAndPath is empty!");
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-storeBLOBFileAsset: " + e.Message.ToString());
+        }
+        return result;
+    }
+
+    public ArrayList getBLOBFileAsset(String comp, String assetno, String filefolder, String filename)
+    {
+        ArrayList lsItemMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, assetno, filename, fileblob, imgwidth, imgheight, createdby, date_format(createddate,'%d-%m-%Y %H:%i:%s') str_createddate ";
+                query = query + " from   asset_image ";
+                query = query + " WHERE  comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  comp = '" + comp + "' ";
+                }
+                if (assetno.Trim().Length > 0)
+                {
+                    query = query + " and  assetno = '" + assetno + "' ";
+                }
+                if (filename.Trim().Length > 0)
+                {
+                    query = query + " and  upper(filename) like '%" + filename + "%' ";
+                }
+                query = query + " order by comp, assetno, createddate ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modItem = new MainModel();
+                    modItem.GetSetcomp = replaceNull(dataReader, "comp");
+                    modItem.GetSetassetno = replaceNull(dataReader, "assetno");
+                    modItem.GetSetfilename = replaceNull(dataReader, "filename");
+                    modItem.GetSetimgwidth = replaceZero(dataReader, "imgwidth");
+                    modItem.GetSetimgheight = replaceZero(dataReader, "imgheight");
+                    String sUrl = filefolder + modItem.GetSetfilename;
+                    if (dataReader["fileblob"] != DBNull.Value)
+                    {
+                        File.WriteAllBytes(sUrl, (byte[])dataReader["fileblob"]);
+                        /*
+                        FileStream fs = new FileStream(sUrl, FileMode.Create);
+                        //Use buffer to transfer data
+                        byte[] b = new byte[myLob.Length];
+                        //Read data from database
+                        myLob.Read(b, 0, (int)myLob.Length);
+                        //Write data to file
+                        fs.Write(b, 0, (int)myLob.Length);
+                        fs.Close();
+                        */
+                    }
+                    modItem.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modItem.GetSetcreateddate = replaceNull(dataReader, "str_createddate");
+                    lsItemMod.Add(modItem);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getBLOBFileAsset: " + e.Message.ToString());
+        }
+        return lsItemMod;
+    }
+
+    public String deleteBLOBFileAsset(String comp, String assetno, String userid, String sFileName)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM asset_image ";
+                query = query + " WHERE comp = ?comp and assetno = ?assetno and filename = ?filename ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?assetno", MySqlDbType.VarChar).Value = assetno;
+                cmd.Parameters.Add("?filename", MySqlDbType.VarChar).Value = sFileName;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deleteBLOBFileAsset: " + e.Message.ToString());
+        }
+        return result;
+    }
+
+    /*** END FOR ASSET ***/
+    #endregion FOR ASSET
 
     /*** BEGIN FOR OTHER BP ***/
 
@@ -3324,6 +6170,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertOtherBusinessPartner: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -3363,10 +6216,1063 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateOtherBusinessPartner: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
     /*** END FOR OTHER BP ***/
+
+    /*** BEGIN FOR QUOTATION ***/
+
+    public ArrayList getQuotationHeaderList(String comp, String orderno, String ordercat, String bpid, String startdate, String enddate, String status)
+    {
+        ArrayList lsOrdHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.orderno, date_format(a.orderdate,'%d-%m-%Y') str_orderdate, a.ordercat, a.orderactivity, a.ordertype, a.bpid, ";
+                query = query + "        a.bpdesc, a.bpaddress, a.bpcontact, date_format(a.expirydate,'%d-%m-%Y') str_expirydate, a.paytype, a.salesamount, ";
+                query = query + "        a.discamount, a.orderamount, a.taxamount, a.totalamount, ";
+                query = query + "        a.orderremarks, a.orderstatus, a.ordercreated, a.ordercreateddate, a.orderapproved, a.orderapproveddate, a.ordercancelled, a.ordercancelleddate ";
+                query = query + " from   quotation_header a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  upper(a.orderno) like '%" + orderno.ToUpper() + "%' ";
+                }
+                if (ordercat.Trim().Length > 0)
+                {
+                    query = query + " and  a.ordercat = '" + ordercat + "' ";
+                }
+                if (bpid.Trim().Length > 0)
+                {
+                    query = query + " and  a.bpid = '" + bpid + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderstatus = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.orderno desc ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modOrdHdr = new MainModel();
+                    modOrdHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdHdr.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdHdr.GetSetorderdate = replaceNull(dataReader, "str_orderdate");
+                    modOrdHdr.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdHdr.GetSetorderactivity = replaceNull(dataReader, "orderactivity");
+                    modOrdHdr.GetSetordertype = replaceNull(dataReader, "ordertype");
+                    modOrdHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modOrdHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modOrdHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modOrdHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modOrdHdr.GetSetexpirydate = replaceNull(dataReader, "str_expirydate");
+                    modOrdHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modOrdHdr.GetSetsalesamount = replaceDoubleZero(dataReader, "salesamount");
+                    modOrdHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdr.GetSetorderamount = replaceDoubleZero(dataReader, "orderamount");
+                    modOrdHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modOrdHdr.GetSetorderremarks = replaceNull(dataReader, "orderremarks");
+                    modOrdHdr.GetSetorderstatus = replaceNull(dataReader, "orderstatus");
+                    modOrdHdr.GetSetordercreated = replaceNull(dataReader, "ordercreated");
+                    modOrdHdr.GetSetordercreateddate = replaceNull(dataReader, "ordercreateddate");
+                    modOrdHdr.GetSetorderapproved = replaceNull(dataReader, "orderapproved");
+                    modOrdHdr.GetSetorderapproveddate = replaceNull(dataReader, "orderapproveddate");
+                    modOrdHdr.GetSetordercancelled = replaceNull(dataReader, "ordercancelled");
+                    modOrdHdr.GetSetordercancelleddate = replaceNull(dataReader, "ordercancelleddate");
+                    lsOrdHdrMod.Add(modOrdHdr);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationHeaderList: " + e.Message.ToString());
+        }
+        return lsOrdHdrMod;
+    }
+
+    public ArrayList getQuotationHeaderListSearching(String comp, String searchitem, String ordercat, String startdate, String enddate, String status)
+    {
+        ArrayList lsOrdHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.orderno, date_format(a.orderdate,'%d-%m-%Y') str_orderdate, a.ordercat, a.orderactivity, a.ordertype, a.bpid, ";
+                query = query + "        a.bpdesc, a.bpaddress, a.bpcontact, date_format(a.expirydate,'%d-%m-%Y') str_expirydate, a.paytype, a.salesamount, ";
+                query = query + "        a.discamount, a.orderamount, a.taxamount, a.totalamount, ";
+                query = query + "        a.orderremarks, a.orderstatus, a.ordercreated, a.ordercreateddate, a.orderapproved, a.orderapproveddate, a.ordercancelled, a.ordercancelleddate ";
+                query = query + " from   quotation_header a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (searchitem.Trim().Length > 0)
+                {
+                    query = query + " and  (upper(a.orderno) like '%" + searchitem.ToUpper() + "%' or upper(a.bpid) like '%" + searchitem.ToUpper() + "%' or upper(a.bpdesc) like '%" + searchitem.ToUpper() + "%')";
+                }
+                if (ordercat.Trim().Length > 0)
+                {
+                    query = query + " and  a.ordercat = '" + ordercat + "' ";
+                }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderdate >= STR_TO_DATE('" + startdate + "', '%d-%m-%Y') ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderdate <= STR_TO_DATE('" + enddate + "', '%d-%m-%Y') ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderstatus = '" + status + "' ";
+                }
+                query = query + " order by a.comp, a.orderno desc ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modOrdHdr = new MainModel();
+                    modOrdHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdHdr.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdHdr.GetSetorderdate = replaceNull(dataReader, "str_orderdate");
+                    modOrdHdr.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdHdr.GetSetorderactivity = replaceNull(dataReader, "orderactivity");
+                    modOrdHdr.GetSetordertype = replaceNull(dataReader, "ordertype");
+                    modOrdHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modOrdHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modOrdHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modOrdHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modOrdHdr.GetSetexpirydate = replaceNull(dataReader, "str_expirydate");
+                    modOrdHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modOrdHdr.GetSetsalesamount = replaceDoubleZero(dataReader, "salesamount");
+                    modOrdHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdr.GetSetorderamount = replaceDoubleZero(dataReader, "orderamount");
+                    modOrdHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modOrdHdr.GetSetorderremarks = replaceNull(dataReader, "orderremarks");
+                    modOrdHdr.GetSetorderstatus = replaceNull(dataReader, "orderstatus");
+                    modOrdHdr.GetSetordercreated = replaceNull(dataReader, "ordercreated");
+                    modOrdHdr.GetSetordercreateddate = replaceNull(dataReader, "ordercreateddate");
+                    modOrdHdr.GetSetorderapproved = replaceNull(dataReader, "orderapproved");
+                    modOrdHdr.GetSetorderapproveddate = replaceNull(dataReader, "orderapproveddate");
+                    modOrdHdr.GetSetordercancelled = replaceNull(dataReader, "ordercancelled");
+                    modOrdHdr.GetSetordercancelleddate = replaceNull(dataReader, "ordercancelleddate");
+                    lsOrdHdrMod.Add(modOrdHdr);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationHeaderListSearching: " + e.Message.ToString());
+        }
+        return lsOrdHdrMod;
+    }
+
+    public ArrayList getQuotationHeaderDetailList(String comp, String orderno, String bpid, String startdate, String enddate, String itemno, String status, String orderstatus)
+    {
+        ArrayList lsOrdHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.orderno, date_format(a.orderdate,'%d-%m-%Y') str_orderdate, a.ordercat, a.orderactivity, a.ordertype, a.bpid, ";
+                query = query + "        a.bpdesc, a.bpaddress, a.bpcontact, date_format(a.expirydate,'%d-%m-%Y') str_expirydate, a.paytype, a.salesamount, ";
+                query = query + "        a.discamount, a.orderamount, a.taxamount, a.totalamount, ";
+                query = query + "        a.orderremarks, a.orderstatus, a.ordercreated, a.ordercreateddate, a.orderapproved, a.orderapproveddate, a.ordercancelled, a.ordercancelleddate, ";
+                query = query + "        b.lineno, ";
+                query = query + " 	     b.itemno, b.itemdesc, item.itemcat, b.remarks, b.unitprice, ";
+                query = query + "        b.discamount, b.quantity, b.orderprice, ";
+                query = query + "        b.taxcode, b.taxrate, b.taxamount, ";
+                query = query + "        b.totalprice, b.salesorderno, b.saleslineno ";
+                query = query + " from   quotation_header a, quotation_details b, item ";
+                query = query + " WHERE  a.comp is not NULL ";
+                query = query + " AND    a.comp = b.comp ";
+                query = query + " AND    a.orderno = b.orderno ";
+                query = query + " AND    b.comp = item.comp ";
+                query = query + " AND    b.itemno = item.itemno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  s.comp = '" + comp + "' ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  upper(s.orderno) like '%" + orderno.ToUpper() + "%' ";
+                }
+                if (bpid.Trim().Length > 0)
+                {
+                    query = query + " and  s.bpid = '" + bpid + "' ";
+                }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  s.orderdate >= STR_TO_DATE('" + startdate + "', '%d-%m-%Y') ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  s.orderdate <= STR_TO_DATE('" + enddate + "', '%d-%m-%Y') ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  s.itemno = '" + itemno + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  s.orderstatus = '" + status + "' ";
+                }
+                if (orderstatus.Equals("DONE"))
+                {
+                    query = query + " and  (b.salesorderno is not null and b.salesorderno != '') ";
+                }
+                else if (orderstatus.Equals("IN-PROGRESS"))
+                {
+                    query = query + " and  (b.salesorderno is null or b.salesorderno == '') ";
+                }
+                query = query + " order by a.comp, a.orderno desc ";
+                //WriteToLogFile("MainController-SQL: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modOrdHdrDet = new MainModel();
+                    bool addinarray = true;
+                    modOrdHdrDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdHdrDet.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdHdrDet.GetSetorderdate = replaceNull(dataReader, "str_orderdate");
+                    modOrdHdrDet.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdHdrDet.GetSetorderactivity = replaceNull(dataReader, "orderactivity");
+                    modOrdHdrDet.GetSetordertype = replaceNull(dataReader, "ordertype");
+                    modOrdHdrDet.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modOrdHdrDet.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modOrdHdrDet.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modOrdHdrDet.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modOrdHdrDet.GetSetexpirydate = replaceNull(dataReader, "str_expirydate");
+                    modOrdHdrDet.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modOrdHdrDet.GetSetsalesamount = replaceDoubleZero(dataReader, "salesamount");
+                    modOrdHdrDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdrDet.GetSetorderamount = replaceDoubleZero(dataReader, "orderamount");
+                    modOrdHdrDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdrDet.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modOrdHdrDet.GetSetorderremarks = replaceNull(dataReader, "orderremarks");
+                    modOrdHdrDet.GetSetorderstatus = replaceNull(dataReader, "orderstatus");
+                    modOrdHdrDet.GetSetordercreated = replaceNull(dataReader, "ordercreated");
+                    modOrdHdrDet.GetSetordercreateddate = replaceNull(dataReader, "ordercreateddate");
+                    modOrdHdrDet.GetSetorderapproved = replaceNull(dataReader, "orderapproved");
+                    modOrdHdrDet.GetSetorderapproveddate = replaceNull(dataReader, "orderapproveddate");
+                    modOrdHdrDet.GetSetordercancelled = replaceNull(dataReader, "ordercancelled");
+                    modOrdHdrDet.GetSetordercancelleddate = replaceNull(dataReader, "ordercancelleddate");
+                    modOrdHdrDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modOrdHdrDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdHdrDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdHdrDet.GetSetitemcat = replaceNull(dataReader, "itemcat");
+                    modOrdHdrDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modOrdHdrDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
+                    modOrdHdrDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdrDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdHdrDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
+                    modOrdHdrDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
+                    modOrdHdrDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
+                    modOrdHdrDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdrDet.GetSettotalprice = replaceDoubleZero(dataReader, "totalprice");
+                    modOrdHdrDet.GetSetsalesorderno = replaceNull(dataReader, "salesorderno");
+                    modOrdHdrDet.GetSetsaleslineno = replaceZero(dataReader, "saleslineno");
+                    if (addinarray)
+                    {
+                        lsOrdHdrMod.Add(modOrdHdrDet);
+                    }
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationHeaderDetailList: " + e.Message.ToString());
+        }
+        return lsOrdHdrMod;
+    }
+
+    public MainModel getQuotationHeaderDetails(String comp, String orderno)
+    {
+        MainModel modOrdHdr = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.orderno, date_format(a.orderdate,'%d-%m-%Y') str_orderdate, a.ordercat, a.orderactivity, a.ordertype, a.bpid, ";
+                query = query + "        a.bpdesc, a.bpaddress, a.bpcontact, date_format(a.expirydate,'%d-%m-%Y') str_expirydate, a.paytype, a.salesamount, ";
+                query = query + "        a.discamount, a.orderamount, a.taxamount, a.totalamount, ";
+                query = query + "        a.orderremarks, a.orderstatus, a.ordercreated, a.ordercreateddate, a.orderapproved, ifnull((select max(username) from userprofile where userid = a.ordercreated),'') str_ordercreated, a.orderapproveddate, a.ordercancelled, a.ordercancelleddate ";
+                query = query + " from   quotation_header a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderno = '" + orderno + "' ";
+                }
+                query = query + " order by a.comp, a.orderno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdHdr.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdHdr.GetSetorderdate = replaceNull(dataReader, "str_orderdate");
+                    modOrdHdr.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdHdr.GetSetorderactivity = replaceNull(dataReader, "orderactivity");
+                    modOrdHdr.GetSetordertype = replaceNull(dataReader, "ordertype");
+                    modOrdHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modOrdHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modOrdHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modOrdHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modOrdHdr.GetSetexpirydate = replaceNull(dataReader, "str_expirydate");
+                    modOrdHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modOrdHdr.GetSetsalesamount = replaceDoubleZero(dataReader, "salesamount");
+                    modOrdHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdr.GetSetorderamount = replaceDoubleZero(dataReader, "orderamount");
+                    modOrdHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modOrdHdr.GetSetorderremarks = replaceNull(dataReader, "orderremarks");
+                    modOrdHdr.GetSetorderstatus = replaceNull(dataReader, "orderstatus");
+                    modOrdHdr.GetSetordercreated = replaceNull(dataReader, "ordercreated");
+                    modOrdHdr.GetSetusername = replaceNull(dataReader, "str_ordercreated");
+                    modOrdHdr.GetSetordercreateddate = replaceNull(dataReader, "ordercreateddate");
+                    modOrdHdr.GetSetorderapproved = replaceNull(dataReader, "orderapproved");
+                    modOrdHdr.GetSetorderapproveddate = replaceNull(dataReader, "orderapproveddate");
+                    modOrdHdr.GetSetordercancelled = replaceNull(dataReader, "ordercancelled");
+                    modOrdHdr.GetSetordercancelleddate = replaceNull(dataReader, "ordercancelleddate");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationHeaderDetails: " + e.Message.ToString());
+        }
+        return modOrdHdr;
+    }
+
+    public ArrayList getQuotationDetailsList(String comp, String orderno, int lineno, String itemno)
+    {
+        ArrayList lsOrdDetMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.orderno, a.lineno, ";
+                query = query + " 	     a.itemno, a.itemdesc, item.itemcat, item.itemtype, a.remarks, a.unitprice, ";
+                query = query + "        a.discamount, a.quantity, a.orderprice, ";
+                query = query + "        a.taxcode, a.taxrate, a.taxamount, ";
+                query = query + "        a.totalprice, a.salesorderno, a.saleslineno ";
+                query = query + " from   quotation_details a, item ";
+                query = query + " WHERE  a.comp is not NULL ";
+                query = query + " AND  a.comp = item.comp ";
+                query = query + " AND  a.itemno = item.itemno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderno = '" + orderno + "' ";
+                }
+                if (lineno > 0)
+                {
+                    query = query + " and  a.lineno = " + lineno + " ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  a.itemno = '" + itemno + "' ";
+                }
+                query = query + " order by a.comp, a.orderno, a.lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modOrdDet = new MainModel();
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modOrdDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdDet.GetSetitemcat = replaceNull(dataReader, "itemcat");
+                    modOrdDet.GetSetitemtype = replaceNull(dataReader, "itemtype");
+                    modOrdDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
+                    modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
+                    modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
+                    modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
+                    modOrdDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "totalprice");
+                    modOrdDet.GetSetsalesorderno = replaceNull(dataReader, "salesorderno");
+                    modOrdDet.GetSetsaleslineno = replaceZero(dataReader, "saleslineno");
+                    lsOrdDetMod.Add(modOrdDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationDetailsList: " + e.Message.ToString());
+        }
+        return lsOrdDetMod;
+    }
+
+    public MainModel getQuotationDetailsDetails(String comp, String orderno, int lineno, String itemno)
+    {
+        MainModel modOrdDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.orderno, a.lineno, ";
+                query = query + " 	     a.itemno, a.itemdesc, item.itemcat, item.itemtype, a.remarks, a.unitprice, ";
+                query = query + "        a.discamount, a.quantity, a.orderprice, ";
+                query = query + "        a.taxcode, a.taxrate, a.taxamount, ";
+                query = query + "        a.totalprice, a.salesorderno, a.saleslineno ";
+                query = query + " from   quotation_details a, item ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderno = '" + orderno + "' ";
+                }
+                if (lineno > 0)
+                {
+                    query = query + " and  a.lineno = " + lineno + " ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  a.itemno = '" + itemno + "' ";
+                }
+                query = query + " order by a.comp, a.orderno, a.lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modOrdDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
+                    modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
+                    modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
+                    modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
+                    modOrdDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "totalprice");
+                    modOrdDet.GetSetsalesorderno = replaceNull(dataReader, "salesorderno");
+                    modOrdDet.GetSetsaleslineno = replaceZero(dataReader, "saleslineno");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationDetailsDetails: " + e.Message.ToString());
+        }
+        return modOrdDet;
+    }
+
+    public MainModel getQuotationDetailsDetailsByItem(String comp, String orderno, int lineno, String itemno, String fyr, String month, String status)
+    {
+        MainModel modOrdDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.itemno, a.itemdesc, SUM(a.totalprice) order_amount, a.salesorderno ";
+                query = query + " from   quotation_details a, quotation_header b ";
+                query = query + " WHERE  a.comp is not NULL ";
+                query = query + " AND    a.orderno = b.orderno ";
+                query = query + " AND    a.comp = b.comp ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  a.orderno = '" + orderno + "' ";
+                }
+                if (lineno > 0)
+                {
+                    query = query + " and  a.lineno = " + lineno + " ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  a.itemno = '" + itemno + "' ";
+                }
+                if (fyr.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(b.orderapproveddate,'%m-%Y') IN (SELECT CONCAT(actualmonth, '-', actualyear) FROM comp = '" + comp + "' and fiscalperiod WHERE financeyear = '" + fyr + "') ";
+                }
+                if (month.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(b.orderapproveddate,'%m') = (SELECT actualmonth FROM fiscalperiod WHERE comp = '" + comp + "' and financeyear = '" + fyr + "' and financemonth = '" + month + "') ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  b.orderstatus = '" + status + "' ";
+                }
+                query = query + " group by a.comp, a.itemno, a.itemdesc, a.salesorderno ";
+                query = query + " order by a.comp, a.itemno, a.itemdesc, a.salesorderno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "order_amount");
+                    modOrdDet.GetSetsalesorderno = replaceNull(dataReader, "salesorderno");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationDetailsDetailsByItem: " + e.Message.ToString());
+        }
+        return modOrdDet;
+    }
+
+    public MainModel getQuotationDetailsDetailsByAllItem(String comp, String fyr, String month, String orderno, String ordercat, String status)
+    {
+        MainModel modOrdDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, SUM(a.totalprice) order_amount, a.salesorderno ";
+                query = query + " from   quotation_details a, quotation_header b ";
+                query = query + " WHERE  a.comp is not NULL ";
+                query = query + " AND    a.orderno = b.orderno ";
+                query = query + " AND    a.comp = order_headber.comp ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (fyr.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(b.orderapproveddate,'%m-%Y') IN (SELECT CONCAT(actualmonth, '-', actualyear) FROM fiscalperiod WHERE comp = '" + comp + "' and financeyear = '" + fyr + "') ";
+                }
+                if (month.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(b.orderapproveddate,'%m') = (SELECT actualmonth FROM fiscalperiod WHERE comp = '" + comp + "' and financeyear = '" + fyr + "' and financemonth = '" + month + "') ";
+                }
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  b.orderno = '" + orderno + "' ";
+                }
+                if (ordercat.Trim().Length > 0)
+                {
+                    query = query + " and  b.ordercat = '" + ordercat + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  b.orderstatus = '" + status + "' ";
+                }
+                query = query + " group by a.comp, a.salesorderno ";
+                query = query + " order by a.comp, a.salesorderno ";
+                //WriteToLogFile("MainController-getQuotationDetailsDetailsByAllItem [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "order_amount");
+                    modOrdDet.GetSetdeliverqty = replaceZero(dataReader, "order_qty");
+                    modOrdDet.GetSetsalesorderno = replaceNull(dataReader, "salesorderno");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getQuotationDetailsDetailsByAllItem: " + e.Message.ToString());
+        }
+        return modOrdDet;
+    }
+
+    public String insertQuotationHeader(MainModel oModOrder)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO quotation_header (comp, orderno, orderdate, ordercat, orderactivity, ordertype, bpid, bpdesc, bpaddress, bpcontact, paytype, salesamount, discamount, orderamount, taxamount, totalamount, expirydate, orderremarks, orderstatus, ordercreated, ordercreateddate, orderapproved, orderapproveddate, ordercancelled, ordercancelleddate) ";
+                query = query + " VALUES (?comp, ?orderno, ?orderdate, ?ordercat, ?orderactivity, ?ordertype, ?bpid, ?bpdesc, ?bpaddress, ?bpcontact, ?paytype, ?salesamount, ?discamount, ?orderamount, ?taxamount, ?totalamount, ?expirydate, ?orderremarks, ?orderstatus, ?ordercreated, ?ordercreateddate, ?orderapproved, ?orderapproveddate, ?ordercancelled, ?ordercancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModOrder.GetSetcomp;
+                cmd.Parameters.Add("?orderno", MySqlDbType.VarChar).Value = oModOrder.GetSetorderno;
+                if (oModOrder.GetSetorderdate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModOrder.GetSetorderdate, ukDtfi);
+                    cmd.Parameters.Add("?orderdate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?orderdate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?ordercat", MySqlDbType.VarChar).Value = oModOrder.GetSetordercat;
+                cmd.Parameters.Add("?orderactivity", MySqlDbType.VarChar).Value = oModOrder.GetSetorderactivity;
+                cmd.Parameters.Add("?ordertype", MySqlDbType.VarChar).Value = oModOrder.GetSetordertype;
+                cmd.Parameters.Add("?bpid", MySqlDbType.VarChar).Value = oModOrder.GetSetbpid;
+                cmd.Parameters.Add("?bpdesc", MySqlDbType.VarChar).Value = oModOrder.GetSetbpdesc;
+                cmd.Parameters.Add("?bpaddress", MySqlDbType.VarChar).Value = oModOrder.GetSetbpaddress;
+                cmd.Parameters.Add("?bpcontact", MySqlDbType.VarChar).Value = oModOrder.GetSetbpcontact;
+                cmd.Parameters.Add("?paytype", MySqlDbType.VarChar).Value = oModOrder.GetSetpaytype;
+                cmd.Parameters.Add("?salesamount", MySqlDbType.Double).Value = oModOrder.GetSetsalesamount;
+                cmd.Parameters.Add("?discamount", MySqlDbType.Double).Value = oModOrder.GetSetdiscamount;
+                cmd.Parameters.Add("?orderamount", MySqlDbType.Double).Value = oModOrder.GetSetorderamount;
+                cmd.Parameters.Add("?taxamount", MySqlDbType.Double).Value = oModOrder.GetSettaxamount;
+                cmd.Parameters.Add("?totalamount", MySqlDbType.Double).Value = oModOrder.GetSettotalamount;
+                if (oModOrder.GetSetexpirydate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModOrder.GetSetexpirydate, ukDtfi);
+                    cmd.Parameters.Add("?expirydate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?expirydate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?orderremarks", MySqlDbType.VarChar).Value = oModOrder.GetSetorderremarks;
+                cmd.Parameters.Add("?orderstatus", MySqlDbType.VarChar).Value = oModOrder.GetSetorderstatus;
+                cmd.Parameters.Add("?ordercreated", MySqlDbType.VarChar).Value = oModOrder.GetSetordercreated;
+                if (oModOrder.GetSetordercreated.Length > 0)
+                {
+                    if (oModOrder.GetSetordercreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModOrder.GetSetordercreateddate);
+                        cmd.Parameters.Add("?ordercreateddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?ordercreateddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?ordercreateddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?orderapproved", MySqlDbType.VarChar).Value = oModOrder.GetSetorderapproved;
+                if (oModOrder.GetSetorderapproved.Length > 0)
+                {
+                    if (oModOrder.GetSetorderapproveddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModOrder.GetSetorderapproveddate);
+                        cmd.Parameters.Add("?orderapproveddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?orderapproveddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?orderapproveddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?ordercancelled", MySqlDbType.VarChar).Value = oModOrder.GetSetordercancelled;
+                if (oModOrder.GetSetordercancelled.Length > 0)
+                {
+                    if (oModOrder.GetSetordercancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModOrder.GetSetordercancelleddate);
+                        cmd.Parameters.Add("?ordercancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?ordercancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?ordercancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertQuotationHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updateQuotationHeader(MainModel oModOrder)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE quotation_header ";
+                query = query + " SET    ordercat = ?ordercat, orderactivity = ?orderactivity, ordertype = ?ordertype, bpid = ?bpid, bpdesc = ?bpdesc, bpaddress = ?bpaddress, bpcontact = ?bpcontact, paytype = ?paytype, salesamount = ?salesamount, discamount = ?discamount, ";
+                query = query + "        orderamount = ?orderamount, taxamount = ?taxamount, totalamount = ?totalamount, expirydate = ?expirydate, orderremarks = ?orderremarks, orderstatus = ?orderstatus, ordercreated = ?ordercreated, ordercreateddate = ?ordercreateddate, orderapproved = ?orderapproved, orderapproveddate = ?orderapproveddate, ordercancelled = ?ordercancelled, ordercancelleddate = ?ordercancelleddate ";
+                query = query + " WHERE  comp = ?comp AND orderno = ?orderno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModOrder.GetSetcomp;
+                cmd.Parameters.Add("?orderno", MySqlDbType.VarChar).Value = oModOrder.GetSetorderno;
+                cmd.Parameters.Add("?ordercat", MySqlDbType.VarChar).Value = oModOrder.GetSetordercat;
+                cmd.Parameters.Add("?orderactivity", MySqlDbType.VarChar).Value = oModOrder.GetSetorderactivity;
+                cmd.Parameters.Add("?ordertype", MySqlDbType.VarChar).Value = oModOrder.GetSetordertype;
+                cmd.Parameters.Add("?bpid", MySqlDbType.VarChar).Value = oModOrder.GetSetbpid;
+                cmd.Parameters.Add("?bpdesc", MySqlDbType.VarChar).Value = oModOrder.GetSetbpdesc;
+                cmd.Parameters.Add("?bpaddress", MySqlDbType.VarChar).Value = oModOrder.GetSetbpaddress;
+                cmd.Parameters.Add("?bpcontact", MySqlDbType.VarChar).Value = oModOrder.GetSetbpcontact;
+                cmd.Parameters.Add("?paytype", MySqlDbType.VarChar).Value = oModOrder.GetSetpaytype;
+                cmd.Parameters.Add("?salesamount", MySqlDbType.Double).Value = oModOrder.GetSetsalesamount;
+                cmd.Parameters.Add("?discamount", MySqlDbType.Double).Value = oModOrder.GetSetdiscamount;
+                cmd.Parameters.Add("?orderamount", MySqlDbType.Double).Value = oModOrder.GetSetorderamount;
+                cmd.Parameters.Add("?taxamount", MySqlDbType.Double).Value = oModOrder.GetSettaxamount;
+                cmd.Parameters.Add("?totalamount", MySqlDbType.Double).Value = oModOrder.GetSettotalamount;
+                if (oModOrder.GetSetexpirydate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModOrder.GetSetexpirydate, ukDtfi);
+                    cmd.Parameters.Add("?expirydate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?expirydate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?orderremarks", MySqlDbType.VarChar).Value = oModOrder.GetSetorderremarks;
+                cmd.Parameters.Add("?orderstatus", MySqlDbType.VarChar).Value = oModOrder.GetSetorderstatus;
+                cmd.Parameters.Add("?ordercreated", MySqlDbType.VarChar).Value = oModOrder.GetSetordercreated;
+                if (oModOrder.GetSetordercreated.Length > 0)
+                {
+                    //WriteToLogFile("MainController-updateOrderHeader: oModOrder.GetSetordercreated - " + oModOrder.GetSetordercreateddate);
+                    if (oModOrder.GetSetordercreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModOrder.GetSetordercreateddate);
+                        cmd.Parameters.Add("?ordercreateddate", MySqlDbType.DateTime).Value = datetime;
+                        //WriteToLogFile("MainController-updateOrderHeader: datetime - " + datetime);
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?ordercreateddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?ordercreateddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?orderapproved", MySqlDbType.VarChar).Value = oModOrder.GetSetorderapproved;
+                if (oModOrder.GetSetorderapproved.Length > 0)
+                {
+                    if (oModOrder.GetSetorderapproveddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModOrder.GetSetorderapproveddate);
+                        cmd.Parameters.Add("?orderapproveddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?orderapproveddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?orderapproveddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?ordercancelled", MySqlDbType.VarChar).Value = oModOrder.GetSetordercancelled;
+                if (oModOrder.GetSetordercancelled.Length > 0)
+                {
+                    if (oModOrder.GetSetordercancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModOrder.GetSetordercancelleddate);
+                        cmd.Parameters.Add("?ordercancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?ordercancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?ordercancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateQuotationHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updateQuotationHeaderInfo(String sComp, String sOrderNo)
+    {
+        String result = "Y";
+
+        MainModel oModOrdHdr = new MainModel();
+        ArrayList lsOrderLineItem = new ArrayList();
+
+        try
+        {
+            oModOrdHdr = getQuotationHeaderDetails(sComp, sOrderNo);
+            if (oModOrdHdr.GetSetorderno.Length > 0)
+            {
+                double salesamount = 0, discamount = 0, orderamount = 0, taxamount = 0, totalamount = 0;
+                lsOrderLineItem = getQuotationDetailsList(sComp, sOrderNo, 0, "");
+                for (int i = 0; i < lsOrderLineItem.Count; i++)
+                {
+                    MainModel oModLineItem = (MainModel)lsOrderLineItem[i];
+                    salesamount = salesamount + (oModLineItem.GetSetunitprice * oModLineItem.GetSetquantity);
+                    discamount = discamount + (oModLineItem.GetSetdiscamount * oModLineItem.GetSetquantity);
+                    orderamount = orderamount + oModLineItem.GetSetorderprice;
+                    taxamount = taxamount + oModLineItem.GetSettaxamount;
+                    totalamount = totalamount + oModLineItem.GetSettotalprice;
+                }
+                oModOrdHdr.GetSetsalesamount = salesamount;
+                oModOrdHdr.GetSetdiscamount = discamount;
+                oModOrdHdr.GetSetorderamount = orderamount;
+                oModOrdHdr.GetSettaxamount = taxamount;
+                oModOrdHdr.GetSettotalamount = totalamount;
+                //update order header
+                result = updateQuotationHeader(oModOrdHdr);
+            }
+            else
+            {
+                result = "N";
+            }
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateQuotationHeaderInfo: " + e.Message.ToString());
+        }
+        return result;
+    }
+
+    public String insertQuotationDetails(MainModel oModOrderDet)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO quotation_details (comp, orderno, lineno, itemno, itemdesc, remarks, unitprice, discamount, quantity, orderprice, taxcode, taxrate, taxamount, totalprice, salesorderno, saleslineno) ";
+                query = query + " VALUES (?comp, ?orderno, ?lineno, ?itemno, ?itemdesc, ?remarks, ?unitprice, ?discamount, ?quantity, ?orderprice, ?taxcode, ?taxrate, ?taxamount, ?totalprice, ?salesorderno, ?saleslineno) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModOrderDet.GetSetcomp;
+                cmd.Parameters.Add("?orderno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetorderno;
+                cmd.Parameters.Add("?lineno", MySqlDbType.Int16).Value = oModOrderDet.GetSetlineno;
+                cmd.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetitemno;
+                cmd.Parameters.Add("?itemdesc", MySqlDbType.VarChar).Value = oModOrderDet.GetSetitemdesc;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModOrderDet.GetSetremarks;
+                cmd.Parameters.Add("?unitprice", MySqlDbType.Double).Value = oModOrderDet.GetSetunitprice;
+                cmd.Parameters.Add("?discamount", MySqlDbType.Double).Value = oModOrderDet.GetSetdiscamount;
+                cmd.Parameters.Add("?quantity", MySqlDbType.Int16).Value = oModOrderDet.GetSetquantity;
+                cmd.Parameters.Add("?orderprice", MySqlDbType.Double).Value = oModOrderDet.GetSetorderprice;
+                cmd.Parameters.Add("?taxcode", MySqlDbType.VarChar).Value = oModOrderDet.GetSettaxcode;
+                cmd.Parameters.Add("?taxrate", MySqlDbType.Double).Value = oModOrderDet.GetSettaxrate;
+                cmd.Parameters.Add("?taxamount", MySqlDbType.Double).Value = oModOrderDet.GetSettaxamount;
+                cmd.Parameters.Add("?totalprice", MySqlDbType.Double).Value = oModOrderDet.GetSettotalprice;
+                cmd.Parameters.Add("?salesorderno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetsalesorderno;
+                cmd.Parameters.Add("?saleslineno", MySqlDbType.Int16).Value = oModOrderDet.GetSetsaleslineno;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertQuotationDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String updateQuotationDetails(MainModel oModOrderDet)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE quotation_details ";
+                query = query + " SET    itemno = ?itemno, itemdesc = ?itemdesc, remarks = ?remarks, unitprice = ?unitprice, discamount = ?discamount, quantity = ?quantity, orderprice = ?orderprice, taxcode = ?taxcode, taxrate = ?taxrate, taxamount = ?taxamount, totalprice = ?totalprice, salesorderno = ?salesorderno, saleslineno = ?saleslineno ";
+                query = query + " WHERE  comp = ?comp AND orderno = ?orderno AND lineno = ?lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModOrderDet.GetSetcomp;
+                cmd.Parameters.Add("?orderno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetorderno;
+                cmd.Parameters.Add("?lineno", MySqlDbType.Int16).Value = oModOrderDet.GetSetlineno;
+                cmd.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetitemno;
+                cmd.Parameters.Add("?itemdesc", MySqlDbType.VarChar).Value = oModOrderDet.GetSetitemdesc;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModOrderDet.GetSetremarks;
+                cmd.Parameters.Add("?unitprice", MySqlDbType.Double).Value = oModOrderDet.GetSetunitprice;
+                cmd.Parameters.Add("?discamount", MySqlDbType.Double).Value = oModOrderDet.GetSetdiscamount;
+                cmd.Parameters.Add("?quantity", MySqlDbType.Int16).Value = oModOrderDet.GetSetquantity;
+                cmd.Parameters.Add("?orderprice", MySqlDbType.Double).Value = oModOrderDet.GetSetorderprice;
+                cmd.Parameters.Add("?taxcode", MySqlDbType.VarChar).Value = oModOrderDet.GetSettaxcode;
+                cmd.Parameters.Add("?taxrate", MySqlDbType.Double).Value = oModOrderDet.GetSettaxrate;
+                cmd.Parameters.Add("?taxamount", MySqlDbType.Double).Value = oModOrderDet.GetSettaxamount;
+                cmd.Parameters.Add("?totalprice", MySqlDbType.Double).Value = oModOrderDet.GetSettotalprice;
+                cmd.Parameters.Add("?salesorderno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetsalesorderno;
+                cmd.Parameters.Add("?saleslineno", MySqlDbType.Int16).Value = oModOrderDet.GetSetsaleslineno;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateQuotationDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String deleteQuotationDetails(MainModel oModOrderDet)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM quotation_details ";
+                query = query + " WHERE  comp = ?comp AND orderno = ?orderno AND lineno = ?lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModOrderDet.GetSetcomp;
+                cmd.Parameters.Add("?orderno", MySqlDbType.VarChar).Value = oModOrderDet.GetSetorderno;
+                cmd.Parameters.Add("?lineno", MySqlDbType.Int16).Value = oModOrderDet.GetSetlineno;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deleteQuotationDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    /*** END FOR QUOTATION ***/
 
     /*** BEGIN FOR ORDER ***/
 
@@ -3738,6 +7644,104 @@ public class MainController
         return modOrdHdr;
     }
 
+    public MainModel getOrderHeaderDetails(String comp, String orderno, String ordercat)
+    {
+        MainModel modOrdHdr = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                if (ordercat.Equals("TRANSFER_ORDER"))
+                {
+                    query = "";
+                    query = query + " SELECT transfer_header.compfrom comp, transfer_header.orderno, date_format(transfer_header.orderdate,'%d-%m-%Y') str_orderdate, transfer_header.ordercat, transfer_header.ordertype, transfer_header.orderactivity, ";
+                    //query = query + "        transfer_header.compfrom bpid, comp1.comp_name bpdesc, comp1.comp_address bpaddress, comp1.comp_contact bpcontact, ";
+                    query = query + "        transfer_header.compto bpid, comp2.comp_name bpdesc, comp2.comp_address bpaddress, comp2.comp_contact bpcontact, ";
+                    query = query + "        date_format(transfer_header.shipmentdate,'%d-%m-%Y') str_plandeliverydate, ";
+                    //query = query + "        date_format(transfer_header.receiptdate,'%d-%m-%Y') str_plandeliverydate, ";
+                    query = query + "        'NOT_APPLICABLE' paytype, transfer_header.transferamount salesamount, ";
+                    query = query + "        transfer_header.discamount, transfer_header.orderamount, transfer_header.taxamount, transfer_header.totalamount, ";
+                    query = query + "        transfer_header.orderremarks, transfer_header.orderstatus, transfer_header.ordercreated, transfer_header.ordercreateddate, transfer_header.orderapproved, ifnull((select max(username) from userprofile where userid = transfer_header.ordercreated),'') str_ordercreated, transfer_header.orderapproveddate, transfer_header.ordercancelled, transfer_header.ordercancelleddate ";
+                    query = query + " from   transfer_header, comp_details comp1, comp_details comp2 ";
+                    query = query + " WHERE  transfer_header.comp is not NULL ";
+                    query = query + " and    transfer_header.compfrom = comp1.comp ";
+                    query = query + " and    transfer_header.compto = comp2.comp ";
+                    if (comp.Trim().Length > 0)
+                    {
+                        query = query + " and    transfer_header.compfrom = '" + comp + "' ";
+                        //query = query + " and    transfer_header.compto = '" + comp + "' ";
+                    }
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_header.orderno = '" + orderno + "' ";
+                    }
+                    query = query + " order by transfer_header.compfrom, transfer_header.orderno ";
+                    //query = query + " order by transfer_header.compto, transfer_header.orderno ";
+                }
+                else
+                {
+                    query = "";
+                    query = query + " SELECT order_header.comp, order_header.orderno, date_format(order_header.orderdate,'%d-%m-%Y') str_orderdate, order_header.ordercat, order_header.orderactivity, order_header.ordertype, order_header.bpid, ";
+                    query = query + "        order_header.bpdesc, order_header.bpaddress, order_header.bpcontact, date_format(order_header.plandeliverydate,'%d-%m-%Y') str_plandeliverydate, order_header.paytype, order_header.salesamount, ";
+                    query = query + "        order_header.discamount, order_header.orderamount, order_header.taxamount, order_header.totalamount, ";
+                    query = query + "        order_header.orderremarks, order_header.orderstatus, order_header.ordercreated, order_header.ordercreateddate, order_header.orderapproved, ifnull((select max(username) from userprofile where userid = order_header.ordercreated),'') str_ordercreated, order_header.orderapproveddate, order_header.ordercancelled, order_header.ordercancelleddate ";
+                    query = query + " from   order_header ";
+                    query = query + " WHERE  order_header.comp is not NULL ";
+                    if (comp.Trim().Length > 0)
+                    {
+                        query = query + " and  order_header.comp = '" + comp + "' ";
+                    }
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  order_header.orderno = '" + orderno + "' ";
+                    }
+                    query = query + " order by order_header.comp, order_header.orderno ";
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdHdr.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdHdr.GetSetorderdate = replaceNull(dataReader, "str_orderdate");
+                    modOrdHdr.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdHdr.GetSetorderactivity = replaceNull(dataReader, "orderactivity");
+                    modOrdHdr.GetSetordertype = replaceNull(dataReader, "ordertype");
+                    modOrdHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modOrdHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modOrdHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modOrdHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modOrdHdr.GetSetplandeliverydate = replaceNull(dataReader, "str_plandeliverydate");
+                    modOrdHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modOrdHdr.GetSetsalesamount = replaceDoubleZero(dataReader, "salesamount");
+                    modOrdHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdr.GetSetorderamount = replaceDoubleZero(dataReader, "orderamount");
+                    modOrdHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modOrdHdr.GetSetorderremarks = replaceNull(dataReader, "orderremarks");
+                    modOrdHdr.GetSetorderstatus = replaceNull(dataReader, "orderstatus");
+                    modOrdHdr.GetSetordercreated = replaceNull(dataReader, "ordercreated");
+                    modOrdHdr.GetSetusername = replaceNull(dataReader, "str_ordercreated");
+                    modOrdHdr.GetSetordercreateddate = replaceNull(dataReader, "ordercreateddate");
+                    modOrdHdr.GetSetorderapproved = replaceNull(dataReader, "orderapproved");
+                    modOrdHdr.GetSetorderapproveddate = replaceNull(dataReader, "orderapproveddate");
+                    modOrdHdr.GetSetordercancelled = replaceNull(dataReader, "ordercancelled");
+                    modOrdHdr.GetSetordercancelleddate = replaceNull(dataReader, "ordercancelleddate");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getOrderHeaderDetails: " + e.Message.ToString());
+        }
+        return modOrdHdr;
+    }
+
     public ArrayList getOrderDetailsList(String comp, String orderno, int lineno, String itemno)
     {
         ArrayList lsOrdDetMod = new ArrayList();
@@ -3859,6 +7863,110 @@ public class MainController
                     modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
                     modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
                     modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
+                    modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
+                    modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
+                    modOrdDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "totalprice");
+                    modOrdDet.GetSetdeliverqty = replaceZero(dataReader, "deliverqty");
+                    modOrdDet.GetSetinvoiceamount = replaceDoubleZero(dataReader, "invoiceamount");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getOrderDetailsDetails: " + e.Message.ToString());
+        }
+        return modOrdDet;
+    }
+
+    public MainModel getOrderDetailsDetails(String comp, String orderno, int lineno, String itemno, String ordercat, String shipmentno)
+    {
+        MainModel modOrdDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                if (ordercat.Equals("TRANSFER_ORDER"))
+                {
+                    query = "";
+                    query = query + " SELECT transfer_header.compfrom comp, transfer_details.orderno, transfer_details.lineno, ";
+                    query = query + " 	     transfer_details.itemno, transfer_details.itemdesc, transfer_details.remarks, transfer_details.unitprice, ";
+                    query = query + "        transfer_details.discamount, transfer_details.quantity, transfer_details.orderprice, ";
+                    query = query + "        transfer_details.quantity - transfer_details.deliverqty - ifnull((select sum(shipment_details.shipment_quantity) from shipment_details where shipment_details.comp = transfer_details.comp and shipment_details.shipmentno = '" + shipmentno + "' and shipment_details.itemno = transfer_details.itemno and shipment_details.orderno = transfer_details.orderno and shipment_details.order_lineno = transfer_details.lineno),0) order_quantity, ";
+                    query = query + "        transfer_details.taxcode, transfer_details.taxrate, transfer_details.taxamount, ";
+                    query = query + "        transfer_details.totalprice, transfer_details.deliverqty, transfer_details.invoiceamount ";
+                    query = query + " from   transfer_details, transfer_header ";
+                    query = query + " WHERE  transfer_details.comp is not NULL ";
+                    query = query + " AND  transfer_details.comp = transfer_header.comp ";
+                    query = query + " AND  transfer_details.orderno = transfer_header.orderno ";
+                    query = query + " and  transfer_header.comp is not null ";
+                    if (comp.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_header.compfrom = '" + comp + "' ";
+                    }
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_details.orderno = '" + orderno + "' ";
+                    }
+                    if (lineno > 0)
+                    {
+                        query = query + " and  transfer_details.lineno = " + lineno + " ";
+                    }
+                    if (itemno.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_details.itemno = '" + itemno + "' ";
+                    }
+                    query = query + " order by transfer_header.compfrom, transfer_details.orderno, transfer_details.lineno ";
+                }
+                else
+                {
+                    query = "";
+                    query = query + " SELECT order_details.comp, order_details.orderno, order_details.lineno, ";
+                    query = query + " 	     order_details.itemno, order_details.itemdesc, order_details.remarks, order_details.unitprice, ";
+                    query = query + "        order_details.discamount, order_details.quantity, order_details.orderprice, ";
+                    query = query + "        order_details.quantity - order_details.deliverqty - ifnull((select sum(shipment_details.shipment_quantity) from shipment_details where shipment_details.comp = order_details.comp and shipment_details.shipmentno = '" + shipmentno + "' and shipment_details.itemno = order_details.itemno and shipment_details.orderno = order_details.orderno and shipment_details.order_lineno = order_details.lineno),0) order_quantity, ";
+                    query = query + "        order_details.taxcode, order_details.taxrate, order_details.taxamount, ";
+                    query = query + "        order_details.totalprice, order_details.deliverqty, order_details.invoiceamount ";
+                    query = query + " from   order_details ";
+                    query = query + " WHERE  order_details.comp is not NULL ";
+                    if (comp.Trim().Length > 0)
+                    {
+                        query = query + " and  order_details.comp = '" + comp + "' ";
+                    }
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  order_details.orderno = '" + orderno + "' ";
+                    }
+                    if (lineno > 0)
+                    {
+                        query = query + " and  order_details.lineno = " + lineno + " ";
+                    }
+                    if (itemno.Trim().Length > 0)
+                    {
+                        query = query + " and  order_details.itemno = '" + itemno + "' ";
+                    }
+                    query = query + " order by order_details.comp, order_details.orderno, order_details.lineno ";
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modOrdDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
+                    modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorder_quantity = replaceZero(dataReader, "order_quantity");
                     modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
                     modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
                     modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
@@ -4117,6 +8225,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertOrderHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -4224,6 +8339,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateOrderHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -4310,6 +8432,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertOrderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -4353,6 +8482,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateOrderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -4381,6 +8517,76 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-deleteOrderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String cancelSalesOrderDetails(MainModel oModCounterTransDet)
+    {
+        String result = "Y";
+
+        try
+        {
+            if (oModCounterTransDet.GetSetorderno.Length > 0)
+            {
+                MainModel modOrderHdr = getOrderHeaderDetails(oModCounterTransDet.GetSetcomp, oModCounterTransDet.GetSetorderno);
+                if (modOrderHdr.GetSetorderno.Length > 0)
+                {
+                    modOrderHdr.GetSetorderstatus = "CANCELLED";
+                    updateOrderHeader(modOrderHdr);
+                    oModCounterTransDet.GetSetorderstatus = "CANCELLED";
+                    updateCounterTransDetails(oModCounterTransDet);
+                }
+            }
+
+            if (oModCounterTransDet.GetSetshipmentno.Length > 0)
+            {
+                MainModel modShipmentHdr = getShipmentHeaderDetails(oModCounterTransDet.GetSetcomp, oModCounterTransDet.GetSetshipmentno);
+                if (modShipmentHdr.GetSetshipmentno.Length > 0)
+                {
+                    modShipmentHdr.GetSetstatus = "CANCELLED";
+                    updateShipmentHeader(modShipmentHdr);
+                    oModCounterTransDet.GetSetshipmentstatus = "CANCELLED";
+                    updateCounterTransDetails(oModCounterTransDet);
+                }
+            }
+
+            if (oModCounterTransDet.GetSetinvoiceno.Length > 0)
+            {
+                MainModel modInvoicetHdr = getInvoiceHeaderDetails(oModCounterTransDet.GetSetcomp, oModCounterTransDet.GetSetinvoiceno);
+                if (modInvoicetHdr.GetSetinvoiceno.Length > 0)
+                {
+                    modInvoicetHdr.GetSetstatus = "CANCELLED";
+                    updateInvoiceHeader(modInvoicetHdr);
+                    oModCounterTransDet.GetSetinvoicestatus = "CANCELLED";
+                    updateCounterTransDetails(oModCounterTransDet);
+                }
+            }
+
+            if (oModCounterTransDet.GetSetpayrcptno.Length > 0)
+            {
+                MainModel modPayRcptHdr = getPaymentReceiptHeaderDetails(oModCounterTransDet.GetSetcomp, oModCounterTransDet.GetSetpayrcptno);
+                if (modPayRcptHdr.GetSetpayrcptno.Length > 0)
+                {
+                    modPayRcptHdr.GetSetstatus = "CANCELLED";
+                    updatePaymentReceiptHeader(modPayRcptHdr);
+                    oModCounterTransDet.GetSetpayrcptstatus = "CANCELLED";
+                    updateCounterTransDetails(oModCounterTransDet);
+                }
+            }
+
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-cancelSalesOrderDetails: " + e.Message.ToString());
         }
         return result;
     }
@@ -4454,6 +8660,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getShipmentHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsHdrMod;
     }
 
@@ -4511,6 +8724,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getShipmentHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modHdr;
     }
@@ -4586,6 +8806,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getShipmentDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsHdrMod;
     }
@@ -4691,6 +8918,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getShipmentDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsHdrMod;
     }
@@ -4836,6 +9070,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getShipmentDetailsOther: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modShipmentDet;
     }
 
@@ -4909,6 +9150,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getShipmentDetailsDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modShipmentDet;
     }
 
@@ -4963,6 +9211,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getOrderPendingShipment: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdDetMod;
     }
@@ -5033,6 +9288,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getLineItemPendingShipment: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdDetMod;
     }
@@ -5107,6 +9369,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getLineItemPendingShipment: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdDetMod;
     }
@@ -5225,6 +9494,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingShipment: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdDetMod;
     }
 
@@ -5319,6 +9595,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertShipmentHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -5416,6 +9699,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateShipmentHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -5463,6 +9753,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertShipmentDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -5501,6 +9798,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateShipmentDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -5530,12 +9834,111 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-deleteShipmentDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
     /*** END FOR SHIPMENT ***/
 
     /*** BEGIN FOR INVOICE ***/
+    public ArrayList getParametertype(String paramtcategory)
+    {
+        ArrayList lsparametertype = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+
+                query = "";
+                query = query + " SELECT paramttype,paramtdesc, paramtcategory, paramstatus,paramtcode";
+                query = query + " FROM   tbl_parametertype";
+                query = query + " WHERE paramtcategory =  '" + paramtcategory + "' ";
+                //query = query + " AND  paramtcode IS NOT NULL";
+
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modParam = new MainModel();
+                    modParam.GetSetparamttype = replaceNull(dataReader, "paramttype");
+                    modParam.GetSetparamtcategory = replaceNull(dataReader, "paramtcategory");
+                    modParam.GetSetparamstatus = replaceNull(dataReader, "paramstatus");
+                    modParam.GetSetparamtcode = replaceNull(dataReader, "paramtcode");
+                    modParam.GetSetparamtdesc = replaceNull(dataReader, "paramtdesc");
+                    //WriteToLogFile("MainController-getParametertype: " + replaceNull(dataReader, "paramtdesc"));
+                    lsparametertype.Add(modParam);
+                }
+                dataReader.Close();
+
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getParametertype: " + e.Message.ToString());
+        }
+        return lsparametertype;
+    }
+
+    public ArrayList getParametertype(String inparamtcategory, String paramstatus)
+    {
+        ArrayList lsparametertype = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+
+                query = "";
+                query = query + " SELECT paramttype, paramtdesc, paramtcategory, paramstatus,paramtcode";
+                query = query + " FROM   tbl_parametertype";
+                query = query + " WHERE paramttype is not null ";
+                if (inparamtcategory.Trim().Length > 0)
+                {
+                    query = query + " AND paramtcategory IN (" + inparamtcategory + ") ";
+                }
+                if (paramstatus.Trim().Length > 0)
+                {
+                    query = query + " AND paramstatus = '"+ paramstatus + "' ";
+                }
+                query = query + " ORDER BY paramttype ";
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modParam = new MainModel();
+                    modParam.GetSetparamttype = replaceNull(dataReader, "paramttype");
+                    modParam.GetSetparamtcategory = replaceNull(dataReader, "paramtcategory");
+                    modParam.GetSetparamstatus = replaceNull(dataReader, "paramstatus");
+                    modParam.GetSetparamtcode = replaceNull(dataReader, "paramtcode");
+                    modParam.GetSetparamtdesc = replaceNull(dataReader, "paramtdesc");
+                    //WriteToLogFile("MainController-getParametertype: " + replaceNull(dataReader, "paramtdesc"));
+                    lsparametertype.Add(modParam);
+                }
+                dataReader.Close();
+
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getParametertype: " + e.Message.ToString());
+        }
+        return lsparametertype;
+    }
 
     public ArrayList getLineItemPendingInvoice(String comp, String bpid, String ordertype, String invoicecat, String invoicetype, String shipmentno)
     {
@@ -5760,6 +10163,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingInvoice: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPendInvMod;
     }
 
@@ -5973,6 +10383,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getLineItemPendingInvoice: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPendInvMod;
     }
@@ -6203,6 +10620,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getLineItemPendingInvoice: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPendInvMod;
     }
@@ -6438,6 +10862,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getInvoiceHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrMod;
     }
 
@@ -6513,6 +10944,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getInvoiceHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdHdrMod;
     }
@@ -6641,6 +11079,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getInvoiceHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrMod;
     }
 
@@ -6739,6 +11184,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getInvoiceHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrMod;
     }
 
@@ -6824,6 +11276,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getInvoiceHeaderListSum: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrMod;
     }
 
@@ -6890,6 +11349,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getInvoiceHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modInvHdr;
     }
@@ -6961,6 +11427,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getInvoiceDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsInvDetMod;
     }
@@ -7046,6 +11519,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getInvoiceDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsInvDetMod;
     }
@@ -7159,6 +11639,152 @@ public class MainController
         {
             WriteToLogFile("MainController-getInvoiceHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsInvHdrMod;
+    }
+
+    public ArrayList getInvoiceHeaderDetailsList(String comp, String fyr, String invoiceno, String bpid, String startdate, String enddate, String itemno, String status, String postingstatus)
+    {
+        ArrayList lsInvHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT invoice_header.comp, invoice_header.invoiceno, date_format(invoice_header.invoicedate,'%d-%m-%Y') str_invoicedate, invoice_header.invoicecat, invoice_header.invoicetype, invoice_header.invoiceterm, invoice_header.bpid, ";
+                query = query + "        invoice_header.bpdesc, invoice_header.bpaddress, invoice_header.bpcontact, invoice_header.salesamount, invoice_header.discamount, invoice_header.invoiceamount, ";
+                query = query + "        invoice_header.taxamount, invoice_header.totalamount, invoice_header.payrcptamount, invoice_header.remarks, invoice_header.status, invoice_header.createdby, invoice_header.createddate, ";
+                query = query + "        invoice_header.confirmedby, invoice_header.confirmeddate, invoice_header.cancelledby, invoice_header.cancelleddate, ";
+                query = query + "        invoice_details.itemno, invoice_details.itemdesc, invoice_details.invoiceprice, invoice_details.totalinvoice, fis_posting.tranno, fis_posting.trancode ";
+                query = query + " from   invoice_header, invoice_details left join fis_posting on invoice_details.comp = fis_posting.comp and invoice_details.invoiceno = fis_posting.refno and invoice_details.lineno = fis_posting.lineno ";
+                query = query + " WHERE  invoice_header.comp is not NULL ";
+                query = query + " AND    invoice_header.comp = invoice_details.comp ";
+                query = query + " AND    invoice_header.invoiceno = invoice_details.invoiceno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (invoiceno.Trim().Length > 0)
+                {
+                    query = query + " and  upper(invoice_header.invoiceno) like '%" + invoiceno.ToUpper() + "%' ";
+                }
+                if (bpid.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.bpid = '" + bpid + "' ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_details.itemno = '" + itemno + "' ";
+                }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.invoicedate >= ?startdate ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.invoicedate <= ?enddate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                query = query + " order by invoice_header.comp, invoice_header.invoiceno ";
+                //WriteToLogFile("MainController-getInvoiceHeaderList: [SQL] " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (startdate.Length > 0)
+                {
+                    if (startdate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(startdate);
+                        cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = null;
+                }
+
+                if (enddate.Length > 0)
+                {
+                    if (enddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(enddate);
+                        cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = null;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modInvHdr = new MainModel();
+                    modInvHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modInvHdr.GetSetfyr = fyr;
+                    modInvHdr.GetSetinvoiceno = replaceNull(dataReader, "invoiceno");
+                    modInvHdr.GetSetinvoicedate = replaceNull(dataReader, "str_invoicedate");
+                    modInvHdr.GetSetinvoicecat = replaceNull(dataReader, "invoicecat");
+                    modInvHdr.GetSetinvoicetype = replaceNull(dataReader, "invoicetype");
+                    modInvHdr.GetSetinvoiceterm = replaceNull(dataReader, "invoiceterm");
+                    modInvHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modInvHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modInvHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modInvHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modInvHdr.GetSetsalesamount = replaceDoubleZero(dataReader, "salesamount");
+                    modInvHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modInvHdr.GetSetinvoiceamount = replaceDoubleZero(dataReader, "invoiceamount");
+                    modInvHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modInvHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modInvHdr.GetSetpayrcptamount = replaceDoubleZero(dataReader, "payrcptamount");
+                    modInvHdr.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modInvHdr.GetSetstatus = replaceNull(dataReader, "status");
+                    modInvHdr.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modInvHdr.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modInvHdr.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modInvHdr.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modInvHdr.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modInvHdr.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    modInvHdr.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modInvHdr.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modInvHdr.GetSetinvoiceprice = replaceDoubleZero(dataReader, "invoiceprice");
+                    modInvHdr.GetSettotalinvoice = replaceDoubleZero(dataReader, "totalinvoice");
+                    modInvHdr.GetSettranno = replaceNull(dataReader, "tranno");
+                    modInvHdr.GetSettrancode = replaceNull(dataReader, "trancode");
+                    lsInvHdrMod.Add(modInvHdr);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getInvoiceHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsInvHdrMod;
     }
 
@@ -7237,6 +11863,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getInvoiceDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modInvDet;
     }
@@ -7340,6 +11973,123 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertInvoiceHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String insertInvoiceHeader2(MainModel oModInvoice)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO invoice_header (comp, invoiceno, invoicedate, invoicecat, invoicetype, invoiceterm, bpid, bpdesc, bpaddress, bpcontact, salesamount, discamount, invoiceamount, taxamount, totalamount, payrcptamount, remarks, status, createdby, createddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?invoiceno, ?invoicedate, ?invoicecat, ?invoicetype, ?invoiceterm, ?bpid, ?bpdesc, ?bpaddress, ?bpcontact, ?salesamount, ?discamount, ?invoiceamount, ?taxamount, ?totalamount, ?payrcptamount, ?remarks, ?status, ?createdby, ?createddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModInvoice.GetSetcomp;
+                cmd.Parameters.Add("?invoiceno", MySqlDbType.VarChar).Value = oModInvoice.GetSetinvoiceno;
+                if (oModInvoice.GetSetinvoicedate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModInvoice.GetSetinvoicedate, ukDtfi);
+                    cmd.Parameters.Add("?invoicedate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?invoicedate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?invoicecat", MySqlDbType.VarChar).Value = oModInvoice.GetSetinvoicecat;
+                cmd.Parameters.Add("?invoicetype", MySqlDbType.VarChar).Value = oModInvoice.GetSetinvoicetype;
+                cmd.Parameters.Add("?invoiceterm", MySqlDbType.VarChar).Value = oModInvoice.GetSetinvoiceterm;
+                cmd.Parameters.Add("?bpid", MySqlDbType.VarChar).Value = oModInvoice.GetSetbpid;
+                cmd.Parameters.Add("?bpdesc", MySqlDbType.VarChar).Value = oModInvoice.GetSetbpdesc;
+                cmd.Parameters.Add("?bpaddress", MySqlDbType.VarChar).Value = oModInvoice.GetSetbpaddress;
+                cmd.Parameters.Add("?bpcontact", MySqlDbType.VarChar).Value = oModInvoice.GetSetbpcontact;
+                cmd.Parameters.Add("?salesamount", MySqlDbType.Double).Value = oModInvoice.GetSetsalesamount;
+                cmd.Parameters.Add("?discamount", MySqlDbType.Double).Value = oModInvoice.GetSetdiscamount;
+                cmd.Parameters.Add("?invoiceamount", MySqlDbType.Double).Value = oModInvoice.GetSetinvoiceamount;
+                cmd.Parameters.Add("?payrcptamount", MySqlDbType.Double).Value = oModInvoice.GetSetpayrcptamount;
+                cmd.Parameters.Add("?taxamount", MySqlDbType.Double).Value = oModInvoice.GetSettaxamount;
+                cmd.Parameters.Add("?totalamount", MySqlDbType.Double).Value = oModInvoice.GetSettotalamount;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModInvoice.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModInvoice.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModInvoice.GetSetcreatedby;
+                if (oModInvoice.GetSetcreatedby.Length > 0)
+                {
+                    if (oModInvoice.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModInvoice.GetSetcreateddate, ukDtfi);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModInvoice.GetSetconfirmedby;
+                if (oModInvoice.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModInvoice.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModInvoice.GetSetconfirmeddate, ukDtfi);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModInvoice.GetSetcancelledby;
+                if (oModInvoice.GetSetcancelledby.Length > 0)
+                {
+                    if (oModInvoice.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModInvoice.GetSetcancelleddate, ukDtfi);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertInvoiceHeader2: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -7445,6 +12195,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateInvoiceHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -7534,6 +12291,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertInvoiceDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -7580,6 +12344,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateInvoiceDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -7609,7 +12380,96 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-deleteInvoiceDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
+    }
+
+    public ArrayList getRevenueListDetails(String comp, String selyear, String selmonth, String selday, String status, String additionalquery)
+    {
+        ArrayList lsRevMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT invoice_header.comp, date_format(invoice_header.confirmeddate,'%d-%m-%Y') str_confirmeddate, invoice_header.invoicecat, invoice_header.invoicetype, ";
+                query = query + "        invoice_details.invoiceno, invoice_details.itemno, invoice_details.itemdesc, (invoice_details.unitprice - invoice_details.discamount) unit_price, invoice_details.quantity, ";
+                query = query + "        invoice_details.invoiceprice, invoice_details.taxamount, invoice_details.totalinvoice ";
+                query = query + " FROM   invoice_header, invoice_details ";
+                query = query + " WHERE  invoice_header.comp is not NULL ";
+                query = query + " AND    invoice_header.comp = invoice_details.comp ";
+                query = query + " AND    invoice_header.invoiceno = invoice_details.invoiceno ";
+
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (selyear.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%Y') = '" + selyear + "'";
+                }
+                if (selmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%m') = '" + selmonth + "'";
+                }
+                if (selday.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%d') = '" + selday + "'";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                if (additionalquery.Length > 0)
+                {
+                    query = query + additionalquery;
+                }
+                query = query + " order by invoice_header.comp, date_format(invoice_header.invoicedate,'%d-%m-%Y'), invoice_details.invoiceno, invoice_details.itemno ";
+                //WriteToLogFile("MainController-getRevenueListDetails: [SQL] " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modRevDet = new MainModel();
+                    modRevDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modRevDet.GetSetconfirmeddate = replaceNull(dataReader, "str_confirmeddate");
+                    modRevDet.GetSetinvoicecat = replaceNull(dataReader, "invoicecat");
+                    modRevDet.GetSetinvoicetype = replaceNull(dataReader, "invoicetype");
+                    modRevDet.GetSetinvoiceno = replaceNull(dataReader, "invoiceno");
+                    modRevDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modRevDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modRevDet.GetSetunitprice = replaceDoubleZero(dataReader, "unit_price");
+                    modRevDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modRevDet.GetSetinvoiceprice = replaceDoubleZero(dataReader, "invoiceprice");
+                    modRevDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modRevDet.GetSettotalinvoice = replaceDoubleZero(dataReader, "totalinvoice");
+                    lsRevMod.Add(modRevDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getRevenuListDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsRevMod;
     }
 
     /*** END FOR INVOICE ***/
@@ -7693,6 +12553,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingPaymentReceipt: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPendPayRcptMod;
     }
 
@@ -7706,11 +12573,32 @@ public class MainController
         {
             if (dbConnect.OpenConnection() == true)
             {
+                ArrayList lsParamType = getParametertype("INCOME");
+                ArrayList revenuetype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    revenuetype.Add(modParam.GetSetparamttype);
+                }
+                String revtyp = "";
+                for (int i = 0; i < revenuetype.Count; i++)
+                {
+                    String str = (String)revenuetype[i];
+                    if (i.Equals(0))
+                    {
+                        revtyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        revtyp = revtyp + ",'" + str + "'";
+                    }
+                }
+
                 query = "";
                 query = query + " SELECT invoice_header.comp, invoice_header.bpid, invoice_header.bpdesc, invoice_header.bpaddress, invoice_header.bpcontact, SUM(invoice_header.totalamount) inv_amount, SUM(invoice_header.payrcptamount) pay_amount ";
                 query = query + " from   invoice_header ";
                 query = query + " WHERE  invoice_header.comp is not NULL ";
-                query = query + " and  (invoice_header.invoicecat = 'SALES_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
+                query = query + " and  (invoice_header.invoicecat in ('SALES_INVOICE','TRANSFER_INVOICE') or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype in (" + revtyp + "))) ";
 
                 if (comp.Trim().Length > 0)
                 {
@@ -7735,6 +12623,7 @@ public class MainController
                 query = query + " group by invoice_header.comp, invoice_header.bpid, invoice_header.bpdesc, invoice_header.bpaddress, invoice_header.bpcontact ";
                 query = query + " order by invoice_header.comp, invoice_header.bpid, invoice_header.bpdesc, invoice_header.bpaddress, invoice_header.bpcontact ";
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                //WriteToLogFile("MainController-getInvoicePaymentReceiptHeaderListSumByBP [SQL]: " + query);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
                 {
@@ -7755,6 +12644,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getInvoicePaymentReceiptHeaderListSumByBP: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPayRcptHdrMod;
     }
@@ -7788,12 +12684,30 @@ public class MainController
                 {
                     query = query + " and  payrcpt_header.bpid = '" + bpid + "' ";
                 }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.confirmeddate >= ?startdate ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.confirmeddate <= ?enddate ";
+                }
                 if (status.Trim().Length > 0)
                 {
                     query = query + " and  payrcpt_header.status = '" + status + "' ";
                 }
                 query = query + " order by payrcpt_header.comp, payrcpt_header.payrcptno desc ";
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (startdate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(startdate);
+                    cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = datetime;
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(enddate);
+                    cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = datetime;
+                }
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
                 {
@@ -7825,6 +12739,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentReceiptHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPayRcptHdrMod;
     }
@@ -7916,7 +12837,109 @@ public class MainController
         {
             WriteToLogFile("MainController-getPaymentReceiptHeaderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPayRcptDetMod;
+    }
+
+    public MainModel getPaymentReceiptHeaderDetailsDetails(String comp, String payrcptno, String bpid, int lineno, String invoiceno, String status)
+    {
+        MainModel modPayRcptDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT payrcpt_header.comp, payrcpt_header.payrcptno, date_format(payrcpt_header.payrcptdate,'%d-%m-%Y') str_payrcptdate, payrcpt_header.payrcpttype, payrcpt_header.bpid, ";
+                query = query + "        payrcpt_header.bpdesc, payrcpt_header.bpaddress, payrcpt_header.bpcontact, payrcpt_header.invoiceamount, payrcpt_header.payrcptamount, ";
+                query = query + "        payrcpt_header.remarks, payrcpt_header.status, payrcpt_header.createdby, payrcpt_header.createddate, ";
+                query = query + "        payrcpt_header.confirmedby, payrcpt_header.confirmeddate, payrcpt_header.cancelledby, payrcpt_header.cancelleddate,  ";
+                query = query + "        payrcpt_details.lineno, payrcpt_details.invoiceno, date_format(payrcpt_details.invoicedate,'%d-%m-%Y') str_invoicedate, ";
+                query = query + " 	     payrcpt_details.paytype, payrcpt_details.payrefno, payrcpt_details.payremarks, payrcpt_details.invoiceprice, payrcpt_details.payrcptprice ";
+                query = query + " from   payrcpt_header, payrcpt_details ";
+                query = query + " WHERE  payrcpt_header.comp is not NULL ";
+                query = query + " AND    payrcpt_header.comp = payrcpt_details.comp ";
+                query = query + " AND    payrcpt_header.payrcptno = payrcpt_details.payrcptno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_details.comp = '" + comp + "' ";
+                }
+                if (payrcptno.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_details.payrcptno = '" + payrcptno + "' ";
+                }
+                if (lineno > 0)
+                {
+                    query = query + " and  payrcpt_details.lineno = " + lineno + " ";
+                }
+                if (invoiceno.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_details.invoiceno = '" + invoiceno + "' ";
+                }
+                if (bpid.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.bpid = '" + bpid + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.status = '" + status + "' ";
+                }
+                query = query + " order by payrcpt_details.comp, payrcpt_details.payrcptno, payrcpt_details.lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modPayRcptDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modPayRcptDet.GetSetpayrcptno = replaceNull(dataReader, "payrcptno");
+                    modPayRcptDet.GetSetpayrcptdate = replaceNull(dataReader, "str_payrcptdate");
+                    modPayRcptDet.GetSetpayrcpttype = replaceNull(dataReader, "payrcpttype");
+                    modPayRcptDet.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modPayRcptDet.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modPayRcptDet.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modPayRcptDet.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modPayRcptDet.GetSetinvoiceamount = replaceDoubleZero(dataReader, "invoiceamount");
+                    modPayRcptDet.GetSetpayrcptamount = replaceDoubleZero(dataReader, "payrcptamount");
+                    modPayRcptDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modPayRcptDet.GetSetstatus = replaceNull(dataReader, "status");
+                    modPayRcptDet.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modPayRcptDet.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modPayRcptDet.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modPayRcptDet.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modPayRcptDet.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modPayRcptDet.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    modPayRcptDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modPayRcptDet.GetSetinvoiceno = replaceNull(dataReader, "invoiceno");
+                    modPayRcptDet.GetSetinvoicedate = replaceNull(dataReader, "str_invoicedate");
+                    modPayRcptDet.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modPayRcptDet.GetSetpayrefno = replaceNull(dataReader, "payrefno");
+                    modPayRcptDet.GetSetpayremarks = replaceNull(dataReader, "payremarks");
+                    modPayRcptDet.GetSetinvoiceprice = replaceDoubleZero(dataReader, "invoiceprice");
+                    modPayRcptDet.GetSetpayrcptprice = replaceDoubleZero(dataReader, "payrcptprice");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPaymentReceiptHeaderDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modPayRcptDet;
     }
 
     public MainModel getPaymentReceiptHeaderDetails(String comp, String payrcptno)
@@ -7975,6 +12998,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentReceiptHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modInvHdr;
     }
@@ -8035,6 +13065,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentReceiptDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPayRcptDetMod;
     }
@@ -8097,6 +13134,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentReceiptDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modPayRcptDet;
     }
@@ -8180,6 +13224,189 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentReceiptCashFlowList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsPaymentMod;
+    }
+
+    public ArrayList getPaymentReceiptCashInList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+        ArrayList lsPaymentMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT payrcpt_header.comp, payrcpt_header.payrcptno paymentno, date_format(payrcpt_header.payrcptdate,'%d-%m-%Y') paymentdate, ";
+                query = query + "        date_format(payrcpt_header.confirmeddate,'%d-%m-%Y %H:%i:%s') paymentconfirmeddate, ";
+                query = query + "        concat(payrcpt_header.payrcpttype,': ',invoice_header.invoicetype) paymenttype, ";
+                query = query + "        payrcpt_header.bpid, payrcpt_header.bpdesc, payrcpt_details.lineno, ";
+                query = query + "        payrcpt_details.invoiceno paydetno, payrcpt_details.paytype, payrcpt_details.payrefno, ";
+                query = query + "        payrcpt_details.payremarks, payrcpt_details.payrcptprice payamount, ";
+                query = query + "        payrcpt_details.invoiceno, date_format(payrcpt_details.invoicedate,'%d-%m-%Y %H:%i:%s') invoicedate ";
+                query = query + " from   payrcpt_header, payrcpt_details, invoice_header ";
+                query = query + " WHERE  payrcpt_header.comp is not NULL ";
+                query = query + " AND    payrcpt_header.comp =  payrcpt_details.comp ";
+                query = query + " AND    payrcpt_header.payrcptno =  payrcpt_details.payrcptno ";
+                query = query + " AND	   payrcpt_details.comp = invoice_header.comp ";
+                query = query + " AND	   payrcpt_details.invoiceno = invoice_header.invoiceno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_details.comp = '" + comp + "' ";
+                }
+                if (selyear.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(payrcpt_header.confirmeddate,'%Y') = '" + selyear + "'";
+                }
+                if (selmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(payrcpt_header.confirmeddate,'%m') = '" + selmonth + "'";
+                }
+                if (selday.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(payrcpt_header.confirmeddate,'%d') = '" + selday + "'";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.status = '" + status + "' ";
+                }
+                query = query + " order by payrcpt_header.comp, payrcpt_header.payrcptno, payrcpt_details.lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modPaymentDet = new MainModel();
+                    modPaymentDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modPaymentDet.GetSetpaymentno = replaceNull(dataReader, "paymentno");
+                    modPaymentDet.GetSetpaymentdate = replaceNull(dataReader, "paymentdate");
+                    modPaymentDet.GetSetpaymentconfirmeddate = replaceNull(dataReader, "paymentconfirmeddate");
+                    modPaymentDet.GetSetpaymenttype = replaceNull(dataReader, "paymenttype");
+                    modPaymentDet.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modPaymentDet.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modPaymentDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modPaymentDet.GetSetpaydetno = replaceNull(dataReader, "paydetno");
+                    modPaymentDet.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modPaymentDet.GetSetpayrefno = replaceNull(dataReader, "payrefno");
+                    modPaymentDet.GetSetpayremarks = replaceNull(dataReader, "payremarks");
+                    modPaymentDet.GetSetpayamount = replaceDoubleZero(dataReader, "payamount");
+                    modPaymentDet.GetSetinvoiceno = replaceNull(dataReader, "invoiceno");
+                    modPaymentDet.GetSetinvoicedate = replaceNull(dataReader, "invoicedate");
+                    lsPaymentMod.Add(modPaymentDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPaymentReceiptCashInList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsPaymentMod;
+    }
+
+    public ArrayList getPaymentReceiptCashFlowList(String comp, String fyr, String startdate, String enddate, String status)
+    {
+        ArrayList lsPaymentMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT payrcpt_header.comp, payrcpt_header.payrcptno paymentno, date_format(payrcpt_header.payrcptdate,'%d-%m-%Y') paymentdate, ";
+                query = query + "        date_format(payrcpt_header.confirmeddate,'%d-%m-%Y %H:%i:%s') paymentconfirmeddate, ";
+                query = query + "        concat(invoice_header.invoicecat,': ',payrcpt_details.payrefno) paymenttype, ";
+                query = query + "        payrcpt_header.bpid, payrcpt_header.bpdesc, payrcpt_details.lineno, ";
+                query = query + "        payrcpt_details.invoiceno paydetno, payrcpt_details.paytype, payrcpt_details.payrefno, ";
+                query = query + "        payrcpt_details.payremarks, payrcpt_details.payrcptprice payamount, fis_posting.tranno, fis_posting.trancode ";
+                query = query + " from   payrcpt_header, invoice_header, payrcpt_details left join fis_posting on payrcpt_details.comp = fis_posting.comp and payrcpt_details.payrcptno = fis_posting.refno and payrcpt_details.lineno = fis_posting.lineno ";
+                query = query + " WHERE  payrcpt_header.comp is not NULL ";
+                query = query + " AND    payrcpt_header.comp =  payrcpt_details.comp ";
+                query = query + " AND    payrcpt_header.payrcptno =  payrcpt_details.payrcptno ";
+                query = query + " AND	   payrcpt_details.comp = invoice_header.comp ";
+                query = query + " AND	   payrcpt_details.invoiceno = invoice_header.invoiceno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_details.comp = '" + comp + "' ";
+                }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.confirmeddate >= ?startdate ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.confirmeddate <= ?enddate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.status = '" + status + "' ";
+                }
+                query = query + " order by payrcpt_header.comp, payrcpt_header.payrcptno, payrcpt_details.lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (startdate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(startdate);
+                    cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = datetime;
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(enddate);
+                    cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = datetime;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modPaymentDet = new MainModel();
+                    modPaymentDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modPaymentDet.GetSetfyr = fyr;
+                    modPaymentDet.GetSetpaymentno = replaceNull(dataReader, "paymentno");
+                    modPaymentDet.GetSetpaymentdate = replaceNull(dataReader, "paymentdate");
+                    modPaymentDet.GetSetpaymentconfirmeddate = replaceNull(dataReader, "paymentconfirmeddate");
+                    modPaymentDet.GetSetpaymenttype = replaceNull(dataReader, "paymenttype");
+                    modPaymentDet.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modPaymentDet.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modPaymentDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modPaymentDet.GetSetpaydetno = replaceNull(dataReader, "paydetno");
+                    modPaymentDet.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modPaymentDet.GetSetpayrefno = replaceNull(dataReader, "payrefno");
+                    modPaymentDet.GetSetpayremarks = replaceNull(dataReader, "payremarks");
+                    modPaymentDet.GetSetpayamount = replaceDoubleZero(dataReader, "payamount");
+                    modPaymentDet.GetSettranno = replaceNull(dataReader, "tranno");
+                    modPaymentDet.GetSettrancode = replaceNull(dataReader, "trancode");
+                    lsPaymentMod.Add(modPaymentDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPaymentReceiptCashFlowList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPaymentMod;
     }
@@ -8277,6 +13504,117 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertPaymentReceiptHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String insertPaymentReceiptHeader2(MainModel oModPayRcpt)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO payrcpt_header (comp, payrcptno, payrcptdate, payrcpttype, bpid, bpdesc, bpaddress, bpcontact, invoiceamount, payrcptamount, remarks, status, createdby, createddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?payrcptno, ?payrcptdate, ?payrcpttype, ?bpid, ?bpdesc, ?bpaddress, ?bpcontact, ?invoiceamount, ?payrcptamount, ?remarks, ?status, ?createdby, ?createddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetcomp;
+                cmd.Parameters.Add("?payrcptno", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetpayrcptno;
+                if (oModPayRcpt.GetSetpayrcptdate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModPayRcpt.GetSetpayrcptdate, ukDtfi);
+                    cmd.Parameters.Add("?payrcptdate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?payrcptdate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?payrcpttype", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetpayrcpttype;
+                cmd.Parameters.Add("?bpid", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetbpid;
+                cmd.Parameters.Add("?bpdesc", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetbpdesc;
+                cmd.Parameters.Add("?bpaddress", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetbpaddress;
+                cmd.Parameters.Add("?bpcontact", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetbpcontact;
+                cmd.Parameters.Add("?invoiceamount", MySqlDbType.Double).Value = oModPayRcpt.GetSetinvoiceamount;
+                cmd.Parameters.Add("?payrcptamount", MySqlDbType.Double).Value = oModPayRcpt.GetSetpayrcptamount;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetcreatedby;
+                if (oModPayRcpt.GetSetcreatedby.Length > 0)
+                {
+                    if (oModPayRcpt.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModPayRcpt.GetSetcreateddate, ukDtfi);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetconfirmedby;
+                if (oModPayRcpt.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModPayRcpt.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModPayRcpt.GetSetconfirmeddate, ukDtfi);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModPayRcpt.GetSetcancelledby;
+                if (oModPayRcpt.GetSetcancelledby.Length > 0)
+                {
+                    if (oModPayRcpt.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModPayRcpt.GetSetcancelleddate, ukDtfi);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertPaymentReceiptHeader2: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -8378,6 +13716,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updatePaymentReceiptHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -8460,6 +13805,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertPaymentReceiptDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -8504,6 +13856,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updatePaymentReceiptDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -8739,6 +14098,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getAdjustmentHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsAdjHdrMod;
     }
 
@@ -8791,6 +14157,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getAdjustmentHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modHdr;
     }
@@ -8856,6 +14229,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getAdjustmentDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsAdjDetMod;
     }
@@ -8931,6 +14311,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getAdjustmentDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modDet;
     }
@@ -9108,6 +14495,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertAdjustmentHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -9200,6 +14594,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateAdjustmentHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -9288,6 +14689,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertAdjustmentDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -9337,6 +14745,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateAdjustmentDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -9365,6 +14780,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-deleteAdjustmentDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -9447,6 +14869,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getPurchaseOrderHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrMod;
     }
 
@@ -9528,6 +14957,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPurchaseOrderHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdHdrMod;
     }
@@ -9654,6 +15090,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getPurchaseOrderHeaderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrDetMod;
     }
 
@@ -9680,6 +15123,108 @@ public class MainController
                     query = query + " and  purchase_header.orderno = '" + orderno.ToUpper() + "' ";
                 }
                 query = query + " order by purchase_header.comp, purchase_header.orderno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdHdr.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdHdr.GetSetorderdate = replaceNull(dataReader, "str_orderdate");
+                    modOrdHdr.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdHdr.GetSetorderactivity = replaceNull(dataReader, "orderactivity");
+                    modOrdHdr.GetSetordertype = replaceNull(dataReader, "ordertype");
+                    modOrdHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modOrdHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modOrdHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modOrdHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modOrdHdr.GetSetplandeliverydate = replaceNull(dataReader, "str_plandeliverydate");
+                    modOrdHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modOrdHdr.GetSetpurchaseamount = replaceDoubleZero(dataReader, "purchaseamount");
+                    modOrdHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdHdr.GetSetorderamount = replaceDoubleZero(dataReader, "orderamount");
+                    modOrdHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modOrdHdr.GetSetorderremarks = replaceNull(dataReader, "orderremarks");
+                    modOrdHdr.GetSetorderstatus = replaceNull(dataReader, "orderstatus");
+                    modOrdHdr.GetSetordercreated = replaceNull(dataReader, "ordercreated");
+                    modOrdHdr.GetSetordercreateddate = replaceNull(dataReader, "ordercreateddate");
+                    modOrdHdr.GetSetorderapproved = replaceNull(dataReader, "orderapproved");
+                    modOrdHdr.GetSetorderapproveddate = replaceNull(dataReader, "orderapproveddate");
+                    modOrdHdr.GetSetordercancelled = replaceNull(dataReader, "ordercancelled");
+                    modOrdHdr.GetSetordercancelleddate = replaceNull(dataReader, "ordercancelleddate");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPurchaseOrderHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modOrdHdr;
+    }
+
+    public MainModel getPurchaseOrderHeaderDetails(String comp, String orderno, String ordercat)
+    {
+        MainModel modOrdHdr = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                if (ordercat.Equals("TRANSFER_ORDER"))
+                {
+                    query = "";
+                    query = query + " SELECT transfer_header.compto comp, transfer_header.orderno, date_format(transfer_header.orderdate,'%d-%m-%Y') str_orderdate, transfer_header.ordercat, transfer_header.ordertype, transfer_header.orderactivity, ";
+                    query = query + "        transfer_header.compfrom bpid, comp1.comp_name bpdesc, comp1.comp_address bpaddress, comp1.comp_contact bpcontact, ";
+                    //query = query + "        transfer_header.compto bpid, comp2.comp_name bpdesc, comp2.comp_address bpaddress, comp2.comp_contact bpcontact, ";
+                    //query = query + "        date_format(transfer_header.shipmentdate,'%d-%m-%Y') str_shipmentdate, ";
+                    query = query + "        date_format(transfer_header.receiptdate,'%d-%m-%Y') str_plandeliverydate, ";
+                    query = query + "        'NOT_APPLICABLE' paytype, transfer_header.transferamount purchaseamount, ";
+                    query = query + "        transfer_header.discamount, transfer_header.orderamount, transfer_header.taxamount, transfer_header.totalamount, ";
+                    query = query + "        transfer_header.orderremarks, transfer_header.orderstatus, transfer_header.ordercreated, transfer_header.ordercreateddate, transfer_header.orderapproved, transfer_header.orderapproveddate, transfer_header.ordercancelled, transfer_header.ordercancelleddate ";
+                    query = query + " from   transfer_header, comp_details comp1, comp_details comp2 ";
+                    query = query + " WHERE  transfer_header.comp is not NULL ";
+                    query = query + " and    transfer_header.compfrom = comp1.comp ";
+                    query = query + " and    transfer_header.compto = comp2.comp ";
+                    if (comp.Trim().Length > 0)
+                    {
+                        //query = query + " and    transfer_header.compfrom = '" + comp + "' ";
+                        query = query + " and    transfer_header.compto = '" + comp + "' ";
+                    }
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_header.orderno = '" + orderno + "' ";
+                    }
+                    //query = query + " order by transfer_header.compfrom, transfer_header.orderno ";
+                    query = query + " order by transfer_header.compto, transfer_header.orderno ";
+                }
+                else
+                {
+                    query = "";
+                    query = query + " SELECT purchase_header.comp, purchase_header.orderno, date_format(purchase_header.orderdate,'%d-%m-%Y') str_orderdate, purchase_header.ordercat, purchase_header.orderactivity, purchase_header.ordertype, purchase_header.bpid, ";
+                    query = query + "        purchase_header.bpdesc, purchase_header.bpaddress, purchase_header.bpcontact, date_format(purchase_header.plandeliverydate,'%d-%m-%Y') str_plandeliverydate, purchase_header.paytype, purchase_header.purchaseamount, ";
+                    query = query + "        purchase_header.discamount, purchase_header.orderamount, purchase_header.taxamount, purchase_header.totalamount, ";
+                    query = query + "        purchase_header.orderremarks, purchase_header.orderstatus, purchase_header.ordercreated, purchase_header.ordercreateddate, purchase_header.orderapproved, purchase_header.orderapproveddate, purchase_header.ordercancelled, purchase_header.ordercancelleddate ";
+                    query = query + " from   purchase_header ";
+                    query = query + " WHERE  purchase_header.comp is not NULL ";
+                    query = query + " and  purchase_header.comp = '" + comp + "' ";
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  purchase_header.orderno = '" + orderno + "' ";
+                    }
+                    query = query + " order by purchase_header.comp, purchase_header.orderno ";
+                }
+
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
@@ -9790,6 +15335,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getPurchaseOrderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdDetMod;
     }
 
@@ -9841,6 +15393,183 @@ public class MainController
                     modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
                     modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
                     modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
+                    modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
+                    modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
+                    modOrdDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "totalprice");
+                    modOrdDet.GetSetreceiptqty = replaceZero(dataReader, "receiptqty");
+                    modOrdDet.GetSetbillingamount = replaceDoubleZero(dataReader, "billingamount");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPurchaseOrderDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return modOrdDet;
+    }
+
+    public MainModel getPurchaseOrderDetailsDetails(String comp, String orderno, int lineno, String itemno, String receiptno)
+    {
+        MainModel modOrdDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT purchase_details.comp, purchase_details.orderno, purchase_details.lineno, purchase_header.ordercat, ";
+                query = query + " 	     purchase_details.itemno, purchase_details.itemdesc, purchase_details.remarks, purchase_details.unitprice, ";
+                query = query + "        purchase_details.discamount, purchase_details.quantity, purchase_details.orderprice, ";
+                query = query + "        purchase_details.quantity - purchase_details.receiptqty - ifnull((select sum(receipt_details.receipt_quantity) from receipt_details where receipt_details.comp = purchase_details.comp and receipt_details.receiptno = '" + receiptno + "' and receipt_details.itemno = purchase_details.itemno and receipt_details.orderno = purchase_details.orderno and receipt_details.order_lineno = purchase_details.lineno),0) order_quantity, ";
+                query = query + "        purchase_details.taxcode, purchase_details.taxrate, purchase_details.taxamount, ";
+                query = query + "        purchase_details.totalprice, purchase_details.receiptqty, purchase_details.billingamount ";
+                query = query + " from   purchase_details, purchase_header ";
+                query = query + " WHERE  purchase_details.comp is not NULL ";
+                query = query + " and    purchase_details.comp = purchase_header.comp ";
+                query = query + " and    purchase_details.orderno = purchase_header.orderno ";
+                //query = query + " AND    purchase_details.quantity - purchase_details.receiptqty - ifnull((select sum(receipt_details.receipt_quantity) from receipt_details where receipt_details.comp = purchase_details.comp and receipt_details.receiptno = '" + receiptno + "' and receipt_details.itemno = purchase_details.itemno and receipt_details.orderno = purchase_details.orderno and receipt_details.order_lineno = purchase_details.lineno),0) > 0 ";
+                query = query + " and    purchase_details.comp = '" + comp + "' ";
+                if (orderno.Trim().Length > 0)
+                {
+                    query = query + " and  purchase_details.orderno = '" + orderno + "' ";
+                }
+                if (lineno > 0)
+                {
+                    query = query + " and  purchase_details.lineno = " + lineno + " ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  purchase_details.itemno = '" + itemno + "' ";
+                }
+                query = query + " order by purchase_details.comp, purchase_details.orderno, purchase_details.lineno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modOrdDet.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
+                    modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorder_quantity = replaceZero(dataReader, "order_quantity");
+                    modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
+                    modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
+                    modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
+                    modOrdDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modOrdDet.GetSettotalprice = replaceDoubleZero(dataReader, "totalprice");
+                    modOrdDet.GetSetreceiptqty = replaceZero(dataReader, "receiptqty");
+                    modOrdDet.GetSetbillingamount = replaceDoubleZero(dataReader, "billingamount");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPurchaseOrderDetailsDetails: " + e.Message.ToString());
+        }
+        return modOrdDet;
+    }
+
+    public MainModel getPurchaseOrderDetailsDetails(String comp, String orderno, int lineno, String itemno, String ordercat, String receiptno)
+    {
+        MainModel modOrdDet = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                if (ordercat.Equals("TRANSFER_ORDER"))
+                {
+                    query = "";
+                    query = query + " SELECT transfer_header.compto comp, transfer_details.orderno, transfer_details.lineno, transfer_header.ordercat, ";
+                    query = query + " 	     transfer_details.itemno, transfer_details.itemdesc, transfer_details.remarks, transfer_details.unitprice, ";
+                    query = query + "        transfer_details.discamount, transfer_details.quantity, transfer_details.orderprice, ";
+                    query = query + "        transfer_details.deliverqty - transfer_details.receiptqty - ifnull((select sum(receipt_details.receipt_quantity) from receipt_details where receipt_details.comp = transfer_header.compto and transfer_header.comp = transfer_details.comp and transfer_header.orderno = transfer_details.orderno and receipt_details.receiptno = '" + receiptno + "' and receipt_details.itemno = transfer_details.itemno and receipt_details.orderno = transfer_details.orderno and receipt_details.order_lineno = transfer_details.lineno),0) order_quantity, ";
+                    query = query + "        transfer_details.taxcode, transfer_details.taxrate, transfer_details.taxamount, ";
+                    query = query + "        transfer_details.totalprice, transfer_details.deliverqty, transfer_details.invoiceamount, transfer_details.receiptqty, transfer_details.billingamount ";
+                    query = query + " from   transfer_details, transfer_header ";
+                    query = query + " WHERE  transfer_details.comp is not NULL ";
+                    query = query + " AND  transfer_details.comp = transfer_header.comp ";
+                    query = query + " AND  transfer_details.orderno = transfer_header.orderno ";
+                    query = query + " and  transfer_header.compto = '" + comp + "' ";
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_details.orderno = '" + orderno + "' ";
+                    }
+                    if (lineno > 0)
+                    {
+                        query = query + " and  transfer_details.lineno = " + lineno + " ";
+                    }
+                    if (itemno.Trim().Length > 0)
+                    {
+                        query = query + " and  transfer_details.itemno = '" + itemno + "' ";
+                    }
+                    query = query + " order by transfer_header.compto, transfer_details.orderno, transfer_details.lineno ";
+                }
+                else
+                {
+                    query = "";
+                    query = query + " SELECT purchase_details.comp, purchase_details.orderno, purchase_details.lineno, purchase_header.ordercat, ";
+                    query = query + " 	     purchase_details.itemno, purchase_details.itemdesc, purchase_details.remarks, purchase_details.unitprice, ";
+                    query = query + "        purchase_details.discamount, purchase_details.quantity, purchase_details.orderprice, ";
+                    query = query + "        purchase_details.quantity - purchase_details.receiptqty - ifnull((select sum(receipt_details.receipt_quantity) from receipt_details where receipt_details.comp = purchase_details.comp and receipt_details.receiptno = '" + receiptno + "' and receipt_details.itemno = purchase_details.itemno and receipt_details.orderno = purchase_details.orderno and receipt_details.order_lineno = purchase_details.lineno),0) order_quantity, ";
+                    query = query + "        purchase_details.taxcode, purchase_details.taxrate, purchase_details.taxamount, ";
+                    query = query + "        purchase_details.totalprice, purchase_details.receiptqty, purchase_details.billingamount ";
+                    query = query + " from   purchase_details, purchase_header ";
+                    query = query + " WHERE  purchase_details.comp is not NULL ";
+                    query = query + " and    purchase_details.comp = purchase_header.comp ";
+                    query = query + " and    purchase_details.orderno = purchase_header.orderno ";
+                    query = query + " and    purchase_details.comp = '" + comp + "' ";
+                    if (orderno.Trim().Length > 0)
+                    {
+                        query = query + " and  purchase_details.orderno = '" + orderno + "' ";
+                    }
+                    if (lineno > 0)
+                    {
+                        query = query + " and  purchase_details.lineno = " + lineno + " ";
+                    }
+                    if (itemno.Trim().Length > 0)
+                    {
+                        query = query + " and  purchase_details.itemno = '" + itemno + "' ";
+                    }
+                    query = query + " order by purchase_details.comp, purchase_details.orderno, purchase_details.lineno ";
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modOrdDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modOrdDet.GetSetorderno = replaceNull(dataReader, "orderno");
+                    modOrdDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modOrdDet.GetSetordercat = replaceNull(dataReader, "ordercat");
+                    modOrdDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modOrdDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modOrdDet.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modOrdDet.GetSetunitprice = replaceDoubleZero(dataReader, "unitprice");
+                    modOrdDet.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modOrdDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modOrdDet.GetSetorder_quantity = replaceZero(dataReader, "order_quantity");
                     modOrdDet.GetSetorderprice = replaceDoubleZero(dataReader, "orderprice");
                     modOrdDet.GetSettaxcode = replaceNull(dataReader, "taxcode");
                     modOrdDet.GetSettaxrate = replaceDoubleZero(dataReader, "taxrate");
@@ -9969,6 +15698,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertPurchaseOrderHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -10076,6 +15812,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updatePurchaseOrderHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -10162,6 +15905,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertPuchaseOrderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -10205,6 +15955,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updatePurchaseOrderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -10233,6 +15990,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-deletePurchaseOrderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -10344,6 +16108,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getTransferOrderHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdHdrMod;
     }
@@ -10464,6 +16235,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertTransferOrderHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -10564,6 +16342,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getTransferOrderHeaderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modOrdHdr;
     }
 
@@ -10634,6 +16419,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getTransferOrderDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdDetMod;
     }
@@ -10808,6 +16600,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getTransferOrderHeaderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdHdrDetMod;
     }
 
@@ -10879,6 +16678,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getTransferOrderDetailsDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modOrdDet;
     }
 
@@ -10922,6 +16728,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertTransferOrderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -10967,6 +16780,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updateTransferOrderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -11082,6 +16902,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateTransferOrderHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -11155,6 +16982,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-deleteTransferOrderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -11208,6 +17042,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getTransferPendingShipment: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdDetMod;
     }
 
@@ -11260,6 +17101,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getTransferPendingReceipt: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdDetMod;
     }
@@ -11330,6 +17178,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getReceiptHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsHdrMod;
     }
 
@@ -11385,6 +17240,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReceiptHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modHdr;
     }
@@ -11488,6 +17350,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getReceiptHeaderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsHdrMod;
     }
 
@@ -11549,6 +17418,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReceiptDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsHdrMod;
     }
@@ -11620,6 +17496,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getReceiptDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsHdrMod;
     }
 
@@ -11679,6 +17562,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReceiptDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modReceiptDet;
     }
@@ -11747,6 +17637,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingReceipt: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdDetMod;
     }
 
@@ -11766,7 +17663,7 @@ public class MainController
                     query = query + " SELECT transfer_details.comp, transfer_details.orderno, transfer_header.ordertype, transfer_details.lineno, ";
                     query = query + "        transfer_details.itemno, transfer_details.itemdesc, item.itemcat, transfer_details.remarks, transfer_details.unitprice, ";
                     query = query + "        transfer_details.discamount, transfer_details.quantity, transfer_details.orderprice, ";
-                    query = query + "        transfer_details.quantity - transfer_details.receiptqty - ifnull((select sum(receipt_details.receipt_quantity) from receipt_details where receipt_details.comp = transfer_header.compto and transfer_header.comp = transfer_details.comp and transfer_header.orderno = transfer_details.orderno and receipt_details.receiptno = '" + receiptno + "' and receipt_details.itemno = transfer_details.itemno and receipt_details.orderno = transfer_details.orderno and receipt_details.order_lineno = transfer_details.lineno),0) order_quantity, ";
+                    query = query + "        transfer_details.deliverqty - transfer_details.receiptqty - ifnull((select sum(receipt_details.receipt_quantity) from receipt_details where receipt_details.comp = transfer_header.compto and transfer_header.comp = transfer_details.comp and transfer_header.orderno = transfer_details.orderno and receipt_details.receiptno = '" + receiptno + "' and receipt_details.itemno = transfer_details.itemno and receipt_details.orderno = transfer_details.orderno and receipt_details.order_lineno = transfer_details.lineno),0) order_quantity, ";
                     query = query + "        transfer_details.taxcode, transfer_details.taxrate, transfer_details.taxamount, ";
                     query = query + "        transfer_details.totalprice, transfer_details.receiptqty, transfer_details.billingamount ";
                     query = query + " from   transfer_details, transfer_header, item ";
@@ -11865,6 +17762,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingReceipt: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsOrdDetMod;
     }
 
@@ -11919,6 +17823,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getOrderPendingReceipt: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsOrdDetMod;
     }
@@ -11987,6 +17898,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReceiptDetailsOther: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modShipmentDet;
     }
@@ -12082,6 +18000,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertReceiptHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -12179,6 +18104,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateReceiptHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -12225,6 +18157,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertReceiptDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -12274,6 +18213,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateReceiptDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -12302,6 +18248,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-deleteReceiptDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -12487,6 +18440,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingExpenses: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPendExpMod;
     }
 
@@ -12656,6 +18616,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getLineItemPendingExpenses: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPendExpMod;
     }
@@ -12842,6 +18809,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getLineItemPendingExpenses: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPendExpMod;
     }
@@ -13039,6 +19013,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingExpenses: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPendExpMod;
     }
 
@@ -13134,6 +19115,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getExpensesHeaderListSearching: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsExpHdrMod;
     }
 
@@ -13208,6 +19196,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getExpensesHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsExpHdrMod;
     }
@@ -13336,6 +19331,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getExpensesHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsExpHdrMod;
     }
 
@@ -13434,6 +19436,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getExpensesHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsExpHdrMod;
     }
 
@@ -13518,6 +19527,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getExpensesHeaderListSum: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsExpHdrMod;
     }
@@ -13648,6 +19664,151 @@ public class MainController
         {
             WriteToLogFile("MainController-getExpensesHeaderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsExpHdrMod;
+    }
+
+    public ArrayList getExpensesHeaderDetailsList(String comp, String fyr, String expensesno, String bpid, String startdate, String enddate, String itemno, String status, String paymentstatus)
+    {
+        ArrayList lsExpHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT expenses_header.comp, expenses_header.expensesno, date_format(expenses_header.expensesdate,'%d-%m-%Y') str_expensesdate, expenses_header.expensestype, expenses_header.expensescat, ";
+                query = query + "        expenses_header.bpid, expenses_header.bpdesc, expenses_header.bpaddress, expenses_header.bpcontact, expenses_header.purchaseamount, expenses_header.discamount, expenses_header.expensesamount, ";
+                query = query + "        expenses_header.taxamount, expenses_header.totalamount, expenses_header.paypaidamount, expenses_header.remarks, expenses_header.status, expenses_header.createdby, expenses_header.createddate, ";
+                query = query + "        expenses_header.confirmedby, expenses_header.confirmeddate, expenses_header.cancelledby, expenses_header.cancelleddate, ";
+                query = query + " 	     expenses_details.itemno, expenses_details.itemdesc, expenses_details.expensesprice, expenses_details.totalexpenses, fis_posting.tranno, fis_posting.trancode ";
+                query = query + " from   expenses_header, expenses_details left join fis_posting on expenses_details.comp = fis_posting.comp and expenses_details.expensesno = fis_posting.refno and expenses_details.lineno = fis_posting.lineno ";
+                query = query + " WHERE  expenses_header.comp is not NULL ";
+                query = query + " AND    expenses_header.comp = expenses_details.comp ";
+                query = query + " AND    expenses_header.expensesno = expenses_details.expensesno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.comp = '" + comp + "' ";
+                }
+                if (expensesno.Trim().Length > 0)
+                {
+                    query = query + " and  upper(expenses_header.expensesno) like '%" + expensesno.ToUpper() + "%' ";
+                }
+                if (bpid.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.bpid = '" + bpid + "' ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_details.itemno = '" + itemno + "' ";
+                }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.expensesdate >= ?startdate ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.expensesdate <= ?enddate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.status = '" + status + "' ";
+                }
+
+                query = query + " order by expenses_header.comp, expenses_header.expensesno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (startdate.Length > 0)
+                {
+                    if (startdate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(startdate);
+                        cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = null;
+                }
+
+                if (enddate.Length > 0)
+                {
+                    if (enddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(enddate);
+                        cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = null;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modExpHdr = new MainModel();
+                    modExpHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modExpHdr.GetSetfyr = fyr;
+                    modExpHdr.GetSetexpensesno = replaceNull(dataReader, "expensesno");
+                    modExpHdr.GetSetexpensesdate = replaceNull(dataReader, "str_expensesdate");
+                    modExpHdr.GetSetexpensestype = replaceNull(dataReader, "expensestype");
+                    modExpHdr.GetSetexpensescat = replaceNull(dataReader, "expensescat");
+                    modExpHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modExpHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modExpHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modExpHdr.GetSetbpcontact = replaceNull(dataReader, "bpcontact");
+                    modExpHdr.GetSetpurchaseamount = replaceDoubleZero(dataReader, "purchaseamount");
+                    modExpHdr.GetSetdiscamount = replaceDoubleZero(dataReader, "discamount");
+                    modExpHdr.GetSetexpensesamount = replaceDoubleZero(dataReader, "expensesamount");
+                    modExpHdr.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modExpHdr.GetSettotalamount = replaceDoubleZero(dataReader, "totalamount");
+                    modExpHdr.GetSetpaypaidamount = replaceDoubleZero(dataReader, "paypaidamount");
+                    modExpHdr.GetSetremarks = replaceNull(dataReader, "remarks");
+                    modExpHdr.GetSetstatus = replaceNull(dataReader, "status");
+                    modExpHdr.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modExpHdr.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modExpHdr.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modExpHdr.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modExpHdr.GetSetcancelledby = replaceNull(dataReader, "cancelledby");
+                    modExpHdr.GetSetcancelleddate = replaceNull(dataReader, "cancelleddate");
+                    modExpHdr.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modExpHdr.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modExpHdr.GetSetexpensesprice = replaceDoubleZero(dataReader, "expensesprice");
+                    modExpHdr.GetSettotalexpenses = replaceDoubleZero(dataReader, "totalexpenses");
+                    modExpHdr.GetSettranno = replaceNull(dataReader, "tranno");
+                    modExpHdr.GetSettrancode = replaceNull(dataReader, "trancode");
+                    lsExpHdrMod.Add(modExpHdr);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getExpensesHeaderDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsExpHdrMod;
     }
 
@@ -13712,6 +19873,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getExpensesHeaderDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modExpHdr;
     }
@@ -13783,6 +19951,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getExpensesDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsExpDetMod;
     }
@@ -13869,6 +20044,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getExpensesDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsExpDetMod;
     }
 
@@ -13947,6 +20129,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getExpensesDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modExpDet;
     }
@@ -14049,6 +20238,124 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertExpensesHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String insertExpensesHeader2(MainModel oModExpenses)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO expenses_header (comp, expensesno, expensesdate, expensescat, expensestype, bpid, bpdesc, bpaddress, bpcontact, purchaseamount, discamount, expensesamount, taxamount, totalamount, paypaidamount, remarks, status, createdby, createddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?expensesno, ?expensesdate, ?expensescat, ?expensestype, ?bpid, ?bpdesc, ?bpaddress, ?bpcontact, ?purchaseamount, ?discamount, ?expensesamount, ?taxamount, ?totalamount, ?paypaidamount, ?remarks, ?status, ?createdby, ?createddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                
+                //WriteToLogFile("MainController-insertExpensesHeader2: Remarks [" + oModExpenses.GetSetremarks + "]");
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModExpenses.GetSetcomp;
+                cmd.Parameters.Add("?expensesno", MySqlDbType.VarChar).Value = oModExpenses.GetSetexpensesno;
+                if (oModExpenses.GetSetexpensesdate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModExpenses.GetSetexpensesdate, ukDtfi);
+                    cmd.Parameters.Add("?expensesdate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?expensesdate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?expensescat", MySqlDbType.VarChar).Value = oModExpenses.GetSetexpensescat;
+                cmd.Parameters.Add("?expensestype", MySqlDbType.VarChar).Value = oModExpenses.GetSetexpensestype;
+                cmd.Parameters.Add("?bpid", MySqlDbType.VarChar).Value = oModExpenses.GetSetbpid;
+                cmd.Parameters.Add("?bpdesc", MySqlDbType.VarChar).Value = oModExpenses.GetSetbpdesc;
+                cmd.Parameters.Add("?bpaddress", MySqlDbType.VarChar).Value = oModExpenses.GetSetbpaddress;
+                cmd.Parameters.Add("?bpcontact", MySqlDbType.VarChar).Value = oModExpenses.GetSetbpcontact;
+                cmd.Parameters.Add("?purchaseamount", MySqlDbType.Double).Value = oModExpenses.GetSetpurchaseamount;
+                cmd.Parameters.Add("?discamount", MySqlDbType.Double).Value = oModExpenses.GetSetdiscamount;
+                cmd.Parameters.Add("?expensesamount", MySqlDbType.Double).Value = oModExpenses.GetSetexpensesamount;
+                cmd.Parameters.Add("?taxamount", MySqlDbType.Double).Value = oModExpenses.GetSettaxamount;
+                cmd.Parameters.Add("?totalamount", MySqlDbType.Double).Value = oModExpenses.GetSettotalamount;
+                cmd.Parameters.Add("?paypaidamount", MySqlDbType.Double).Value = oModExpenses.GetSetpaypaidamount;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModExpenses.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModExpenses.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModExpenses.GetSetcreatedby;
+                if (oModExpenses.GetSetcreatedby.Length > 0)
+                {
+                    if (oModExpenses.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModExpenses.GetSetcreateddate, ukDtfi);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModExpenses.GetSetconfirmedby;
+                if (oModExpenses.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModExpenses.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModExpenses.GetSetconfirmeddate, ukDtfi);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModExpenses.GetSetcancelledby;
+                if (oModExpenses.GetSetcancelledby.Length > 0)
+                {
+                    if (oModExpenses.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModExpenses.GetSetcancelleddate, ukDtfi);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertExpensesHeader2: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -14153,6 +20460,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateExpensesHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -14241,6 +20555,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertExpensesDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -14285,6 +20606,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateExpensesDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -14314,7 +20642,95 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-deleteExpensesDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
+    }
+
+    public ArrayList getExpensesListDetails(String comp, String selyear, String selmonth, String selday, String status, String additionalquery)
+    {
+        ArrayList lsExpMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT expenses_header.comp, date_format(expenses_header.confirmeddate,'%d-%m-%Y') str_confirmeddate, expenses_header.expensestype, expenses_header.expensescat, ";
+                query = query + "        expenses_details.expensesno, expenses_details.itemno, expenses_details.itemdesc, (expenses_details.unitprice - expenses_details.discamount) unit_price, expenses_details.quantity, ";
+                query = query + "        expenses_details.expensesprice, expenses_details.taxamount, expenses_details.totalexpenses ";
+                query = query + " from   expenses_header, expenses_details ";
+                query = query + " WHERE  expenses_header.comp is not NULL ";
+                query = query + " AND    expenses_header.comp = expenses_details.comp ";
+                query = query + " AND    expenses_header.expensesno = expenses_details.expensesno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.comp = '" + comp + "' ";
+                }
+                if (selyear.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(expenses_header.confirmeddate,'%Y') = '" + selyear + "'";
+                }
+                if (selmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(expenses_header.confirmeddate,'%m') = '" + selmonth + "'";
+                }
+                if (selday.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(expenses_header.confirmeddate,'%d') = '" + selday + "'";
+                }
+                if (additionalquery.Length > 0)
+                {
+                    query = query + additionalquery;
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.status = '" + status + "' ";
+                }
+                query = query + " order by expenses_header.comp, date_format(expenses_header.confirmeddate,'%d-%m-%Y'), expenses_details.expensesno, expenses_details.itemno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                //WriteToLogFile("MainController-getExpensesListDetails: [SQL] " + query);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modExpDet = new MainModel();
+                    modExpDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modExpDet.GetSetconfirmeddate = replaceNull(dataReader, "str_confirmeddate");
+                    modExpDet.GetSetexpensestype = replaceNull(dataReader, "expensestype");
+                    modExpDet.GetSetexpensescat = replaceNull(dataReader, "expensescat");
+                    modExpDet.GetSetexpensesno = replaceNull(dataReader, "expensesno");
+                    modExpDet.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modExpDet.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modExpDet.GetSetunitprice = replaceDoubleZero(dataReader, "unit_price");
+                    modExpDet.GetSetquantity = replaceZero(dataReader, "quantity");
+                    modExpDet.GetSetexpensesprice = replaceDoubleZero(dataReader, "expensesprice");
+                    modExpDet.GetSettaxamount = replaceDoubleZero(dataReader, "taxamount");
+                    modExpDet.GetSettotalexpenses = replaceDoubleZero(dataReader, "totalexpenses");
+                    lsExpMod.Add(modExpDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getExpensesListDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsExpMod;
     }
 
     /*** END FOR EXPENSES ***/
@@ -14399,6 +20815,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getLineItemPendingPaymentPaid: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPendPayPaidMod;
     }
 
@@ -14412,10 +20835,32 @@ public class MainController
         {
             if (dbConnect.OpenConnection() == true)
             {
+                ArrayList lsParamType = getParametertype("EXPENSES");
+                ArrayList expensestype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    expensestype.Add(modParam.GetSetparamttype);
+                }
+                String exptyp = "";
+                for (int i = 0; i < expensestype.Count; i++)
+                {
+                    String str = (String)expensestype[i];
+                    if (i.Equals(0))
+                    {
+                        exptyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        exptyp = exptyp + ",'" + str + "'";
+                    }
+                }
+
                 query = "";
                 query = query + " SELECT expenses_header.comp, expenses_header.bpid, expenses_header.bpdesc, expenses_header.bpaddress, expenses_header.bpcontact, SUM(expenses_header.totalamount) exp_amount, SUM(expenses_header.paypaidamount) pay_amount ";
                 query = query + " from   expenses_header ";
                 query = query + " WHERE  expenses_header.comp is not NULL ";
+                query = query + " and  (expenses_header.expensescat in ('PURCHASE_INVOICE','TRANSFER_INVOICE') or (expenses_header.expensescat = 'PAYMENT_VOUCHER' and expenses_header.expensestype in (" + exptyp + "))) ";
                 if (comp.Trim().Length > 0)
                 {
                     query = query + " and  expenses_header.comp = '" + comp + "' ";
@@ -14459,6 +20904,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getExpensesPaymentPaidHeaderListSumByBP: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsExpPayPaidHdrMod;
     }
@@ -14529,6 +20981,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentPaidHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPayPaidHdrMod;
     }
@@ -14620,6 +21079,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getPaymentPaidHeaderDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsPayPaidHdrMod;
     }
 
@@ -14680,6 +21146,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getPaymentPaidHeaderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modPaidHdr;
     }
 
@@ -14739,6 +21212,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentPaidDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPayPaidDetMod;
     }
@@ -14801,6 +21281,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentPaidDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modPayPaidDet;
     }
@@ -14885,6 +21372,191 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getPaymentPaidCashFlowList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsPaymentMod;
+    }
+
+    public ArrayList getPaymentPaidCashOutList(String comp, String selyear, String selmonth, String selday, String status)
+    {
+        ArrayList lsPaymentMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT paypaid_header.comp, paypaid_header.paypaidno paymentno, date_format(paypaid_header.paypaiddate,'%d-%m-%Y') paymentdate, ";
+                query = query + "        date_format(paypaid_header.confirmeddate,'%d-%m-%Y %H:%i:%s') paymentconfirmeddate, ";
+                query = query + "        concat(paypaid_header.paypaidtype,': ',expenses_header.expensestype) paymenttype, ";
+                query = query + "        paypaid_header.bpid, paypaid_header.bpdesc, paypaid_details.lineno, ";
+                query = query + "        paypaid_details.expensesno paydetno, paypaid_details.paytype, paypaid_details.payrefno, ";
+                query = query + "        paypaid_details.payremarks, paypaid_details.paypaidprice payamount, ";
+                query = query + "        paypaid_details.expensesno, date_format(paypaid_details.expensesdate,'%d-%m-%Y %H:%i:%s') expensesdate ";
+                query = query + " from   paypaid_header, paypaid_details, expenses_header ";
+                query = query + " WHERE  paypaid_header.comp is not NULL ";
+                query = query + " AND    paypaid_header.comp =  paypaid_details.comp ";
+                query = query + " AND    paypaid_header.paypaidno =  paypaid_details.paypaidno ";
+                query = query + " AND	   paypaid_details.comp = expenses_header.comp ";
+                query = query + " AND	   paypaid_details.expensesno = expenses_header.expensesno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  paypaid_details.comp = '" + comp + "' ";
+                }
+                if (selyear.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(paypaid_header.confirmeddate,'%Y') = '" + selyear + "'";
+                }
+                if (selmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(paypaid_header.confirmeddate,'%m') = '" + selmonth + "'";
+                }
+                if (selday.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(paypaid_header.confirmeddate,'%d') = '" + selday + "'";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  paypaid_header.status = '" + status + "' ";
+                }
+                query = query + " order by paypaid_header.comp, paypaid_header.paypaidno, paypaid_details.lineno ";
+                //WriteToLogFile("MainController-SQL: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modPaymentDet = new MainModel();
+                    modPaymentDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modPaymentDet.GetSetpaymentno = replaceNull(dataReader, "paymentno");
+                    modPaymentDet.GetSetpaymentdate = replaceNull(dataReader, "paymentdate");
+                    modPaymentDet.GetSetpaymentconfirmeddate = replaceNull(dataReader, "paymentconfirmeddate");
+                    modPaymentDet.GetSetpaymenttype = replaceNull(dataReader, "paymenttype");
+                    modPaymentDet.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modPaymentDet.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modPaymentDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modPaymentDet.GetSetpaydetno = replaceNull(dataReader, "paydetno");
+                    modPaymentDet.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modPaymentDet.GetSetpayrefno = replaceNull(dataReader, "payrefno");
+                    modPaymentDet.GetSetpayremarks = replaceNull(dataReader, "payremarks");
+                    modPaymentDet.GetSetpayamount = replaceDoubleZero(dataReader, "payamount");
+                    modPaymentDet.GetSetexpensesno = replaceNull(dataReader, "expensesno");
+                    modPaymentDet.GetSetexpensesdate = replaceNull(dataReader, "expensesdate");
+                    lsPaymentMod.Add(modPaymentDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPaymentPaidCashOutList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsPaymentMod;
+    }
+
+    public ArrayList getPaymentPaidCashFlowList(String comp, String fyr, String startdate, String enddate, String status)
+    {
+        ArrayList lsPaymentMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT paypaid_header.comp, paypaid_header.paypaidno paymentno, date_format(paypaid_header.paypaiddate,'%d-%m-%Y') paymentdate, ";
+                query = query + "        date_format(paypaid_header.confirmeddate,'%d-%m-%Y %H:%i:%s') paymentconfirmeddate, ";
+                query = query + "        concat(expenses_header.expensescat,': ',expenses_header.expensestype) paymenttype, ";
+                query = query + "        paypaid_header.bpid, paypaid_header.bpdesc, paypaid_details.lineno, ";
+                query = query + "        paypaid_details.expensesno paydetno, paypaid_details.paytype, paypaid_details.payrefno, ";
+                query = query + "        paypaid_details.payremarks, paypaid_details.paypaidprice payamount, fis_posting.tranno, fis_posting.trancode ";
+                query = query + " from   paypaid_header, expenses_header, paypaid_details left join fis_posting on paypaid_details.comp = fis_posting.comp and paypaid_details.paypaidno = fis_posting.refno and paypaid_details.lineno = fis_posting.lineno ";
+                query = query + " WHERE  paypaid_header.comp is not NULL ";
+                query = query + " AND    paypaid_header.comp =  paypaid_details.comp ";
+                query = query + " AND    paypaid_header.paypaidno =  paypaid_details.paypaidno ";
+                query = query + " AND	   paypaid_details.comp = expenses_header.comp ";
+                query = query + " AND	   paypaid_details.expensesno = expenses_header.expensesno ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  paypaid_details.comp = '" + comp + "' ";
+                }
+                if (startdate.Trim().Length > 0)
+                {
+                    query = query + " and  paypaid_header.confirmeddate >= ?startdate ";
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    query = query + " and  paypaid_header.confirmeddate <= ?enddate ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  paypaid_header.status = '" + status + "' ";
+                }
+                query = query + " order by paypaid_header.comp, paypaid_header.paypaidno, paypaid_details.lineno ";
+                //WriteToLogFile("MainController-SQL: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                if (startdate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(startdate);
+                    cmd.Parameters.Add("?startdate", MySqlDbType.DateTime).Value = datetime;
+                }
+                if (enddate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(enddate);
+                    cmd.Parameters.Add("?enddate", MySqlDbType.DateTime).Value = datetime;
+                }
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modPaymentDet = new MainModel();
+                    modPaymentDet.GetSetcomp = replaceNull(dataReader, "comp");
+                    modPaymentDet.GetSetfyr = fyr;
+                    modPaymentDet.GetSetpaymentno = replaceNull(dataReader, "paymentno");
+                    modPaymentDet.GetSetpaymentdate = replaceNull(dataReader, "paymentdate");
+                    modPaymentDet.GetSetpaymentconfirmeddate = replaceNull(dataReader, "paymentconfirmeddate");
+                    modPaymentDet.GetSetpaymenttype = replaceNull(dataReader, "paymenttype");
+                    modPaymentDet.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modPaymentDet.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modPaymentDet.GetSetlineno = replaceZero(dataReader, "lineno");
+                    modPaymentDet.GetSetpaydetno = replaceNull(dataReader, "paydetno");
+                    modPaymentDet.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modPaymentDet.GetSetpayrefno = replaceNull(dataReader, "payrefno");
+                    modPaymentDet.GetSetpayremarks = replaceNull(dataReader, "payremarks");
+                    modPaymentDet.GetSetpayamount = replaceDoubleZero(dataReader, "payamount");
+                    modPaymentDet.GetSettranno = replaceNull(dataReader, "tranno");
+                    modPaymentDet.GetSettrancode = replaceNull(dataReader, "trancode");
+                    lsPaymentMod.Add(modPaymentDet);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getPaymentPaidCashFlowList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsPaymentMod;
     }
@@ -14982,6 +21654,117 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertPaymentPaidHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+
+    public String insertPaymentPaidHeader2(MainModel oModPayPaid)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO paypaid_header (comp, paypaidno, paypaiddate, paypaidtype, bpid, bpdesc, bpaddress, bpcontact, expensesamount, paypaidamount, remarks, status, createdby, createddate, confirmedby, confirmeddate, cancelledby, cancelleddate) ";
+                query = query + " VALUES (?comp, ?paypaidno, ?paypaiddate, ?paypaidtype, ?bpid, ?bpdesc, ?bpaddress, ?bpcontact, ?expensesamount, ?paypaidamount, ?remarks, ?status, ?createdby, ?createddate, ?confirmedby, ?confirmeddate, ?cancelledby, ?cancelleddate) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModPayPaid.GetSetcomp;
+                cmd.Parameters.Add("?paypaidno", MySqlDbType.VarChar).Value = oModPayPaid.GetSetpaypaidno;
+                if (oModPayPaid.GetSetpaypaiddate.Trim().Length > 0)
+                {
+                    DateTime datetime = Convert.ToDateTime(oModPayPaid.GetSetpaypaiddate, ukDtfi);
+                    cmd.Parameters.Add("?paypaiddate", MySqlDbType.Date).Value = datetime;
+                }
+                else
+                {
+                    cmd.Parameters.Add("?paypaiddate", MySqlDbType.Date).Value = DateTime.Now;
+                }
+                cmd.Parameters.Add("?paypaidtype", MySqlDbType.VarChar).Value = oModPayPaid.GetSetpaypaidtype;
+                cmd.Parameters.Add("?bpid", MySqlDbType.VarChar).Value = oModPayPaid.GetSetbpid;
+                cmd.Parameters.Add("?bpdesc", MySqlDbType.VarChar).Value = oModPayPaid.GetSetbpdesc;
+                cmd.Parameters.Add("?bpaddress", MySqlDbType.VarChar).Value = oModPayPaid.GetSetbpaddress;
+                cmd.Parameters.Add("?bpcontact", MySqlDbType.VarChar).Value = oModPayPaid.GetSetbpcontact;
+                cmd.Parameters.Add("?expensesamount", MySqlDbType.Double).Value = oModPayPaid.GetSetexpensesamount;
+                cmd.Parameters.Add("?paypaidamount", MySqlDbType.Double).Value = oModPayPaid.GetSetpaypaidamount;
+                cmd.Parameters.Add("?remarks", MySqlDbType.VarChar).Value = oModPayPaid.GetSetremarks;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModPayPaid.GetSetstatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = oModPayPaid.GetSetcreatedby;
+                if (oModPayPaid.GetSetcreatedby.Length > 0)
+                {
+                    if (oModPayPaid.GetSetcreateddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModPayPaid.GetSetcreateddate, ukDtfi);
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?confirmedby", MySqlDbType.VarChar).Value = oModPayPaid.GetSetconfirmedby;
+                if (oModPayPaid.GetSetconfirmedby.Length > 0)
+                {
+                    if (oModPayPaid.GetSetconfirmeddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModPayPaid.GetSetconfirmeddate, ukDtfi);
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?confirmeddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.Parameters.Add("?cancelledby", MySqlDbType.VarChar).Value = oModPayPaid.GetSetcancelledby;
+                if (oModPayPaid.GetSetcancelledby.Length > 0)
+                {
+                    if (oModPayPaid.GetSetcancelleddate.Trim().Length > 0)
+                    {
+                        DateTime datetime = Convert.ToDateTime(oModPayPaid.GetSetcancelleddate, ukDtfi);
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = datetime;
+                    }
+                    else
+                    {
+                        cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = DateTime.Now;
+                    }
+                }
+                else
+                {
+                    cmd.Parameters.Add("?cancelleddate", MySqlDbType.DateTime).Value = null;
+                }
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertPaymentPaidHeader2: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -15081,6 +21864,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updatePaymentPaidHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -15163,6 +21953,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertPaymentPaidDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -15208,6 +22005,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updatePaymentPaidDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -15236,6 +22040,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-deletePaymentPaidDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -15331,6 +22142,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCashFlowHeaderList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsCashFlowHdrMod;
     }
 
@@ -15403,6 +22221,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCashFlowHeaderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modCashFlowHdr;
     }
 
@@ -15473,6 +22298,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCashFlowLastHeaderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modCashFlowHdr;
     }
 
@@ -15537,6 +22369,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCashFlowDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsCashFlowDetMod;
     }
 
@@ -15598,6 +22437,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getCashFlowDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modCashFlowDet;
     }
@@ -15714,6 +22560,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertCashFlowHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -15838,6 +22691,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateCashFlowHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -15894,6 +22754,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertCashFlowDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -15981,6 +22848,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getStockStateHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsStockStateHdrMod;
     }
@@ -16110,6 +22984,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getStockStateHeaderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modStockStateHdr;
     }
 
@@ -16172,6 +23053,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getStockStateDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsStockStateDetMod;
     }
 
@@ -16232,6 +23120,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getStockStateDetailsDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modStockStateDet;
     }
 
@@ -16290,6 +23185,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getStockStateSOHList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsItemMod;
     }
@@ -16372,6 +23274,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getStockStateLastSOHList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsItemMod;
     }
@@ -16484,6 +23393,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertStockStateHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -16602,6 +23518,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateStockStateHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -16659,6 +23582,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertStockStateDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -16700,6 +23630,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertStockStateSOH: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -16795,6 +23732,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getZakatCalculationHeaderList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsZakatCalculationHdrMod;
     }
@@ -16930,6 +23874,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getZakatCalculationHeaderList2: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsZakatCalculationHdrMod;
     }
 
@@ -17006,6 +23957,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getZakatCalculationHeaderDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modZakatCalculationHdr;
     }
     
@@ -17063,6 +24021,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getZakatCalculationDetailsList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lszakatcalculationDetMod;
     }
 
@@ -17115,6 +24080,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getZakatCalculationDetailsDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modDet;
     }
@@ -17246,6 +24218,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertZakatCalculationHeader: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -17381,6 +24360,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateZakatCalculationHeader: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -17422,6 +24408,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertZakatCalculationDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -17465,6 +24458,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updateZakatCalculationDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -17527,6 +24527,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getCompInfoList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsCompMod;
     }
@@ -17592,6 +24599,84 @@ public class MainController
         {
             WriteToLogFile("MainController-getCompInfoListForClosing: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return lsCompMod;
+    }
+
+    public ArrayList getCompInfoListForCashClosing(String comp, String closingdate)
+    {
+        ArrayList lsCompMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, b.cashflowno, a.comp_name, a.comp_id, a.comp_accountbank, a.comp_accountno, ";
+                query = query + "        a.comp_address, a.comp_contact, a.comp_contactno, a.comp_website, a.comp_email, ";
+                query = query + "        a.comp_icon, a.comp_logo1, a.comp_logo2, b.status, ";
+                query = query + "        b.createdby, b.createddate, b.confirmedby, b.confirmeddate ";
+                query = query + " FROM   comp_details a, cashflow_header b ";
+                query = query + " WHERE  a.comp IS NOT NULL ";
+                query = query + " AND    a.comp = b.comp ";
+                query = query + " AND    b.status = 'IN-PROGRESS' ";
+                query = query + " and    b.openingdate <= ?closingdate ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " AND    a.comp = '" + comp + "' ";
+                }
+                query = query + " ORDER  BY a.comp ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                DateTime datetime = Convert.ToDateTime(closingdate, ukDtfi);
+                cmd.Parameters.Add("?closingdate", MySqlDbType.DateTime).Value = datetime;
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modComp = new MainModel();
+                    modComp.GetSetcomp = replaceNull(dataReader, "comp");
+                    modComp.GetSetcashflowno = replaceNull(dataReader, "cashflowno");
+                    modComp.GetSetcomp_name = replaceNull(dataReader, "comp_name");
+                    modComp.GetSetcomp_id = replaceNull(dataReader, "comp_id");
+                    modComp.GetSetcomp_accountbank = replaceNull(dataReader, "comp_accountbank");
+                    modComp.GetSetcomp_accountno = replaceNull(dataReader, "comp_accountno");
+                    modComp.GetSetcomp_address = replaceNull(dataReader, "comp_address");
+                    modComp.GetSetcomp_contact = replaceNull(dataReader, "comp_contact");
+                    modComp.GetSetcomp_contactno = replaceNull(dataReader, "comp_contactno");
+                    modComp.GetSetcomp_website = replaceNull(dataReader, "comp_website");
+                    modComp.GetSetcomp_email = replaceNull(dataReader, "comp_email");
+                    modComp.GetSetcomp_icon = replaceNull(dataReader, "comp_icon");
+                    modComp.GetSetcomp_logo1 = replaceNull(dataReader, "comp_logo1");
+                    modComp.GetSetcomp_logo2 = replaceNull(dataReader, "comp_logo2");
+                    modComp.GetSetstatus = replaceNull(dataReader, "status");
+                    modComp.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modComp.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modComp.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
+                    modComp.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    lsCompMod.Add(modComp);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCompInfoListForCashClosing: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsCompMod;
     }
 
@@ -17654,6 +24739,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getCompInfoList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsCompMod;
     }
@@ -17724,6 +24816,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCompInfoList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsCompMod;
     }
 
@@ -17790,6 +24889,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getUserCompInfoList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsCompMod;
     }
 
@@ -17804,14 +24910,16 @@ public class MainController
             if (dbConnect.OpenConnection() == true)
             {
                 query = "";
-                query = query + " SELECT comp, comp_name, comp_id, comp_accountbank, comp_accountno, ";
+                query = query + " SELECT comp, comp_name, comp_id, comp_type, comp_accountbank, comp_accountno, ";
                 query = query + "        comp_address, comp_contact, comp_contactno, comp_website, comp_email, ";
-                query = query + "        comp_icon, comp_logo1, comp_logo2, status, ";
-                query = query + "        createdby, createddate, confirmedby, confirmeddate ";
+                query = query + "        comp_icon, comp_logo1, comp_logo2, status, comp_daerah,";
+                query = query + "        comp_longitud, comp_latitud, comp_registrationno, comp_area, comp_landstatus, ";
+                query = query + "        createdby, createddate, confirmedby, confirmeddate, comp_category ";
                 query = query + " FROM   comp_details ";
                 query = query + " WHERE  comp IS NOT NULL ";
                 query = query + " AND    comp = '" + comp + "' ";
                 query = query + " ORDER  BY comp ";
+                //WriteToLogFile("MainController-getCompInfoDetails [SQL >]: " + query);
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
@@ -17819,9 +24927,11 @@ public class MainController
                     modComp.GetSetcomp = replaceNull(dataReader, "comp");
                     modComp.GetSetcomp_name = replaceNull(dataReader, "comp_name");
                     modComp.GetSetcomp_id = replaceNull(dataReader, "comp_id");
+                    modComp.GetSetcomp_type = replaceNull(dataReader, "comp_type");
                     modComp.GetSetcomp_accountbank = replaceNull(dataReader, "comp_accountbank");
                     modComp.GetSetcomp_accountno = replaceNull(dataReader, "comp_accountno");
                     modComp.GetSetcomp_address = replaceNull(dataReader, "comp_address");
+                    modComp.GetSetcomp_daerah = replaceNull(dataReader, "comp_daerah");
                     modComp.GetSetcomp_contact = replaceNull(dataReader, "comp_contact");
                     modComp.GetSetcomp_contactno = replaceNull(dataReader, "comp_contactno");
                     modComp.GetSetcomp_website = replaceNull(dataReader, "comp_website");
@@ -17830,10 +24940,16 @@ public class MainController
                     modComp.GetSetcomp_logo1 = replaceNull(dataReader, "comp_logo1");
                     modComp.GetSetcomp_logo2 = replaceNull(dataReader, "comp_logo2");
                     modComp.GetSetstatus = replaceNull(dataReader, "status");
+                    modComp.GetSetcomp_longitud = replaceNull(dataReader, "comp_longitud");
+                    modComp.GetSetcomp_latitud = replaceNull(dataReader, "comp_latitud");
                     modComp.GetSetcreatedby = replaceNull(dataReader, "createdby");
                     modComp.GetSetcreateddate = replaceNull(dataReader, "createddate");
                     modComp.GetSetconfirmedby = replaceNull(dataReader, "confirmedby");
                     modComp.GetSetconfirmeddate = replaceNull(dataReader, "confirmeddate");
+                    modComp.GetSetcomp_registerno = replaceNull(dataReader, "comp_registrationno");
+                    modComp.GetSetcomp_area = replaceNull(dataReader, "comp_area");
+                    modComp.GetSetcomp_landstatus = replaceNull(dataReader, "comp_landstatus");
+                    modComp.GetSetcomp_cat = replaceNull(dataReader, "comp_category");
                 }
                 dataReader.Close();
                 dbConnect.CloseConnection();
@@ -17893,6 +25009,13 @@ public class MainController
         {
             WriteToLogFile("MainController-createCompany: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return success;
     }
 
@@ -17937,6 +25060,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-updateCompany: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -17985,6 +25115,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCompUserProfileList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsArrayList;
     }
 
@@ -18017,6 +25154,13 @@ public class MainController
         {
             WriteToLogFile("MainController-deleteCompUser: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return success;
     }
 
@@ -18048,6 +25192,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-createfiscalyeardashboard: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -18094,6 +25245,67 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getNextRunningNo: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return nextrunno;
+    }
+
+    public String getNextRunningNo(String comp, String type, String status, String initial, String year)
+    {
+        String nextrunno = "";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT running_number.comp, running_number.type, running_number.initial, ";
+                query = query + " 	     running_number.year, running_number.runno, running_number.status ";
+                query = query + " from   running_number ";
+                query = query + " WHERE  running_number.comp is not NULL ";
+                query = query + " and  running_number.comp = '" + comp + "' ";
+                query = query + " and  running_number.type = '" + type + "' ";
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  running_number.status = '" + status + "' ";
+                }
+                query = query + " and  running_number.year = '" + year + "' ";
+                query = query + " order by running_number.comp, running_number.type ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modRunNo = new MainModel();
+                    modRunNo.GetSetcomp = replaceNull(dataReader, "comp");
+                    modRunNo.GetSettype = replaceNull(dataReader, "type");
+                    modRunNo.GetSetinitial = replaceNull(dataReader, "initial");
+                    modRunNo.GetSetyear = replaceNull(dataReader, "year");
+                    modRunNo.GetSetrunno = replaceZero(dataReader, "runno") + 1;
+                    modRunNo.GetSetstatus = replaceNull(dataReader, "status");
+                    nextrunno = modRunNo.GetSetinitial + modRunNo.GetSetyear + modRunNo.GetSetrunno.ToString().PadLeft(4, '0');
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getNextRunningNo: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return nextrunno;
     }
@@ -18148,6 +25360,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getNextRunningNo: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return nextrunno;
     }
 
@@ -18178,6 +25397,51 @@ public class MainController
         {
             WriteToLogFile("MainController-updateNextRunningNo: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+    }
+
+    public void updateNextRunningNo(String comp, String type, String status, String year)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE running_number ";
+                query = query + " SET runno = runno + 1 ";
+                query = query + " WHERE comp = ?comp ";
+                query = query + " AND type = ?type ";
+                query = query + " AND status = ?status ";
+                query = query + " AND year = ?year ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?type", MySqlDbType.VarChar).Value = type;
+                cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = status;
+                cmd.Parameters.Add("?year", MySqlDbType.VarChar).Value = year;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateNextRunningNo: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
     }
 
     public String updateDateSameAsConfirmedDate(String tablename, String columnDate, String columnConfirmedDate, String comp, String columnnoname, String columnnovalue)
@@ -18203,6 +25467,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updateDateSameAsConfirmedDate: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -18246,6 +25517,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getTaxDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return modTaxDet;
     }
 
@@ -18286,6 +25564,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getTaxList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsTax;
     }
 
@@ -18302,6 +25587,182 @@ public class MainController
             }
         }
         return oAlertMssg;
+    }
+
+    public ArrayList getCompRoleList()
+    {
+        ArrayList lsArrayList = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT roleid, rolename, roledesc, rolestatus FROM role ";
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel oModRole = new MainModel();
+                    oModRole.GetSetroleid = replaceNull(dataReader, "roleid");
+                    oModRole.GetSetrolename = replaceNull(dataReader, "rolename");
+                    oModRole.GetSetroledesc = replaceNull(dataReader, "roledesc");
+                    oModRole.GetSetrolestatus = replaceNull(dataReader, "rolestatus");
+                    lsArrayList.Add(oModRole);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCompRoleList: " + e.Message.ToString());
+        }
+        return lsArrayList;
+    }
+
+    public String updateUserRoleSubModule(String comp, String roleid, String[] module, String[] submodule)
+    {
+        String RoleSubModule = "";
+
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                //delete all access
+                query = "";
+                query = query + " DELETE FROM role_submodule ";
+                query = query + " WHERE  comp = ?comp AND roleid = ?roleid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.ExecuteNonQuery();
+
+                query = "";
+                query = query + " DELETE FROM role_module ";
+                query = query + " WHERE  comp = ?comp AND roleid = ?roleid ";
+                cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.ExecuteNonQuery();
+
+                query = "";
+                query = query + " DELETE FROM role_screen ";
+                query = query + " WHERE  comp = ?comp AND roleid = ?roleid ";
+                cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.ExecuteNonQuery();
+
+                //assigned selected access
+
+                for (int i = 0; i < submodule.Length; i++)
+                {
+                    //role_screen, submodule
+                    query = "";
+                    query = query + " INSERT INTO role_submodule(roleid, moduleid, submoduleid, comp) ";
+                    query = query + " VALUES(?roleid, ?moduleid,?submoduleid,?comp ) ";
+                    cmd = new MySqlCommand(query, dbConnect.connection);
+                    cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                    cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = module[i];
+                    cmd.Parameters.Add("?submoduleid", MySqlDbType.VarChar).Value = submodule[i];
+                    cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                    cmd.ExecuteNonQuery();
+
+                    query = "";
+                    query = query + " INSERT INTO role_screen(roleid,screenid,comp) ";
+                    query = query + " VALUES(?roleid, ?screenid,?comp ) ";
+                    cmd = new MySqlCommand(query, dbConnect.connection);
+                    cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                    cmd.Parameters.Add("?screenid", MySqlDbType.VarChar).Value = submodule[i];
+                    cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                    cmd.ExecuteNonQuery();
+
+                }
+                ArrayList moduleCheck = new ArrayList();
+
+                for (int i = 0; i < module.Length; i++)
+                {
+                    //module
+                    if (!moduleCheck.Contains(module[i]))
+                    {
+                        moduleCheck.Add(module[i]);
+                        query = "";
+                        query = query + " INSERT INTO role_module(roleid, moduleid, comp) ";
+                        query = query + " VALUES(?roleid,?moduleid,?comp ) ";
+                        cmd = new MySqlCommand(query, dbConnect.connection);
+                        cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                        cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = module[i];
+                        cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+
+                WriteToLogFile("MainController-updateUserRoleSubModule: " + ":roleid-" + roleid + ":comp-" + comp + ":module-" + module[0] + ":submodule-" + submodule[0]);
+
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateUserRoleSubModule: " + e.Message.ToString());
+        }
+        return RoleSubModule;
+    }
+
+    public ArrayList getRoleSubModule(String comp, String roleid)
+    {
+        ArrayList lsRoleSubModule1 = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT role_submodule.submoduleid, role_submodule.comp, role.roleid FROM role, role_module, role_submodule";
+                query = query + " WHERE role.roleid is not NULL  ";
+                query = query + " AND role.roleid = role_module.roleid ";
+                query = query + " AND role_module.roleid = role_submodule.roleid ";
+                query = query + " AND role_module.moduleid = role_submodule.moduleid ";
+                query = query + " AND role_module.comp = role_submodule.comp ";
+
+                if (comp.Length > 0)
+                {
+                    query = query + " AND    role_module.comp = '" + comp + "' ";
+                }
+                if (roleid.Trim().Length > 0)
+                {
+                    query = query + " and  role_module.roleid = '" + roleid + "' ";
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+                    oMainMod.GetSetcomp = replaceNull(dataReader, "comp");
+                    oMainMod.GetSetroleid = replaceNull(dataReader, "roleid");
+                    oMainMod.GetSetsubmoduleid = replaceNull(dataReader, "submoduleid");
+                    lsRoleSubModule1.Add(oMainMod);
+                }
+
+
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getUserRoleSreen: " + e.Message.ToString());
+        }
+        return lsRoleSubModule1;
     }
 
     public ArrayList getUserRoleModule(String userid, String comp)
@@ -18342,7 +25803,789 @@ public class MainController
         {
             WriteToLogFile("MainController-getUserRoleModule: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsUserRoleMod;
+    }
+
+    public ArrayList getModule()
+    {
+        ArrayList lsMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT module.moduleid, module.modulename, module.moduledesc, module.modulestatus, module.moduleicon FROM module ";
+                query = query + " WHERE  module.moduleid is not NULL ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+
+                    oMainMod.GetSetmoduleid = replaceNull(dataReader, "moduleid");
+                    oMainMod.GetSetmodulename = replaceNull(dataReader, "modulename");
+                    oMainMod.GetSetmoduledesc = replaceNull(dataReader, "moduledesc");
+                    oMainMod.GetSetmodulestatus = replaceNull(dataReader, "modulestatus");
+                    oMainMod.GetSetmoduleicon = replaceNull(dataReader, "moduleicon");
+                    lsMod.Add(oMainMod);
+
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getModule: " + e.Message.ToString());
+        }
+        return lsMod;
+    }
+
+    public ArrayList getModule(string status)
+    {
+        ArrayList lsMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT module.moduleid, module.modulename, module.moduledesc, module.modulestatus, module.moduleicon FROM module ";
+                query = query + " WHERE  module.moduleid is not NULL and modulestatus = '"+status+"' ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+
+                    oMainMod.GetSetmoduleid = replaceNull(dataReader, "moduleid");
+                    oMainMod.GetSetmodulename = replaceNull(dataReader, "modulename");
+                    oMainMod.GetSetmoduledesc = replaceNull(dataReader, "moduledesc");
+                    oMainMod.GetSetmodulestatus = replaceNull(dataReader, "modulestatus");
+                    oMainMod.GetSetmoduleicon = replaceNull(dataReader, "moduleicon");
+                    lsMod.Add(oMainMod);
+
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getModule: " + e.Message.ToString());
+        }
+        return lsMod;
+    }
+
+    public MainModel getModuleDetails(String moduleid)
+    {
+        MainModel oMainMod = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+
+                query = "";
+                query = query + " SELECT module.moduleid, module.modulename, module.moduledesc, module.modulestatus, module.moduleicon FROM module ";
+                query = query + " WHERE  module.moduleid is not NULL ";
+
+                if (moduleid.Trim().Length > 0)
+                {
+                    query = query + " and  module.moduleid = '" + moduleid + "' ";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                if (dataReader.Read())
+                {
+                    oMainMod.GetSetmoduleid = replaceNull(dataReader, "moduleid");
+                    oMainMod.GetSetmodulename = replaceNull(dataReader, "modulename");
+                    oMainMod.GetSetmoduledesc = replaceNull(dataReader, "moduledesc");
+                    oMainMod.GetSetmodulestatus = replaceNull(dataReader, "modulestatus");
+                    oMainMod.GetSetmoduleicon = replaceNull(dataReader, "moduleicon");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getModuleDetails: " + e.Message.ToString());
+        }
+        return oMainMod;
+    }
+
+    public ArrayList getRole()
+    {
+        ArrayList lsMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT roleid, rolename, roledesc, rolestatus FROM bioappdb.role ";
+                query = query + " WHERE  roleid is not NULL ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+
+                    oMainMod.GetSetroleid = replaceNull(dataReader, "roleid");
+                    oMainMod.GetSetrolename = replaceNull(dataReader, "rolename");
+                    oMainMod.GetSetroledesc = replaceNull(dataReader, "roledesc");
+                    oMainMod.GetSetrolestatus = replaceNull(dataReader, "rolestatus");
+
+                    lsMod.Add(oMainMod);
+
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getRole: " + e.Message.ToString());
+        }
+        return lsMod;
+    }
+
+    public MainModel getRoleDetails(String roleid)
+    {
+        MainModel oMod = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT roleid, rolename, roledesc, rolestatus FROM bioappdb.role ";
+                query = query + " WHERE  roleid is not NULL ";
+
+                if (roleid.Trim().Length > 0)
+                {
+                    query = query + " and  roleid = '" + roleid + "' ";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                if (dataReader.Read())
+                {
+                    oMod.GetSetroleid = replaceNull(dataReader, "roleid");
+                    oMod.GetSetrolename = replaceNull(dataReader, "rolename");
+                    oMod.GetSetroledesc = replaceNull(dataReader, "roledesc");
+                    oMod.GetSetrolestatus = replaceNull(dataReader, "rolestatus");
+                }
+
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getRoleDetails: " + e.Message.ToString());
+        }
+        return oMod;
+    }
+
+    public ArrayList getScreen()
+    {
+        ArrayList lsMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT screenid, screenfilename, screendesc, screenstatus FROM bioappdb.screen ";
+                query = query + " WHERE  screenid is not NULL ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+
+                    oMainMod.GetSetscreenid = replaceNull(dataReader, "screenid");
+                    oMainMod.GetSetscreenfilename = replaceNull(dataReader, "screenfilename");
+                    oMainMod.GetSetscreendesc = replaceNull(dataReader, "screendesc");
+                    oMainMod.GetSetscreenstatus = replaceNull(dataReader, "screenstatus");
+
+                    lsMod.Add(oMainMod);
+
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getScreen: " + e.Message.ToString());
+        }
+        return lsMod;
+    }
+
+    public MainModel getScreenDetails(String screenid)
+    {
+        MainModel oMainMod = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT screenid, screenfilename, screendesc, screenstatus FROM bioappdb.screen ";
+                query = query + " WHERE  screenid is not NULL ";
+
+                if (screenid.Trim().Length > 0)
+                {
+                    query = query + " and  screenid = '" + screenid + "' ";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                if (dataReader.Read())
+                {
+                    oMainMod.GetSetscreenid = replaceNull(dataReader, "screenid");
+                    oMainMod.GetSetscreenfilename = replaceNull(dataReader, "screenfilename");
+                    oMainMod.GetSetscreendesc = replaceNull(dataReader, "screendesc");
+                    oMainMod.GetSetscreenstatus = replaceNull(dataReader, "screenstatus");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getScreenDetails: " + e.Message.ToString());
+        }
+        return oMainMod;
+    }
+
+    public ArrayList getSubModule(string moduleid)
+    {
+        ArrayList lsSubMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT submodule.submoduleid, submodule.moduleid, submodule.submodulename, submodule.submoduledesc, submodule.submodulestatus FROM submodule ";
+                query = query + " WHERE submodule.submoduleid IS NOT NULL ";
+
+                if (moduleid.Trim().Length > 0)
+                {
+                    query = query + " and  submodule.moduleid = '" + moduleid + "' ";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+
+                    oMainMod.GetSetsubmoduleid = replaceNull(dataReader, "submoduleid");
+                    oMainMod.GetSetmoduleid = replaceNull(dataReader, "moduleid");
+                    oMainMod.GetSetsubmodulename = replaceNull(dataReader, "submodulename");
+                    oMainMod.GetSetsubmoduledesc = replaceNull(dataReader, "submoduledesc");
+                    oMainMod.GetSetsubmodulestatus = replaceNull(dataReader, "submodulestatus");
+
+                    lsSubMod.Add(oMainMod);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getSubModule: " + e.Message.ToString());
+        }
+        return lsSubMod;
+    }
+
+    public ArrayList getSubModule(string moduleid, string status)
+    {
+        ArrayList lsSubMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT submodule.submoduleid, submodule.moduleid, submodule.submodulename, submodule.submoduledesc, submodule.submodulestatus FROM submodule ";
+                query = query + " WHERE submodule.submoduleid IS NOT NULL and submodulestatus = '"+status+"' ";
+
+                if (moduleid.Trim().Length > 0)
+                {
+                    query = query + " and  submodule.moduleid = '" + moduleid + "' ";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                while (dataReader.Read())
+                {
+                    MainModel oMainMod = new MainModel();
+
+                    oMainMod.GetSetsubmoduleid = replaceNull(dataReader, "submoduleid");
+                    oMainMod.GetSetmoduleid = replaceNull(dataReader, "moduleid");
+                    oMainMod.GetSetsubmodulename = replaceNull(dataReader, "submodulename");
+                    oMainMod.GetSetsubmoduledesc = replaceNull(dataReader, "submoduledesc");
+                    oMainMod.GetSetsubmodulestatus = replaceNull(dataReader, "submodulestatus");
+
+                    lsSubMod.Add(oMainMod);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getSubModule: " + e.Message.ToString());
+        }
+        return lsSubMod;
+    }
+
+    public MainModel getSubModuleDetails(string submodule)
+    {
+        MainModel oMainMod = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT submodule.submoduleid, submodule.moduleid, submodule.submodulename, submodule.submoduledesc, submodule.submodulestatus FROM submodule ";
+                query = query + " WHERE submodule.submoduleid IS NOT NULL ";
+
+                if (submodule.Trim().Length > 0)
+                {
+                    query = query + " and  submodule.submoduleid = '" + submodule + "' ";
+                }
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+
+                if (dataReader.Read())
+                {
+                    oMainMod.GetSetsubmoduleid = replaceNull(dataReader, "submoduleid");
+                    oMainMod.GetSetmoduleid = replaceNull(dataReader, "moduleid");
+                    oMainMod.GetSetsubmodulename = replaceNull(dataReader, "submodulename");
+                    oMainMod.GetSetsubmoduledesc = replaceNull(dataReader, "submoduledesc");
+                    oMainMod.GetSetsubmodulestatus = replaceNull(dataReader, "submodulestatus");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getSubModuleDetails: " + e.Message.ToString());
+        }
+        return oMainMod;
+    }
+
+    public int updateRole(MainModel oModRole)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE role ";
+                query = query + " SET  ";
+                query = query + "     rolename = ?rolename, ";
+                query = query + "     roledesc = ?roledesc, ";
+                query = query + "     rolestatus = ?rolestatus ";
+                query = query + " WHERE roleid=?roleid";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = oModRole.GetSetroleid;
+                cmd.Parameters.Add("?rolename", MySqlDbType.VarChar).Value = oModRole.GetSetrolename;
+                cmd.Parameters.Add("?roledesc", MySqlDbType.VarChar).Value = oModRole.GetSetroledesc;
+                cmd.Parameters.Add("?rolestatus", MySqlDbType.VarChar).Value = oModRole.GetSetrolestatus;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateRole: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateModule(MainModel oModModule)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                WriteToLogFile("MainController-updatemodule: " + oModModule.GetSetmoduleid);
+                query = "";
+                query = query + " UPDATE module ";
+                query = query + " SET  ";
+                query = query + "     modulename = ?modulename, ";
+                query = query + "     moduledesc = ?moduledesc, ";
+                query = query + "     modulestatus = ?modulestatus, ";
+                query = query + "     moduleicon = ?moduleicon ";
+                query = query + " WHERE moduleid=?moduleid";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?modulename", MySqlDbType.VarChar).Value = oModModule.GetSetmodulename;
+                cmd.Parameters.Add("?moduledesc", MySqlDbType.VarChar).Value = oModModule.GetSetmoduledesc;
+                cmd.Parameters.Add("?modulestatus", MySqlDbType.VarChar).Value = oModModule.GetSetmodulestatus;
+                cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = oModModule.GetSetmoduleid;
+                cmd.Parameters.Add("?moduleicon", MySqlDbType.VarChar).Value = oModModule.GetSetmoduleicon;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateModule: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateSubmodule(MainModel oModSubmodule)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE submodule ";
+                query = query + " SET  ";
+                query = query + "     moduleid = ?moduleid, ";
+                query = query + "     submodulename = ?submodulename, ";
+                query = query + "     submoduledesc = ?submoduledesc, ";
+                query = query + "     submodulestatus = ?submodulestatus ";
+                query = query + " WHERE submoduleid=?submoduleid";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?submoduleid", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmoduleid;
+                cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = oModSubmodule.GetSetmoduleid;
+                cmd.Parameters.Add("?submodulename", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmodulename;
+                cmd.Parameters.Add("?submoduledesc", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmoduledesc;
+                cmd.Parameters.Add("?submodulestatus", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmodulestatus;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateSubmodule: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateScreen(MainModel oModScreen)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE screen ";
+                query = query + " SET  ";
+                query = query + "     screenfilename = ?screenfilename, ";
+                query = query + "     screendesc = ?screendesc, ";
+                query = query + "     screenstatus = ?screenstatus ";
+                query = query + " WHERE screenid=?screenid";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?screenid", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenid;
+                cmd.Parameters.Add("?screenfilename", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenfilename;
+                cmd.Parameters.Add("?screendesc", MySqlDbType.VarChar).Value = oModScreen.GetSetscreendesc;
+                cmd.Parameters.Add("?screenstatus", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenstatus;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateScreen: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int insertRole(MainModel oModRole)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO role(roleid, rolename, roledesc, rolestatus) ";
+                query = query + " VALUES(?roleid, ?rolename, ?roledesc, ?rolestatus) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = oModRole.GetSetroleid;
+                cmd.Parameters.Add("?rolename", MySqlDbType.VarChar).Value = oModRole.GetSetrolename;
+                cmd.Parameters.Add("?roledesc", MySqlDbType.VarChar).Value = oModRole.GetSetroledesc;
+                cmd.Parameters.Add("?rolestatus", MySqlDbType.VarChar).Value = oModRole.GetSetrolestatus;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-insertRole: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int insertModule(MainModel oModModule)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO module(moduleid, modulename, moduledesc, modulestatus, moduleicon) ";
+                query = query + " VALUES(?moduleid, ?modulename, ?moduledesc, ?modulestatus, ?moduleicon) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = oModModule.GetSetmoduleid;
+                cmd.Parameters.Add("?modulename", MySqlDbType.VarChar).Value = oModModule.GetSetmodulename;
+                cmd.Parameters.Add("?moduledesc", MySqlDbType.VarChar).Value = oModModule.GetSetmoduledesc;
+                cmd.Parameters.Add("?modulestatus", MySqlDbType.VarChar).Value = oModModule.GetSetmodulestatus;
+                cmd.Parameters.Add("?moduleicon", MySqlDbType.VarChar).Value = oModModule.GetSetmoduleicon;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-insertModule: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int insertSubmodule(MainModel oModSubmodule)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO submodule(submoduleid, moduleid, submodulename, submoduledesc ,submodulestatus) ";
+                query = query + " VALUES(?submoduleid, ?moduleid, ?submodulename, ?submoduledesc ,?submodulestatus) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?submoduleid", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmoduleid;
+                cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = oModSubmodule.GetSetmoduleid;
+                cmd.Parameters.Add("?submodulename", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmodulename;
+                cmd.Parameters.Add("?submoduledesc", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmoduledesc;
+                cmd.Parameters.Add("?submodulestatus", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmodulestatus;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-insertSubmodule: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int insertScreen(MainModel oModScreen)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO screen(screenid, screenfilename, screendesc, screenstatus) ";
+                query = query + " VALUES(?screenid, ?screenfilename, ?screendesc, ?screenstatus) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?screenid", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenid;
+                cmd.Parameters.Add("?screenfilename", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenfilename;
+                cmd.Parameters.Add("?screendesc", MySqlDbType.VarChar).Value = oModScreen.GetSetscreendesc;
+                cmd.Parameters.Add("?screenstatus", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenstatus;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-insertScreen: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int deleteRole(MainModel oModRole)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM role ";
+                query = query + " WHERE roleid = ?roleid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = oModRole.GetSetroleid;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-deleteRole: " + e.Message.ToString());
+        }
+        return success;
+
+    }
+    public int deleteScreen(MainModel oModScreen)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM screen ";
+                query = query + " WHERE screenid = ?screenid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?screenid", MySqlDbType.VarChar).Value = oModScreen.GetSetscreenid;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-deleteScreen: " + e.Message.ToString());
+        }
+        return success;
+    }
+    public int deleteModule(MainModel oModModule)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM module ";
+                query = query + " WHERE moduleid = ?moduleid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?moduleid", MySqlDbType.VarChar).Value = oModModule.GetSetmoduleid;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-deleteModule: " + e.Message.ToString());
+        }
+        return success;
+    }
+    public int deleteSubmodule(MainModel oModSubmodule)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM submodule ";
+                query = query + " WHERE submoduleid = ?submoduleid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?submoduleid", MySqlDbType.VarChar).Value = oModSubmodule.GetSetsubmoduleid;
+
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-deleteSubmodule: " + e.Message.ToString());
+        }
+        return success;
     }
 
     public ArrayList getUserRoleSubModule(String userid, String comp)
@@ -18385,6 +26628,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getUserRoleSubModule: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsUserRoleSubMod;
     }
@@ -18440,6 +26690,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getUserRoleSreen: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return oMainMod;
     }
     
@@ -18471,6 +26728,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-insertCompDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -18508,6 +26772,60 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-updateCompDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return success;
+    }
+
+    public int updateCompDetails1(String comp, String compdesc, String compregisterno, String compcontact, String compcontactno, String compaddress, String comparea, String landstatus, String compstatus)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                WriteToLogFile("MainController-updateCompDetails1: " + comp + compdesc + compregisterno + compcontact + compcontactno + compaddress + "Daerah: " + comparea + landstatus + " : " + compstatus);
+
+
+                query = "";
+                query = query + " UPDATE comp_details ";
+                query = query + " SET comp_name = ?compdesc, ";
+                query = query + "     comp_registrationno = ?compregisterno, ";
+                query = query + "     comp_contact = ?compcontact, ";
+                query = query + "     comp_contactno = ?compcontactno, ";
+                query = query + "     comp_address = ?compaddress, ";
+                query = query + "     comp_daerah = ?comparea, ";
+                query = query + "     comp_landstatus = ?landstatus, ";
+                query = query + "     status = ?compstatus ";
+                query = query + " WHERE comp = ?comp ";
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?compdesc", MySqlDbType.VarChar).Value = compdesc;
+                cmd.Parameters.Add("?compregisterno", MySqlDbType.VarChar).Value = compregisterno;
+                cmd.Parameters.Add("?compcontact", MySqlDbType.VarChar).Value = compcontact;
+                cmd.Parameters.Add("?compcontactno", MySqlDbType.VarChar).Value = compcontactno;
+                cmd.Parameters.Add("?compaddress", MySqlDbType.VarChar).Value = compaddress;
+                cmd.Parameters.Add("?comparea", MySqlDbType.VarChar).Value = comparea;
+                cmd.Parameters.Add("?landstatus", MySqlDbType.VarChar).Value = landstatus;
+                cmd.Parameters.Add("?compstatus", MySqlDbType.VarChar).Value = compstatus;
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateCompDetails1: " + e.Message.ToString());
         }
         return success;
     }
@@ -18563,6 +26881,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReportYearMonth: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return oMainMod;
     }
@@ -18630,6 +26955,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportFYRDetailsSummary: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return oMainMod;
     }
 
@@ -18692,10 +27024,18 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportFYRDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return oMainMod;
     }
 
     //get revenue actual
+    /*
     public Double getReportRevenue(String comp, String actualyear, String actualmonth, String status)
     {
         Double dRevenueAmount = 0;
@@ -18743,8 +27083,226 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportRevenue: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return dRevenueAmount;
     }
+    */
+    /*
+    public Double getReportRevenue(String comp, String actualyear, String actualmonth, String status)
+    {
+        Double dRevenueAmount = 0;
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                ArrayList revenuecat = new ArrayList();
+                revenuecat.Add("SALES_INVOICE");
+                revenuecat.Add("RECEIPT_VOUCHER");
+                ArrayList revenuetype = new ArrayList();
+                revenuetype.Add("OTHER_INCOME");
+
+                String additionalquery = " and  (invoice_header.invoicecat in ('RECEIPT_VOUCHER','JOURNAL_VOUCHER') ";
+                String exptyp = "";
+                for (int i = 0; i < revenuetype.Count; i++)
+                {
+                    String str = (String)revenuetype[i];
+                    if (i.Equals(0))
+                    {
+                        exptyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        exptyp = exptyp + ",'" + str + "'";
+                    }
+                }
+                additionalquery = additionalquery + " and  invoice_header.invoicetype in (" + exptyp + ")) ";
+
+                query = "select sum(revenue) sum_revenue ";
+                query = query + " from ( ";
+                query = query + " SELECT SUM(invoice_header.totalamount) revenue ";
+                query = query + " from   invoice_header ";
+                query = query + " WHERE  invoice_header.comp is not NULL ";
+                query = query + additionalquery;
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                query = query + " union ";
+                query = query + " select sum(totalinvoice) revenue ";
+                query = query + " from   invoice_details, invoice_header ";
+                query = query + " where  invoice_details.comp = invoice_header.comp and invoice_details.invoiceno = invoice_header.invoiceno ";
+                query = query + " and    invoice_header.invoicecat in ('SALES_INVOICE','TRANSFER_INVOICE') ";
+                query = query + " and    invoice_details.itemno in (SELECT itemno FROM item where comp='" + comp + "' and itemcat not in ('INVENTORY','ASSET')) ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                query = query + " ) as listing ";
+
+                //WriteToLogFile("MainController-getReportRevenue-SQL: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    dRevenueAmount = replaceDoubleZero(dataReader, "sum_revenue");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getReportRevenue: " + e.Message.ToString());
+        }
+        return dRevenueAmount;
+    }
+    */
+
+    public Double getReportRevenue(String comp, String actualyear, String actualmonth, String status)
+    {
+        Double dRevenueAmount = 0;
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                ArrayList revenuecat = new ArrayList();
+                revenuecat.Add("SALES_INVOICE");
+                revenuecat.Add("RECEIPT_VOUCHER");
+                /*
+                ArrayList revenuetype = new ArrayList();
+                revenuetype.Add("SUPPLY_EXPENSES");
+                revenuetype.Add("SALARIES_WAGES");
+                revenuetype.Add("TRAVEL_EXPENSES");
+                revenuetype.Add("ENTERTAINMENT_EXPENSES");
+                revenuetype.Add("MARKETING_ADVERTISING");
+                revenuetype.Add("RENTAL_LEASING");
+                revenuetype.Add("REPAIR_MAINTENANCE");
+                revenuetype.Add("DEPRECIATION_EXPENSES");
+                revenuetype.Add("BAD_DEBT_EXPENSES");
+                revenuetype.Add("SUBSCRIPTION_REGISTRATION");
+                revenuetype.Add("INSURANCE_SECURITY");
+                revenuetype.Add("PROFESSIONAL_STATUTORY");
+                revenuetype.Add("BILL_UTILITIES");
+                revenuetype.Add("TAXATION");
+                revenuetype.Add("SELLING_SERVICES");
+                revenuetype.Add("OTHER_INCOME");
+                */
+                ArrayList lsParamType = getParametertype("INCOME");
+                ArrayList revenuetype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    revenuetype.Add(modParam.GetSetparamttype);
+                }
+
+                String additionalquery = " and  (invoice_header.invoicecat in ('RECEIPT_VOUCHER','JOURNAL_VOUCHER') ";
+                String revtyp = "";
+                for (int i = 0; i < revenuetype.Count; i++)
+                {
+                    String str = (String)revenuetype[i];
+                    if (i.Equals(0))
+                    {
+                        revtyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        revtyp = revtyp + ",'" + str + "'";
+                    }
+                }
+                additionalquery = additionalquery + " and  invoice_header.invoicetype in (" + revtyp + ")) ";
+
+                query = "select sum(revenue) sum_revenue ";
+                query = query + " from ( ";
+                query = query + " SELECT SUM(invoice_header.totalamount) revenue ";
+                query = query + " from   invoice_header ";
+                query = query + " WHERE  invoice_header.comp is not NULL ";
+                query = query + additionalquery;
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                query = query + " union ";
+                query = query + " select sum(totalinvoice) revenue ";
+                query = query + " from   invoice_details, invoice_header ";
+                query = query + " where  invoice_details.comp = invoice_header.comp and invoice_details.invoiceno = invoice_header.invoiceno ";
+                query = query + " and    invoice_header.invoicecat in ('SALES_INVOICE','TRANSFER_INVOICE') ";
+                //query = query + " and    invoice_details.itemno in (SELECT itemno FROM item where comp='" + comp + "' and itemcat not in ('INVENTORY','ASSET')) ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                query = query + " ) as listing ";
+
+                //WriteToLogFile("MainController-getReportRevenue-SQL: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    dRevenueAmount = replaceDoubleZero(dataReader, "sum_revenue");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getReportRevenue: " + e.Message.ToString());
+        }
+        return dRevenueAmount;
+    }
+
 
     //get revenue actual Exclude JV
     public Double getReportRevenueExcludeJV(String comp, String actualyear, String actualmonth, String status)
@@ -18757,34 +27315,83 @@ public class MainController
         {
             if (dbConnect.OpenConnection() == true)
             {
-                query = "";
+
+                ArrayList lsParamType = getParametertype("INCOME");
+                ArrayList revenuetype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    revenuetype.Add(modParam.GetSetparamttype);
+                }
+
+                String additionalquery = " and  (invoice_header.invoicecat in ('RECEIPT_VOUCHER') ";
+                String revtyp = "";
+                for (int i = 0; i < revenuetype.Count; i++)
+                {
+                    String str = (String)revenuetype[i];
+                    if (i.Equals(0))
+                    {
+                        revtyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        revtyp = revtyp + ",'" + str + "'";
+                    }
+                }
+                additionalquery = additionalquery + " and  invoice_header.invoicetype in (" + revtyp + ")) ";
+
+                query = "select sum(revenue) sum_revenue ";
+                query = query + " from ( ";
                 query = query + " SELECT SUM(invoice_header.totalamount) revenue ";
                 query = query + " from   invoice_header ";
                 query = query + " WHERE  invoice_header.comp is not NULL ";
-                query = query + " and  (invoice_header.invoicecat = 'SALES_INVOICE' or invoice_header.invoicecat = 'TRANSFER_INVOICE' or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype = 'OTHER_INCOME')) ";
-                //query = query + " AND    invoice_header.invoicetype in ('SALES_INVOICE','OTHER_INCOME') ";
+                query = query + additionalquery;
                 if (comp.Trim().Length > 0)
                 {
                     query = query + " and  invoice_header.comp = '" + comp + "' ";
                 }
                 if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
                 {
-                    query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
                 }
                 if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
                 {
-                    query = query + " and  date_format(confirmeddate,'%Y') = '" + actualyear + "' ";
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%Y') = '" + actualyear + "' ";
                 }
                 if (status.Trim().Length > 0)
                 {
                     query = query + " and  invoice_header.status = '" + status + "' ";
                 }
+                query = query + " union ";
+                query = query + " select sum(totalinvoice) revenue ";
+                query = query + " from   invoice_details, invoice_header ";
+                query = query + " where  invoice_details.comp = invoice_header.comp and invoice_details.invoiceno = invoice_header.invoiceno ";
+                query = query + " and    invoice_header.invoicecat in ('SALES_INVOICE','TRANSFER_INVOICE') ";
+                //query = query + " and    invoice_details.itemno in (SELECT itemno FROM item where comp='" + comp + "' and itemcat not in ('INVENTORY','ASSET')) ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  invoice_header.status = '" + status + "' ";
+                }
+                query = query + " ) as listing ";
+
                 //WriteToLogFile("MainController-getReportRevenue-SQL: " + query);
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 while (dataReader.Read())
                 {
-                    dRevenueAmount = replaceDoubleZero(dataReader, "revenue");
+                    dRevenueAmount = replaceDoubleZero(dataReader, "sum_revenue");
                 }
                 dataReader.Close();
                 dbConnect.CloseConnection();
@@ -18794,10 +27401,18 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportRevenueExcludeJV: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return dRevenueAmount;
     }
 
     //get expenses actual
+    /*
     public Double getReportExpenses(String comp, String actualyear, String actualmonth, String status)
     {
         Double dExpensesAmount = 0;
@@ -18895,11 +27510,17 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportExpenses: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return dExpensesAmount;
     }
-
-    //get expenses actual Exclude JV
-    public Double getReportExpensesExcludeJV(String comp, String actualyear, String actualmonth, String status)
+    */
+    public Double getReportExpenses(String comp, String actualyear, String actualmonth, String status)
     {
         Double dExpensesAmount = 0;
         DBConnect dbConnect = new DBConnect(sErrorLog);
@@ -18912,6 +27533,8 @@ public class MainController
                 ArrayList expensescat = new ArrayList();
                 expensescat.Add("PURCHASE_INVOICE");
                 expensescat.Add("PAYMENT_VOUCHER");
+
+                /*
                 ArrayList expensestype = new ArrayList();
                 expensestype.Add("SUPPLY_EXPENSES");
                 expensestype.Add("SALARIES_WAGES");
@@ -18929,7 +27552,16 @@ public class MainController
                 expensestype.Add("TAXATION");
                 expensestype.Add("SELLING_SERVICES");
                 expensestype.Add("OTHER_EXPENSES");
-                String additionalquery = " and  (expenses_header.expensescat = 'PAYMENT_VOUCHER' ";
+                */
+                ArrayList lsParamType = getParametertype("EXPENSES");
+                ArrayList expensestype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    expensestype.Add(modParam.GetSetparamttype);
+                }
+
+                String additionalquery = " and  (expenses_header.expensescat in ('PAYMENT_VOUCHER','JOURNAL_VOUCHER') ";
                 String exptyp = "";
                 for (int i = 0; i < expensestype.Count; i++)
                 {
@@ -18959,6 +27591,10 @@ public class MainController
                 {
                     query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
                 }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
                 if (status.Trim().Length > 0)
                 {
                     query = query + " and  expenses_header.status = '" + status + "' ";
@@ -18977,6 +27613,10 @@ public class MainController
                 {
                     query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
                 }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
                 if (status.Trim().Length > 0)
                 {
                     query = query + " and  expenses_header.status = '" + status + "' ";
@@ -18994,7 +27634,113 @@ public class MainController
         }
         catch (Exception e)
         {
+            WriteToLogFile("MainController-getReportExpenses: " + e.Message.ToString());
+        }
+        return dExpensesAmount;
+    }
+
+    //get expenses actual Exclude JV
+    public Double getReportExpensesExcludeJV(String comp, String actualyear, String actualmonth, String status)
+    {
+        Double dExpensesAmount = 0;
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+
+                ArrayList lsParamType = getParametertype("EXPENSES");
+                ArrayList expensestype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    expensestype.Add(modParam.GetSetparamttype);
+                }
+
+                String additionalquery = " and  (expenses_header.expensescat in ('PAYMENT_VOUCHER') ";
+                String exptyp = "";
+                for (int i = 0; i < expensestype.Count; i++)
+                {
+                    String str = (String)expensestype[i];
+                    if (i.Equals(0))
+                    {
+                        exptyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        exptyp = exptyp + ",'" + str + "'";
+                    }
+                }
+                additionalquery = additionalquery + " and  expenses_header.expensestype in (" + exptyp + ")) ";
+
+                query = "select sum(expenses) sum_expenses ";
+                query = query + " from ( ";
+                query = query + " SELECT SUM(expenses_header.totalamount) expenses ";
+                query = query + " from   expenses_header ";
+                query = query + " WHERE  expenses_header.comp is not NULL ";
+                query = query + additionalquery;
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.status = '" + status + "' ";
+                }
+                query = query + " union ";
+                query = query + " select sum(totalexpenses) expenses ";
+                query = query + " from   expenses_details, expenses_header ";
+                query = query + " where  expenses_details.comp = expenses_header.comp and expenses_details.expensesno = expenses_header.expensesno ";
+                query = query + " and    expenses_header.expensescat in ('PURCHASE_INVOICE','TRANSFER_INVOICE') ";
+                query = query + " and    expenses_details.itemno in (SELECT itemno FROM item where comp='" + comp + "' and itemcat not in ('INVENTORY','ASSET')) ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  expenses_header.status = '" + status + "' ";
+                }
+                query = query + " ) as listing ";
+                
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    dExpensesAmount = replaceDoubleZero(dataReader, "sum_expenses");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
             WriteToLogFile("MainController-getReportExpensesExcludeJV: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return dExpensesAmount;
     }
@@ -19050,6 +27796,95 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportCollection: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return dCollectionAmount;
+    }
+
+    //get collection actual
+    public Double getReportCollectionBasedOnInvoice(String comp, String actualyear, String actualmonth, String status)
+    {
+        Double dCollectionAmount = 0;
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                ArrayList lsParamType = getParametertype("INCOME");
+                ArrayList revenuetype = new ArrayList();
+                for (int i = 0; i < lsParamType.Count; i++)
+                {
+                    MainModel modParam = (MainModel)lsParamType[i];
+                    revenuetype.Add(modParam.GetSetparamttype);
+                }
+                String revtyp = "";
+                for (int i = 0; i < revenuetype.Count; i++)
+                {
+                    String str = (String)revenuetype[i];
+                    if (i.Equals(0))
+                    {
+                        revtyp = "'" + str + "'";
+                    }
+                    else
+                    {
+                        revtyp = revtyp + ",'" + str + "'";
+                    }
+                }
+
+                query = "";
+                query = query + " SELECT SUM(payrcpt_details.payrcptprice) collection ";
+                query = query + " from   payrcpt_header, payrcpt_details, invoice_header ";
+                query = query + " WHERE  payrcpt_header.comp is not NULL ";
+                query = query + " AND    payrcpt_header.comp = payrcpt_details.comp ";
+                query = query + " AND    payrcpt_header.payrcptno = payrcpt_details.payrcptno ";
+                query = query + " AND    payrcpt_details.comp = invoice_header.comp ";
+                query = query + " AND    payrcpt_details.invoiceno = invoice_header.invoiceno ";
+                query = query + " and  (invoice_header.invoicecat in ('SALES_INVOICE','TRANSFER_INVOICE') or (invoice_header.invoicecat = 'RECEIPT_VOUCHER' and invoice_header.invoicetype in (" + revtyp + "))) ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.comp = '" + comp + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length > 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%m-%Y') = '" + actualmonth + "-" + actualyear + "' ";
+                }
+                if (actualyear.Trim().Length > 0 && actualmonth.Trim().Length == 0)
+                {
+                    query = query + " and  date_format(invoice_header.confirmeddate,'%Y') = '" + actualyear + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " and  payrcpt_header.status = '" + status + "' ";
+                }
+                //WriteToLogFile("MainController-getReportCollection-SQL: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    dCollectionAmount = replaceDoubleZero(dataReader, "collection");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getReportCollectionBasedOnInvoice: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return dCollectionAmount;
     }
 
@@ -19099,6 +27934,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReportPaymentReceipt: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return dPaymentReceipt;
     }
@@ -19150,6 +27992,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportPaymentPaid: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return dPaymentPaid;
     }
 
@@ -19193,6 +28042,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getReportSales: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return dSalesAmount;
     }
@@ -19238,6 +28094,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getReportSlot: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return dSlotAllocated;
     }
 
@@ -19268,6 +28131,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-updateReportFYRDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -19326,6 +28196,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getParamList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsParamMod;
     }
 
@@ -19376,6 +28253,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getParamList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return modParam;
     }
@@ -19435,6 +28319,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getUserProfileList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsArrayList;
     }
@@ -19496,6 +28387,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getUserProfileList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsArrayList;
     }
 
@@ -19549,6 +28447,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-searchUserProfileList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsArrayList;
     }
@@ -19604,6 +28509,140 @@ public class MainController
         {
             WriteToLogFile("MainController-getUserProfile: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return oModUserProfile;
+    }
+
+    public UserProfileModel getUserProfile2(String sComp, String sUserId, String sUserPwd, String sUserType)
+    {
+        UserProfileModel oModUserProfile = new UserProfileModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.screenid, a.userid, a.username, a.useradd, a.usertelno, a.userpwd, a.usertype, a.userstatus, b.roleid FROM userprofile a, user_role b ";
+                query = query + " WHERE  a.comp is not NULL ";
+                query = query + " AND    a.comp = b.comp AND a.userid = b.userid ";
+                if (sComp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + sComp + "' ";
+                }
+                if (sUserId.Trim().Length > 0)
+                {
+                    query = query + " and  a.userid = '" + sUserId.Trim() + "' ";
+                }
+                if (sUserPwd.Trim().Length > 0)
+                {
+                    query = query + " and  a.userpwd = '" + sUserPwd.Trim() + "' ";
+                }
+                if (sUserType.Trim().Length > 0)
+                {
+                    query = query + " and  a.usertype = '" + sUserType.Trim() + "' ";
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                if (dataReader.Read())
+                {
+                    oModUserProfile.GetSetcomp = replaceNull(dataReader, "comp");
+                    oModUserProfile.GetSetscreenid = replaceNull(dataReader, "screenid");
+                    oModUserProfile.GetSetuserid = replaceNull(dataReader, "userid");
+                    oModUserProfile.GetSetusername = replaceNull(dataReader, "username");
+                    oModUserProfile.GetSetuseradd = replaceNull(dataReader, "useradd");
+                    oModUserProfile.GetSetusertelno = replaceNull(dataReader, "usertelno");
+                    oModUserProfile.GetSetuserpwd = replaceNull(dataReader, "userpwd");
+                    oModUserProfile.GetSetusertype = replaceNull(dataReader, "usertype");
+                    oModUserProfile.GetSetuserroleid = replaceNull(dataReader, "roleid");
+                    oModUserProfile.GetSetuserstatus = replaceNull(dataReader, "userstatus");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getUserProfile: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return oModUserProfile;
+    }
+
+    public UserProfileModel getUserProfile3(String sComp, String sUserId, String sUserPwd, String sUserType)
+    {
+        UserProfileModel oModUserProfile = new UserProfileModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT * FROM userprofile ";
+                query = query + " WHERE  userid is not NULL ";
+                if (sComp.Trim().Length > 0)
+                {
+                    query = query + " and  EXISTS (select * from user_role where comp = '" + sComp + "' and userid = '" + sUserId.Trim() + "') ";
+                }
+                if (sUserId.Trim().Length > 0)
+                {
+                    query = query + " and  userid = '" + sUserId.Trim() + "' ";
+                }
+                if (sUserPwd.Trim().Length > 0)
+                {
+                    query = query + " and  userpwd = '" + sUserPwd.Trim() + "' ";
+                }
+                if (sUserType.Trim().Length > 0)
+                {
+                    query = query + " and  usertype = '" + sUserType.Trim() + "' ";
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                if (dataReader.Read())
+                {
+                    if (sComp.Trim().Length > 0)
+                        oModUserProfile.GetSetcomp = sComp;
+                    else
+                        oModUserProfile.GetSetcomp = replaceNull(dataReader, "comp");
+                    oModUserProfile.GetSetscreenid = replaceNull(dataReader, "screenid");
+                    oModUserProfile.GetSetuserid = replaceNull(dataReader, "userid");
+                    oModUserProfile.GetSetusername = replaceNull(dataReader, "username");
+                    oModUserProfile.GetSetuseradd = replaceNull(dataReader, "useradd");
+                    oModUserProfile.GetSetusertelno = replaceNull(dataReader, "usertelno");
+                    oModUserProfile.GetSetuserpwd = replaceNull(dataReader, "userpwd");
+                    oModUserProfile.GetSetusertype = replaceNull(dataReader, "usertype");
+                    oModUserProfile.GetSetuserstatus = replaceNull(dataReader, "userstatus");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getUserProfile: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return oModUserProfile;
     }
 
@@ -19635,6 +28674,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-insertUserDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -19676,6 +28722,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-createUser: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -19721,6 +28774,71 @@ public class MainController
         {
             WriteToLogFile("MainController-updateUserDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return success;
+    }
+
+    public int updateUserDetails(String comp, String usercomp, String userid, String userpwd, String username, String useradd, String usertelno, String usertype, String userstatus, String screenid, String roleid)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        String query_role = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE userprofile ";
+                query = query + " SET comp = ?usercomp, userpwd = ?userpwd, ";
+                query = query + "     username = ?username, ";
+                query = query + "     useradd = ?useradd, ";
+                query = query + "     usertelno = ?usertelno, ";
+                query = query + "     usertype = ?usertype, ";
+                query = query + "     userstatus = ?userstatus, ";
+                query = query + "     screenid = ?screenid ";
+                query = query + " WHERE userid is not null ";
+                query = query + " AND userid = ?userid ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?usercomp", MySqlDbType.VarChar).Value = usercomp;
+                cmd.Parameters.Add("?userpwd", MySqlDbType.VarChar).Value = userpwd;
+                cmd.Parameters.Add("?username", MySqlDbType.VarChar).Value = username;
+                cmd.Parameters.Add("?useradd", MySqlDbType.VarChar).Value = useradd;
+                cmd.Parameters.Add("?usertelno", MySqlDbType.VarChar).Value = usertelno;
+                cmd.Parameters.Add("?usertype", MySqlDbType.VarChar).Value = usertype;
+                cmd.Parameters.Add("?userstatus", MySqlDbType.VarChar).Value = userstatus;
+                cmd.Parameters.Add("?screenid", MySqlDbType.VarChar).Value = screenid;
+                cmd.Parameters.Add("?userid", MySqlDbType.VarChar).Value = userid;
+                cmd.ExecuteNonQuery();
+
+                if (roleid.Trim().Length > 0)
+                {
+                    query_role = "";
+                    query_role = query_role + " UPDATE user_role ";
+                    query_role = query_role + " SET roleid = ?roleid ";
+                    query_role = query_role + " WHERE comp = ?comp ";
+                    query_role = query_role + " AND userid = ?userid ";
+                    MySqlCommand cmd_role = new MySqlCommand(query_role, dbConnect.connection);
+                    cmd_role.Parameters.Add("?roleid", MySqlDbType.VarChar).Value = roleid;
+                    cmd_role.Parameters.Add("?comp", MySqlDbType.VarChar).Value = usercomp;
+                    cmd_role.Parameters.Add("?userid", MySqlDbType.VarChar).Value = userid;
+                    cmd_role.ExecuteNonQuery();
+                }
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateUserDetails: " + e.Message.ToString());
+        }
         return success;
     }
 
@@ -19753,6 +28871,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-insertUserRole: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return success;
     }
@@ -19815,6 +28940,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCounterMasterList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsArrayList;
     }
 
@@ -19851,6 +28983,7 @@ public class MainController
                 {
                     query = query + " and  countertranid = '" + sCounterTranid.Trim() + "' ";
                 }
+                //WriteToLogFile("MainController-getCounterMasterDetails: [SQL] " + query);
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 if (dataReader.Read())
@@ -19878,6 +29011,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getCounterMasterDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return oModCounter;
     }
@@ -19950,6 +29090,13 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-insertCounterMaster: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return result;
     }
 
@@ -20014,6 +29161,9 @@ public class MainController
                 {
                     cmd.Parameters.Add("?createddate", MySqlDbType.DateTime).Value = null;
                 }
+                WriteToLogFile("MainController-updateCounterMaster: [SQL] " + query);
+                WriteToLogFile("MainController-updateCounterMaster: [oModCounterMaster.GetSetcomp] " + oModCounterMaster.GetSetcomp);
+                WriteToLogFile("MainController-updateCounterMaster: [oModCounterMaster.GetSetcounterno] " + oModCounterMaster.GetSetcounterno);
                 cmd.ExecuteNonQuery();
             }
             dbConnect.CloseConnection();
@@ -20022,6 +29172,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updateCounterMaster: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -20037,13 +29194,18 @@ public class MainController
             if (dbConnect.OpenConnection() == true)
             {
                 query = "";
-                query = query + " SELECT a.id, a.comp, a.counterno, a.openingbalance, a.openingby, ";
-                query = query + "        (select b.username from userprofile b where b.comp = a.comp and b.userid = a.openingby) openingbyname, ";
+                query = query + " SELECT a.id, a.comp, a.counterno, a.openingbalance, a.openingby, d.pos_bpid, d.pos_bpdesc, d.pos_ordercat, d.pos_ordertype, d.pos_orderactivity, d.pos_paytype, ";
+                //query = query + "        (select b.username from userprofile b where b.comp = a.comp and b.userid = a.openingby) openingbyname, ";
+                query = query + "        (select b.username from userprofile b where b.userid = a.openingby) openingbyname, ";
                 query = query + "        date_format(a.openingdate,'%d-%m-%Y %H:%i:%s') str_openingdate, a.totalorderamount, a.totalinvoiceamount, a.totalpayrcptamount, a.closingbalance, a.closingby, ";
-                query = query + "        (select c.username from userprofile c where c.comp = a.comp and c.userid = a.closingby) closingbyname, ";
+                //query = query + "        (select c.username from userprofile c where c.comp = a.comp and c.userid = a.closingby) closingbyname, ";
+                query = query + "        (select c.username from userprofile c where c.userid = a.closingby) closingbyname, ";
                 query = query + "        date_format(a.closingdate,'%d-%m-%Y %H:%i:%s') str_closingdate, a.status ";
-                query = query + " FROM   counter_transaction a ";
-                query = query + " WHERE  comp is not NULL ";
+                query = query + " FROM   counter_transaction a left join counter_master d on a.comp = d.comp AND    a.counterno = d.counterno AND    a.id = d.countertranid ";
+                query = query + " WHERE  a.comp is not NULL ";
+                //query = query + " AND    a.comp = d.comp ";
+                //query = query + " AND    a.counterno = d.counterno ";
+                //query = query + " AND    a.id = d.countertranid ";
                 if (sComp.Trim().Length > 0)
                 {
                     query = query + " and  a.comp = '" + sComp + "' ";
@@ -20068,6 +29230,7 @@ public class MainController
                 {
                     query = query + " and  a.status = '" + sStatus.Trim() + "' ";
                 }
+                query = query + " order by  a.comp, a.status desc, a.openingdate desc, a.closingdate ";
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 int rowno = 0;
@@ -20082,6 +29245,12 @@ public class MainController
                     oModCounter.GetSetopeningbalance = replaceDoubleZero(dataReader, "openingbalance");
                     oModCounter.GetSetopeningby = replaceNull(dataReader, "openingby");
                     oModCounter.GetSetopeningbyname = replaceNull(dataReader, "openingbyname");
+                    oModCounter.GetSetpos_bpid = replaceNull(dataReader, "pos_bpid");
+                    oModCounter.GetSetpos_bpdesc = replaceNull(dataReader, "pos_bpdesc");
+                    oModCounter.GetSetpos_ordercat = replaceNull(dataReader, "pos_ordercat");
+                    oModCounter.GetSetpos_ordertype = replaceNull(dataReader, "pos_ordertype");
+                    oModCounter.GetSetpos_orderactivity = replaceNull(dataReader, "pos_orderactivity");
+                    oModCounter.GetSetpos_paytype = replaceNull(dataReader, "pos_paytype");
                     oModCounter.GetSetopeningdate = replaceNull(dataReader, "str_openingdate");
                     oModCounter.GetSettotalorderamount = replaceDoubleZero(dataReader, "totalorderamount");
                     oModCounter.GetSettotalinvoiceamount = replaceDoubleZero(dataReader, "totalinvoiceamount");
@@ -20101,6 +29270,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCounterTransList: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return lsArrayList;
     }
 
@@ -20115,13 +29291,18 @@ public class MainController
             if (dbConnect.OpenConnection() == true)
             {
                 query = "";
-                query = query + " SELECT a.id, a.comp, a.counterno, a.openingbalance, a.openingby, ";
-                query = query + "        (select b.username from userprofile b where b.comp = a.comp and b.userid = a.openingby) openingbyname, ";
+                query = query + " SELECT a.id, a.comp, a.counterno, a.openingbalance, a.openingby, d.pos_bpid, d.pos_bpdesc, d.pos_ordercat, d.pos_ordertype, d.pos_orderactivity, d.pos_paytype, ";
+                //query = query + "        (select b.username from userprofile b where b.comp = a.comp and b.userid = a.openingby) openingbyname, ";
+                query = query + "        (select b.username from userprofile b where b.userid = a.openingby) openingbyname, ";
                 query = query + "        date_format(a.openingdate,'%d-%m-%Y %H:%i:%s') str_openingdate, a.totalorderamount, a.totalinvoiceamount, a.totalpayrcptamount, a.closingbalance, a.closingby, ";
-                query = query + "        (select c.username from userprofile c where c.comp = a.comp and c.userid = a.closingby) closingbyname, ";
+                //query = query + "        (select c.username from userprofile c where c.comp = a.comp and c.userid = a.closingby) closingbyname, ";
+                query = query + "        (select c.username from userprofile c where c.userid = a.closingby) closingbyname, ";
                 query = query + "        date_format(a.closingdate,'%d-%m-%Y %H:%i:%s') str_closingdate, a.status ";
-                query = query + " FROM   counter_transaction a ";
-                query = query + " WHERE  comp is not NULL ";
+                query = query + " FROM   counter_transaction a left join counter_master d on a.comp = d.comp AND    a.counterno = d.counterno AND    a.id = d.countertranid ";
+                query = query + " WHERE  a.comp is not NULL ";
+                //query = query + " AND    a.comp = d.comp ";
+                //query = query + " AND    a.counterno = d.counterno ";
+                //query = query + " AND    a.id = d.countertranid ";
                 if (sComp.Trim().Length > 0)
                 {
                     query = query + " and  a.comp = '" + sComp + "' ";
@@ -20146,6 +29327,7 @@ public class MainController
                 {
                     query = query + " and  a.status = '" + sStatus.Trim() + "' ";
                 }
+                //WriteToLogFile("MainController-getCounterTrans [SQL]: " + query);
                 MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
                 MySqlDataReader dataReader = cmd.ExecuteReader();
                 if (dataReader.Read())
@@ -20157,6 +29339,12 @@ public class MainController
                     oModCounter.GetSetopeningby = replaceNull(dataReader, "openingby");
                     oModCounter.GetSetopeningbyname = replaceNull(dataReader, "openingbyname");
                     oModCounter.GetSetopeningdate = replaceNull(dataReader, "str_openingdate");
+                    oModCounter.GetSetpos_bpid = replaceNull(dataReader, "pos_bpid");
+                    oModCounter.GetSetpos_bpdesc = replaceNull(dataReader, "pos_bpdesc");
+                    oModCounter.GetSetpos_ordercat = replaceNull(dataReader, "pos_ordercat");
+                    oModCounter.GetSetpos_ordertype = replaceNull(dataReader, "pos_ordertype");
+                    oModCounter.GetSetpos_orderactivity = replaceNull(dataReader, "pos_orderactivity");
+                    oModCounter.GetSetpos_paytype = replaceNull(dataReader, "pos_paytype");
                     oModCounter.GetSettotalorderamount = replaceDoubleZero(dataReader, "totalorderamount");
                     oModCounter.GetSettotalinvoiceamount = replaceDoubleZero(dataReader, "totalinvoiceamount");
                     oModCounter.GetSettotalpayrcptamount = replaceDoubleZero(dataReader, "totalpayrcptamount");
@@ -20173,6 +29361,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getCounterTrans: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return oModCounter;
     }
@@ -20232,6 +29427,9 @@ public class MainController
                     cmd.Parameters.Add("?closingdate", MySqlDbType.DateTime).Value = null;
                 }
                 cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModCounterTrans.GetSetstatus;
+                WriteToLogFile("MainController-insertCounterTrans [SQL]: " + query);
+                WriteToLogFile("MainController-insertCounterTrans [SQL]: " + query);
+                WriteToLogFile("MainController-insertCounterTrans [SQL]: " + query);
                 cmd.ExecuteNonQuery();
             }
             dbConnect.CloseConnection();
@@ -20240,6 +29438,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertCounterTrans: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -20257,7 +29462,7 @@ public class MainController
             if (oModCounterTrans.GetSetid.Length > 0)
             {
                 double totalorderamount = 0, totalinvoiceamount = 0, totalpayrcptamount = 0, closingbalance = 0;
-                lsCounterTransDet = getCounterTransDetailsList(oModCounterTrans.GetSetcomp, oModCounterTrans.GetSetcounterno, oModCounterTrans.GetSetcountertranid, "", "", "");
+                lsCounterTransDet = getCounterTransDetailsList(oModCounterTrans.GetSetcomp, oModCounterTrans.GetSetcounterno, oModCounterTrans.GetSetid, "", "", "");
                 for (int i = 0; i < lsCounterTransDet.Count; i++)
                 {
                     MainModel oModLineItem = (MainModel)lsCounterTransDet[i];
@@ -20351,6 +29556,7 @@ public class MainController
                     cmd.Parameters.Add("?closingdate", MySqlDbType.DateTime).Value = null;
                 }
                 cmd.Parameters.Add("?status", MySqlDbType.VarChar).Value = oModCounterTrans.GetSetstatus;
+                //WriteToLogFile("MainController-updateCounterTrans: [SQL] " + query);
                 cmd.ExecuteNonQuery();
             }
             dbConnect.CloseConnection();
@@ -20359,6 +29565,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-updateCounterTrans: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -20442,6 +29655,7 @@ public class MainController
                     oModCounter.GetSetpayrcptamount = replaceDoubleZero(dataReader, "payrcptamount");
                     oModCounter.GetSetpayrcptstatus = replaceNull(dataReader, "payrcptstatus");
                     oModCounter.GetSetpaidamount = replaceDoubleZero(dataReader, "paidamount");
+                    oModCounter.GetSetbalanceamount = replaceDoubleZero(dataReader, "balanceamount");
                     oModCounter.GetSetrowinclude = (replaceZero(dataReader, "rowinclude") == 1 ? true : false);
                     lsModCounterTran.Add(oModCounter);
                 }
@@ -20452,6 +29666,13 @@ public class MainController
         catch (Exception e)
         {
             WriteToLogFile("MainController-getCounterTransDetailsList: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return lsModCounterTran;
     }
@@ -20534,6 +29755,13 @@ public class MainController
         {
             WriteToLogFile("MainController-getCounterTransDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
         return oModCounter;
     }
 
@@ -20588,6 +29816,13 @@ public class MainController
         {
             result = "N";
             WriteToLogFile("MainController-insertCounterTransDetails: " + e.Message.ToString());
+        }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
         }
         return result;
     }
@@ -20689,11 +29924,1493 @@ public class MainController
             result = "N";
             WriteToLogFile("MainController-updateCounterTransDetails: " + e.Message.ToString());
         }
+        finally
+        {
+            if (dbConnect.connection.State.HasFlag(ConnectionState.Open))
+            {
+                dbConnect.CloseConnection();
+            }
+        }
+        return result;
+    }
+    
+    #endregion
+    /*** END FOR COUNTER ***/
+    #region CASHBOOK
+    /***BEGIN CASHBOOK ***/
+
+    public ArrayList getCashInOut(String comp, String sDateFrom, String sDateTo)
+    {
+        ArrayList lsOrdHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT Comp,payno,resno,Date, Amount,type,itemdesc,status, paytype";
+                query = query + " FROM (";
+                query = query + " SELECT paypaid_header.comp, paypaid_header.paypaidno payno, expenses_header.expensesno resno, paypaid_header.confirmeddate Date, paypaid_details.paypaidprice Amount, 'expenses' type, itemdesc, paypaid_header.status,paypaid_details.paytype";
+                query = query + " from   paypaid_header, paypaid_details, expenses_header, expenses_details";
+                query = query + " WHERE  paypaid_header.comp is not NULL ";
+                query = query + " AND    paypaid_header.comp =  paypaid_details.comp ";
+                query = query + " AND    paypaid_header.paypaidno =  paypaid_details.paypaidno ";
+                query = query + " AND	 paypaid_details.comp = expenses_header.comp  ";
+                query = query + " AND    paypaid_details.expensesno = expenses_header.expensesno";
+                query = query + " AND    expenses_details.expensesno = expenses_header.expensesno ";
+                query = query + " AND    paypaid_header.comp =  paypaid_details.comp ";
+                query = query + " AND    paypaid_details.comp = '" + comp + "' ";
+                query = query + " AND    expenses_details.comp = '" + comp + "' ";
+
+                query = query + " UNION ALL";
+
+                query = query + " SELECT payrcpt_header.comp, payrcpt_header.payrcptno payno, invoice_header.invoiceno resno, payrcpt_header.confirmeddate Date, payrcpt_details.payrcptprice Amount, 'income' type, invoice_details.itemdesc itemdesc, payrcpt_header.status, payrcpt_details.paytype";
+                query = query + " FROM payrcpt_header, payrcpt_details, invoice_header, invoice_details";
+                query = query + " WHERE payrcpt_header.comp is not NULL ";
+                query = query + " AND payrcpt_header.comp =  payrcpt_details.comp ";
+                query = query + " AND payrcpt_header.payrcptno =  payrcpt_details.payrcptno ";
+                query = query + " AND payrcpt_details.comp = invoice_header.comp ";
+                query = query + " AND payrcpt_details.invoiceno = invoice_header.invoiceno ";
+                query = query + " AND invoice_header.invoiceno = invoice_details.invoiceno";
+                query = query + " AND payrcpt_details.comp = '" + comp + "'";
+                query = query + " AND invoice_details.comp = '" + comp + "'";
+                query = query + " ) T";
+                if (sDateFrom != "")
+                {
+                    query = query + " where Date >= '" + sDateFrom + "'";
+                    //WriteToLogFile("MainController-getCashInOut:sDateFrom " + sDateFrom);
+                }
+                if (sDateTo != "")
+                {
+                    query = query + " AND Date <= '" + sDateTo + "'";
+                    //WriteToLogFile("MainController-getCashInOut:sDateTo " + sDateTo);
+                }
+                query = query + " Order by Date ASC";
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modInvHdr = new MainModel();
+                    modInvHdr.GetSetCashInOutcomp = replaceNull(dataReader, "Comp");
+                    modInvHdr.GetSetCashInOutpayno = replaceNull(dataReader, "payno");
+                    modInvHdr.GetSetCashInOutresno = replaceNull(dataReader, "resno");
+                    modInvHdr.GetSetCashInOutdate = replaceNull(dataReader, "Date");
+                    modInvHdr.GetSetCashInOutAmount = replaceNull(dataReader, "Amount");
+                    modInvHdr.GetSetCashInOutType = replaceNull(dataReader, "type");
+                    modInvHdr.GetSetCashInOutDesc = replaceNull(dataReader, "itemdesc");
+                    modInvHdr.GetSetCashInOutStatus = replaceNull(dataReader, "status");
+                    modInvHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    lsOrdHdrMod.Add(modInvHdr);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCashInOut: " + e.Message.ToString());
+        }
+        return lsOrdHdrMod;
+    }
+
+    public ArrayList getCashInOut2(String comp, String sDateFrom, String sDateTo)
+    {
+        ArrayList lsOrdHdrMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT Comp,payno,resno, Date1, Date2, Amount,type,itemdesc,status, paytype, remarks";
+                query = query + " FROM (";
+                query = query + " SELECT paypaid_header.comp, paypaid_header.paypaidno payno, expenses_header.expensesno resno, date_format(paypaid_header.confirmeddate,'%d-%m-%Y %H:%i:%s') Date1, paypaid_header.confirmeddate Date2, expenses_details.totalexpenses Amount, 'expenses' type, itemdesc, paypaid_header.status,paypaid_details.paytype, expenses_header.remarks remarks ";
+                query = query + " from   paypaid_header, paypaid_details, expenses_header, expenses_details";
+                query = query + " WHERE  paypaid_header.comp is not NULL ";
+                query = query + " AND    paypaid_header.comp =  paypaid_details.comp ";
+                query = query + " AND    paypaid_header.paypaidno =  paypaid_details.paypaidno ";
+                query = query + " AND	 paypaid_details.comp = expenses_header.comp  ";
+                query = query + " AND    paypaid_details.expensesno = expenses_header.expensesno";
+                query = query + " AND    expenses_details.expensesno = expenses_header.expensesno ";
+                query = query + " AND    paypaid_header.comp =  paypaid_details.comp ";
+                query = query + " AND    paypaid_details.comp = '" + comp + "' ";
+                query = query + " AND    expenses_details.comp = '" + comp + "' ";
+
+                query = query + " UNION ALL";
+
+                query = query + " SELECT payrcpt_header.comp, payrcpt_header.payrcptno payno, invoice_header.invoiceno resno, date_format(payrcpt_header.confirmeddate,'%d-%m-%Y %H:%i:%s') Date1, payrcpt_header.confirmeddate Date2, invoice_details.totalinvoice Amount, 'income' type, invoice_details.itemdesc itemdesc, payrcpt_header.status, payrcpt_details.paytype, invoice_header.remarks remarks ";
+                query = query + " FROM payrcpt_header, payrcpt_details, invoice_header, invoice_details";
+                query = query + " WHERE payrcpt_header.comp is not NULL ";
+                query = query + " AND payrcpt_header.comp =  payrcpt_details.comp ";
+                query = query + " AND payrcpt_header.payrcptno =  payrcpt_details.payrcptno ";
+                query = query + " AND payrcpt_details.comp = invoice_header.comp ";
+                query = query + " AND payrcpt_details.invoiceno = invoice_header.invoiceno ";
+                query = query + " AND invoice_header.invoiceno = invoice_details.invoiceno";
+                query = query + " AND payrcpt_details.comp = '" + comp + "'";
+                query = query + " AND invoice_details.comp = '" + comp + "'";
+                query = query + " ) T";
+                if (sDateFrom != "")
+                {
+                    query = query + " where Date2 >= '" + sDateFrom + "'";
+                    //WriteToLogFile("MainController-getCashInOut:sDateFrom " + sDateFrom);
+                }
+                if (sDateTo != "")
+                {
+                    query = query + " AND Date2 <= '" + sDateTo + "'";
+                    //WriteToLogFile("MainController-getCashInOut:sDateTo " + sDateTo);
+                }
+                query = query + " Order by Date2 desc";
+                //WriteToLogFile("MainController-getCashInOut2 [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    object modInvHdr = new { GetSetCashInOutcomp = replaceNull(dataReader, "Comp"),
+                        GetSetCashInOutpayno = replaceNull(dataReader, "payno"),
+                        GetSetCashInOutresno = replaceNull(dataReader, "resno"),
+                        GetSetCashInOutdate = replaceNull(dataReader, "Date1"),
+                        GetSetCashInOutAmount = replaceNull(dataReader, "Amount"),
+                        GetSetCashInOutType = replaceNull(dataReader, "type"),
+                        GetSetCashInOutDesc = replaceNull(dataReader, "itemdesc"),
+                        GetSetCashInOutStatus = replaceNull(dataReader, "status"),
+                        GetSetpaytype = replaceNull(dataReader, "paytype"),
+                        GetSetRemarks = replaceNull(dataReader, "remarks")
+                    };
+                    lsOrdHdrMod.Add(modInvHdr);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCashInOut2: " + e.Message.ToString());
+        }
+        return lsOrdHdrMod;
+    }
+
+    public MainModel getIncomeDetails(String comp, String paypaidno, String receiptno)
+    {
+        MainModel modIncHdr = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT ih.comp as comp, date_format(ih.confirmeddate,'%d-%m-%Y %H:%i:%s') as invoicedate, bpid, bpdesc, bpaddress, paytype, id.totalinvoice payrcptamount, invoicetype,  itemdesc, paramtdesc, ih.status, paramtcategory, invoicecat, ih.remarks ";
+                query = query + " FROM bioappdb.invoice_header ih, bioappdb.invoice_details id, bioappdb.payrcpt_details pd, tbl_parametertype ";
+                query = query + " WHERE ih.comp = id.comp AND id.invoiceno = ih.invoiceno";
+                query = query + " AND ih.comp = pd.comp AND pd.invoiceno = ih.invoiceno ";
+                query = query + " AND paramttype = invoicetype ";
+                query = query + " AND ih.comp = '" + comp + "'";
+                query = query + " AND ih.invoiceno = '" + receiptno + "'";
+                query = query + " AND payrcptno = '" + paypaidno + "' ";
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                //WriteToLogFile("MainController-getIncomeDetails [SQL]: " + query);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modIncHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modIncHdr.GetSetincomedate = replaceNull(dataReader, "invoicedate");
+                    modIncHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modIncHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modIncHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modIncHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modIncHdr.GetSetincomecat = replaceNull(dataReader, "paramtdesc");
+                    modIncHdr.GetSetincometype = replaceNull(dataReader, "itemdesc");
+                    modIncHdr.GetSetpayrcptamount = replaceDoubleZero(dataReader, "payrcptamount");
+                    modIncHdr.GetSetstatus = replaceNull(dataReader, "status");
+                    modIncHdr.GetSetparamtcategory = replaceNull(dataReader, "paramtcategory");
+                    modIncHdr.GetSetinvoicecat = replaceNull(dataReader, "invoicecat");
+                    modIncHdr.GetSetremarks = replaceNull(dataReader, "remarks");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getIncomeDetails: " + e.Message.ToString());
+        }
+        return modIncHdr;
+    }
+
+    public MainModel getExpensesHeaderDetails2(String comp, String paypaidno, String receiptno)
+    {
+        MainModel modExpHdr = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT eh.comp as comp, date_format(eh.confirmeddate,'%d-%m-%Y %H:%i:%s') as expensesdate, bpid, bpdesc, bpaddress, paytype, ed.totalexpenses paypaidamount, expensestype,  itemdesc, paramtdesc, eh.status, paramtcategory, expensescat, eh.remarks ";
+                query = query + " FROM bioappdb.expenses_header eh, bioappdb.expenses_details ed, bioappdb.paypaid_details pd, tbl_parametertype ";
+                query = query + " WHERE ed.comp = eh.comp AND ed.expensesno = eh.expensesno";
+                query = query + " AND pd.comp = eh.comp AND pd.expensesno = eh.expensesno ";
+                query = query + " AND paramttype = eh.expensestype ";
+                query = query + " AND eh.comp = '" + comp + "'";
+                query = query + " AND eh.expensesno = '" + receiptno + "'";
+                query = query + " AND paypaidno = '" + paypaidno + "' ";
+
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modExpHdr.GetSetcomp = replaceNull(dataReader, "comp");
+                    modExpHdr.GetSetexpensesdate = replaceNull(dataReader, "expensesdate");
+                    modExpHdr.GetSetbpid = replaceNull(dataReader, "bpid");
+                    modExpHdr.GetSetbpdesc = replaceNull(dataReader, "bpdesc");
+                    modExpHdr.GetSetbpaddress = replaceNull(dataReader, "bpaddress");
+                    modExpHdr.GetSetpaytype = replaceNull(dataReader, "paytype");
+                    modExpHdr.GetSetexpensescat = replaceNull(dataReader, "paramtdesc");
+                    modExpHdr.GetSetexpensestype = replaceNull(dataReader, "itemdesc");
+                    modExpHdr.GetSetpaypaidamount = replaceDoubleZero(dataReader, "paypaidamount");
+                    modExpHdr.GetSetstatus = replaceNull(dataReader, "status");
+                    modExpHdr.GetSetparamtcategory = replaceNull(dataReader, "paramtcategory");
+                    modExpHdr.GetSetinvoicecat = replaceNull(dataReader, "expensescat");
+                    modExpHdr.GetSetremarks = replaceNull(dataReader, "remarks");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getExpensesHeaderDetails2: " + e.Message.ToString());
+        }
+        return modExpHdr;
+    }
+
+    /**** END CASHBOOK ****/
+
+    #endregion
+
+    #region/*** BEGIN JAWATANKUASA COMP ***/
+    public ArrayList getCommitteeList(String compId, String committeeid, String committeename, String userid)
+    {
+        ArrayList lsCommitteeMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_role, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND  committee_type='JK_COMP' ";
+                if (userid.Trim().Length > 0)
+                {
+                    query = query + " AND    comp in (SELECT comp FROM user_role ";
+                    query = query + " WHERE userid = '" + userid + "')";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeename.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(committee_name) like '%" + committeename + "%' ";
+                }
+                query = query + " ORDER  BY comp, committee_status";
+                //WriteToLogFile("MainController-getCommitteeList [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modCommittee = new MainModel();
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "committee_role");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modCommittee.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    lsCommitteeMod.Add(modCommittee);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeList: " + e.Message.ToString());
+        }
+        return lsCommitteeMod;
+    }
+
+
+    public ArrayList getCommitteeList(String compId, String committeeid, String committeename, String userid, String currpage)
+    {
+        ArrayList lsCommitteeMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+
+
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_role, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND  committee_type='PEG_MASJID' ";
+
+                if (userid.Trim().Length > 0)
+                {
+                    query = query + " AND    comp in (SELECT comp FROM user_role ";
+                    query = query + " WHERE userid = '" + userid + "')";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeename.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(committee_name) like '%" + committeename + "%' ";
+                }
+                query = query + " ORDER  BY comp, committee_status ";
+
+                /*if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }*/
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modCommittee = new MainModel();
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "committee_role");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modCommittee.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    lsCommitteeMod.Add(modCommittee);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeListPages: " + e.Message.ToString());
+        }
+        return lsCommitteeMod;
+    }
+
+    public ArrayList getJKCommitteeList(String compId, String committeeid, String committeename, String userid)
+    {
+        ArrayList lsCommitteeMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_role, date_format(committee_doa,'%d-%m-%Y') str_committee_doa, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND  committee_type='JK_COMP' ";
+                if (userid.Trim().Length > 0)
+                {
+                    query = query + " AND    comp in (SELECT comp FROM user_role ";
+                    query = query + " WHERE userid = '" + userid + "')";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeename.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(committee_name) like '%" + committeename + "%' ";
+                }
+                query = query + " ORDER  BY comp,committee_status ";
+                //WriteToLogFile("MainController-getCommitteeList [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modCommittee = new MainModel();
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "committee_role");
+                    modCommittee.GetSetcommittee_doa = replaceNull(dataReader, "str_committee_doa");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modCommittee.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    lsCommitteeMod.Add(modCommittee);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeList: " + e.Message.ToString());
+        }
+        return lsCommitteeMod;
+    }
+
+    public ArrayList getJKCommitteeList(String compId, String committeeid, String committeename, String userid, String currpage)
+    {
+        ArrayList lsCommitteeMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_role, date_format(committee_doa,'%d-%m-%Y') str_committee_doa, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND  committee_type='JK_COMP' ";
+
+                if (userid.Trim().Length > 0)
+                {
+                    query = query + " AND    comp in (SELECT comp FROM user_role ";
+                    query = query + " WHERE userid = '" + userid + "')";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeename.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(committee_name) like '%" + committeename + "%' ";
+                }
+                query = query + " ORDER  BY comp, committee_status";
+                /*if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }*/
+                //WriteToLogFile("MainController-getCommitteeListPages [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modCommittee = new MainModel();
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "committee_role");
+                    modCommittee.GetSetcommittee_doa = replaceNull(dataReader, "str_committee_doa");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modCommittee.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    lsCommitteeMod.Add(modCommittee);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeListPages: " + e.Message.ToString());
+        }
+        return lsCommitteeMod;
+    }
+
+
+    public ArrayList getCommitteePositionList(String compId, String committeeid, String committeerole, String committeetype, String committee_status)
+    {
+        ArrayList lsCommitteeMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_role as role, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp";
+                query = query + " WHERE  comp IS NOT NULL ";
+
+                if (committeetype.Trim().Length > 0)
+                {
+                    query = query + " AND  committee_type='" + committeetype + "' ";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeerole.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_role='" + committeerole + "' ";
+                }
+                if (committee_status.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_status='" + committee_status + "' ";
+                }
+
+                query = query + " UNION ALL";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_prevrole as role, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp";
+                query = query + " WHERE  comp IS NOT NULL ";
+
+                if (committeetype.Trim().Length > 0)
+                {
+                    query = query + " AND  committee_type='" + committeetype + "' ";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeerole.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_prevrole='" + committeerole + "' ";
+                }
+                if (committee_status.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_status='" + committee_status + "' ";
+                }
+                query = query + " ORDER  BY comp ";
+
+                WriteToLogFile("MainController-getCommitteeList [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modCommittee = new MainModel();
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "role");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modCommittee.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    lsCommitteeMod.Add(modCommittee);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeList: " + e.Message.ToString());
+        }
+        return lsCommitteeMod;
+    }
+
+
+    public MainModel getCommittee(String comp, String userid)
+    {
+        MainModel modCommittee = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, committee_role, committee_status, committee_dob, ";
+                query = query + " committee_age, committee_prevrole, committee_doa, committee_appointmentby, committee_certno, committee_job";
+                query = query + " FROM   committee_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND    comp = '" + comp + "' ";
+                if (userid.Trim().Length > 0)
+                {
+                    query = query + " and  committee_id = '" + userid + "' ";
+                }
+                query = query + " ORDER  BY comp ";
+                //WriteToLogFile("MainController-getCommitteeWaqaf [SQL >]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "committee_role");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcommittee_dob = replaceNull(dataReader, "committee_dob");
+
+                    modCommittee.GetSetcommittee_age = replaceNull(dataReader, "committee_age");
+                    modCommittee.GetSetcommittee_prevrole = replaceNull(dataReader, "committee_prevrole");
+                    modCommittee.GetSetcommittee_doa = replaceNull(dataReader, "committee_doa");
+                    modCommittee.GetSetcommittee_appointmentby = replaceNull(dataReader, "committee_appointmentby");
+                    modCommittee.GetSetcommittee_certno = replaceNull(dataReader, "committee_certno");
+                    modCommittee.GetSetcommittee_job = replaceNull(dataReader, "committee_job");
+
+
+                    //WriteToLogFile("MainController-getCommitteeWaqaf: " + modCommittee.GetSetcommittee_doa + modCommittee.GetSetcommittee_dob);
+
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeWaqaf: " + e.Message.ToString());
+        }
+        return modCommittee;
+    }
+
+    public ArrayList getCommitteeList1(String compId, String committeeid, String committeename, String userid)
+    {
+        ArrayList lsCommitteeMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, committee_id, committee_name, committee_address, committee_tel, ";
+                query = query + "        committee_role, committee_status,";
+                query = query + "        createdby, createddate ";
+                query = query + " FROM   committee_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND  committee_type='JK_COMP' ";
+                if (userid.Trim().Length > 0)
+                {
+                    query = query + " AND    comp in (SELECT comp FROM user_role ";
+                    query = query + " WHERE userid = '" + userid + "')";
+                }
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(comp) like '%" + compId + "%' ";
+                }
+                if (committeeid.Trim().Length > 0)
+                {
+                    query = query + " AND    committee_id = '" + committeeid + "' ";
+                }
+                if (committeename.Trim().Length > 0)
+                {
+                    query = query + " AND    upper(committee_name) like '%" + committeename + "%' ";
+                }
+                query = query + " ORDER  BY comp, committee_status";
+                //WriteToLogFile("MainController-getCommitteeList [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modCommittee = new MainModel();
+                    modCommittee.GetSetcomp = replaceNull(dataReader, "comp");
+                    modCommittee.GetSetcommittee_id = replaceNull(dataReader, "committee_id");
+                    modCommittee.GetSetcommittee_name = replaceNull(dataReader, "committee_name");
+                    modCommittee.GetSetcommittee_address = replaceNull(dataReader, "committee_address");
+                    modCommittee.GetSetcommittee_contact = replaceNull(dataReader, "committee_tel");
+                    modCommittee.GetSetcommittee_role = replaceNull(dataReader, "committee_role");
+                    modCommittee.GetSetcommittee_status = replaceNull(dataReader, "committee_status");
+                    modCommittee.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modCommittee.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    lsCommitteeMod.Add(modCommittee);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getCommitteeList: " + e.Message.ToString());
+        }
+        return lsCommitteeMod;
+    }
+
+
+    public int insertCommittee(String comp, String committeeid, String committeename, String committeeaddress, String committeetel, String committeerole, String committeestatus, String createdby, String committeedob, String committeeage, String prevcommitteerole, String committeedoa, String committeeappointmentby, String committeecertno, String committeetype, String committeejob, String exchangeid)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+        //WriteToLogFile("MainController-insertCommittee: " + committeerole + committeedob + committeeage + committeerole + committeedoa + committeeappointmentby + committeecertno + "Kerja: " + committeejob + "Exchange id " + exchangeid);
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+
+
+                query = "";
+                query = query + " INSERT INTO committee_comp(comp, committee_id, committee_name, committee_address, committee_tel, committee_role, committee_status, createdby, createddate, committee_dob, committee_age, committee_prevrole, committee_doa, committee_appointmentby, committee_certno, committee_type, committee_job) ";
+                query = query + " VALUES(?comp, ?committeeid, ?committee_name, ?committee_address, ?committee_tel, ?committee_role, ?committee_status, ?createdby, now(), ?committee_dob, ?committee_age, ?committee_prevrole, ?committee_doa, ?committee_appointmentby, ?committee_certno, ?committee_type, ?committee_job) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?committeeid", MySqlDbType.VarChar).Value = committeeid;
+                cmd.Parameters.Add("?committee_name", MySqlDbType.VarChar).Value = committeename;
+                cmd.Parameters.Add("?committee_address", MySqlDbType.VarChar).Value = committeeaddress;
+                cmd.Parameters.Add("?committee_tel", MySqlDbType.VarChar).Value = committeetel;
+                cmd.Parameters.Add("?committee_role", MySqlDbType.VarChar).Value = committeerole;
+                cmd.Parameters.Add("?committee_status", MySqlDbType.VarChar).Value = committeestatus;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = createdby;
+                cmd.Parameters.Add("?committee_dob", MySqlDbType.VarChar).Value = committeedob;
+                cmd.Parameters.Add("?committee_age", MySqlDbType.VarChar).Value = committeeage;
+                cmd.Parameters.Add("?committee_prevrole", MySqlDbType.VarChar).Value = prevcommitteerole;
+                cmd.Parameters.Add("?committee_doa", MySqlDbType.VarChar).Value = committeedoa;
+                cmd.Parameters.Add("?committee_appointmentby", MySqlDbType.VarChar).Value = committeeappointmentby;
+                cmd.Parameters.Add("?committee_certno", MySqlDbType.VarChar).Value = committeecertno;
+                cmd.Parameters.Add("?committee_type", MySqlDbType.VarChar).Value = committeetype;
+                cmd.Parameters.Add("?committee_job", MySqlDbType.VarChar).Value = committeejob;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+
+            if (success == 1)
+            {
+                if (exchangeid != "")
+                {
+                    updateCommittee(comp, exchangeid, "IN-ACTIVE");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-insertCommittee: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateCommittee(String comp, String committee_id, String committee_name, String committee_address, String committee_tel, String committee_role, String committee_status, String committeedob, String committeeage, String prevcommitteerole, String committeedoa, String committeeappointmentby, String committeecertno, String committeejob)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        //WriteToLogFile("MainController-updateCommittee: Kerja " + comp + committee_id + committee_name + committee_address + committee_tel + committee_role + committee_status + committeedob + committeeage + prevcommitteerole + committeedoa + committeeappointmentby + committeecertno + committeejob);
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = @"
+                        UPDATE committee_comp
+                        SET   committee_id = ?param_committee_id,  committee_name = ?param_committee_name, committee_address = ?param_committee_address,
+							  committee_tel = ?param_committee_tel, committee_role = ?param_committee_role, committee_status = ?param_committee_status,
+                              committee_dob = ?param_committee_dob, committee_age = ?param_committee_age, committee_prevrole = ?param_committee_prevrole, 
+                              committee_doa = ?param_committee_doa, committee_appointmentby = ?param_committee_appointmentby, committee_certno = ?param_committee_certno
+                        WHERE committee_id = ?param_committee_id
+                              and comp = ?param_comp;
+                        ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?param_committee_id", MySqlDbType.VarChar).Value = committee_id;
+                cmd.Parameters.Add("?param_committee_name", MySqlDbType.VarChar).Value = committee_name;
+                cmd.Parameters.Add("?param_committee_address", MySqlDbType.VarChar).Value = committee_address;
+                cmd.Parameters.Add("?param_committee_tel", MySqlDbType.VarChar).Value = committee_tel;
+                cmd.Parameters.Add("?param_committee_role", MySqlDbType.VarChar).Value = committee_role;
+                cmd.Parameters.Add("?param_committee_status", MySqlDbType.VarChar).Value = committee_status;
+                cmd.Parameters.Add("?param_comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?param_committee_dob", MySqlDbType.VarChar).Value = committeedob;
+                cmd.Parameters.Add("?param_committee_age", MySqlDbType.VarChar).Value = committeeage;
+                cmd.Parameters.Add("?param_committee_prevrole", MySqlDbType.VarChar).Value = prevcommitteerole;
+                cmd.Parameters.Add("?param_committee_doa", MySqlDbType.VarChar).Value = committeedoa;
+                cmd.Parameters.Add("?param_committee_appointmentby", MySqlDbType.VarChar).Value = committeeappointmentby;
+                cmd.Parameters.Add("?param_committee_certno", MySqlDbType.VarChar).Value = committeecertno;
+                //cmd.Parameters.Add("?param_committee_job", MySqlDbType.VarChar).Value = committeejob;
+
+
+
+                cmd.ExecuteNonQuery();
+                dbConnect.CloseConnection();
+                success = 1;
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateCommittee: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateCommittee(String comp, String committee_id, String committee_status)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        //WriteToLogFile("MainController-updateCommittee: Kerja " + comp + committee_id);
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = @"
+                        UPDATE committee_comp
+                        SET   committee_id = ?param_committee_id, committee_status = ?param_committee_status
+                        WHERE committee_id = ?param_committee_id
+                              and comp = ?param_comp;
+                        ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?param_committee_id", MySqlDbType.VarChar).Value = committee_id;
+                cmd.Parameters.Add("?param_committee_status", MySqlDbType.VarChar).Value = committee_status;
+                cmd.Parameters.Add("?param_comp", MySqlDbType.VarChar).Value = comp;
+                //cmd.Parameters.Add("?param_committee_job", MySqlDbType.VarChar).Value = committeejob;
+
+
+
+                cmd.ExecuteNonQuery();
+                dbConnect.CloseConnection();
+                success = 1;
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateCommittee: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateCommittee1(String comp, String committee_id, String committee_name, String committee_address, String committee_tel, String committee_role, String committee_status, String committeedob, String committeeage, String committeedoa, String committeeappointmentby, String committeejob)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+        //WriteToLogFile("MainController-updateCommittee1: " + "Masukk sini");
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = @"
+                        UPDATE committee_comp
+                        SET   committee_id = ?param_committee_id,  committee_name = ?param_committee_name, committee_address = ?param_committee_address,
+							  committee_tel = ?param_committee_tel, committee_role = ?param_committee_role, committee_status = ?param_committee_status,
+                              committee_dob = ?param_committee_dob, committee_age = ?param_committee_age, committee_prevrole = ?param_committee_prevrole, 
+                              committee_doa = ?param_committee_doa, committee_appointmentby = ?param_committee_appointmentby, committee_certno = ?param_committee_certno, committee_job = ?param_committee_job
+                        WHERE committee_id = ?param_committee_id
+                              and comp = ?param_comp;
+                        ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?param_committee_id", MySqlDbType.VarChar).Value = committee_id;
+                cmd.Parameters.Add("?param_committee_name", MySqlDbType.VarChar).Value = committee_name;
+                cmd.Parameters.Add("?param_committee_address", MySqlDbType.VarChar).Value = committee_address;
+                cmd.Parameters.Add("?param_committee_tel", MySqlDbType.VarChar).Value = committee_tel;
+                cmd.Parameters.Add("?param_committee_role", MySqlDbType.VarChar).Value = committee_role;
+                cmd.Parameters.Add("?param_committee_status", MySqlDbType.VarChar).Value = committee_status;
+                cmd.Parameters.Add("?param_comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?param_committee_dob", MySqlDbType.VarChar).Value = committeedob;
+                cmd.Parameters.Add("?param_committee_age", MySqlDbType.VarChar).Value = committeeage;
+                cmd.Parameters.Add("?param_committee_prevrole", MySqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("?param_committee_doa", MySqlDbType.VarChar).Value = committeedoa;
+                cmd.Parameters.Add("?param_committee_appointmentby", MySqlDbType.VarChar).Value = committeeappointmentby;
+                cmd.Parameters.Add("?param_committee_certno", MySqlDbType.VarChar).Value = "";
+                cmd.Parameters.Add("?param_committee_job", MySqlDbType.VarChar).Value = committeejob;
+
+                cmd.ExecuteNonQuery();
+                dbConnect.CloseConnection();
+                success = 1;
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateCommittee1: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+
+    public int deleteCommitteeUser(String comp, String committeeId)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "DELETE FROM committee_comp where comp = ?comp and committee_id = ?committeeid";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?committeeid", MySqlDbType.VarChar).Value = committeeId;
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                if (dataReader.Read())
+                {
+                    success = replaceZero(dataReader, "result");
+                }
+                success = 1;
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-deleteCommitteeUser: " + e.Message.ToString());
+        }
+        return success;
+    }
+    #endregion/*** END JAWATANKUASA COMP ***/
+
+    #region/*** BEGIN FOR INFO COMP ***/
+    //update by fakhrul @ 06/09/2020
+    public ArrayList getInfoList(String compId, String infono, String infotype, String status)
+    {
+        ArrayList lsInfoMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, info_no, info_type, info_description, info_status, ";
+                query = query + "        createdby, createddate, modifiedby, modifieddate ";
+                query = query + " FROM   info_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    comp = '" + compId + "' ";
+                }
+                if (infono.Trim().Length > 0)
+                {
+                    query = query + " AND    info_no = '" + infono + "' ";
+                }
+                if (infotype.Trim().Length > 0)
+                {
+                    query = query + " AND    info_type = '" + infotype + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " AND    info_status = '" + status + "' ";
+                }
+                query = query + " ORDER  BY comp ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modInfo = new MainModel();
+                    modInfo.GetSetcomp = replaceNull(dataReader, "comp");
+                    modInfo.GetSetinfo_no = replaceNull(dataReader, "info_no");
+                    modInfo.GetSetinfo_type = replaceNull(dataReader, "info_type");
+                    modInfo.GetSetinfo_desc = replaceNull(dataReader, "info_description");
+                    modInfo.GetSetinfo_status = replaceNull(dataReader, "info_status");
+                    modInfo.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modInfo.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modInfo.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modInfo.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    lsInfoMod.Add(modInfo);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getInfoList: " + e.Message.ToString());
+        }
+        return lsInfoMod;
+    }
+
+    public ArrayList getInfoList(String compId, String infono, String infotype, String status, String currpage)
+    {
+        ArrayList lsInfoMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, info_no, info_type, info_description, info_status, ";
+                query = query + "        createdby, createddate, modifiedby, modifieddate ";
+                query = query + " FROM   info_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                if (compId.Trim().Length > 0)
+                {
+                    query = query + " AND    comp = '" + compId + "' ";
+                }
+                if (infono.Trim().Length > 0)
+                {
+                    query = query + " AND    info_no = '" + infono + "' ";
+                }
+                if (infotype.Trim().Length > 0)
+                {
+                    query = query + " AND    info_type = '" + infotype + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " AND    info_status = '" + status + "' ";
+                }
+                query = query + " ORDER  BY comp ";
+                if (currpage.Equals("1"))
+                {
+                    query = query + " LIMIT " + int.Parse(currpage) * 10;
+                }
+                else
+                {
+                    query = query + " LIMIT " + (int.Parse(currpage) - 1) * 10 + ", " + 10;
+                }
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modInfo = new MainModel();
+                    modInfo.GetSetcomp = replaceNull(dataReader, "comp");
+                    modInfo.GetSetinfo_no = replaceNull(dataReader, "info_no");
+                    modInfo.GetSetinfo_type = replaceNull(dataReader, "info_type");
+                    modInfo.GetSetinfo_desc = replaceNull(dataReader, "info_description");
+                    modInfo.GetSetinfo_status = replaceNull(dataReader, "info_status");
+                    modInfo.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modInfo.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modInfo.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modInfo.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                    lsInfoMod.Add(modInfo);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getInfoList: " + e.Message.ToString());
+        }
+        return lsInfoMod;
+    }
+
+    public MainModel getInfoComp(String comp, String infono, String infotype, String status, String createdby, String modifiedby)
+    {
+        MainModel modInfo = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT comp, info_no, info_type, info_description, info_status, ";
+                query = query + "        createdby, createddate, modifiedby, modifieddate ";
+                query = query + " FROM   info_comp ";
+                query = query + " WHERE  comp IS NOT NULL ";
+                query = query + " AND    comp = '" + comp + "' ";
+                if (infono.Trim().Length > 0)
+                {
+                    query = query + " AND    info_no = '" + infono + "' ";
+                }
+                if (infotype.Trim().Length > 0)
+                {
+                    query = query + " AND    info_type = '" + infotype + "' ";
+                }
+                if (status.Trim().Length > 0)
+                {
+                    query = query + " AND    info_status = '" + status + "' ";
+                }
+                if (createdby.Trim().Length > 0)
+                {
+                    query = query + " and  createdby = '" + createdby + "' ";
+                }
+                if (modifiedby.Trim().Length > 0)
+                {
+                    query = query + " and  modifiedby = '" + modifiedby + "' ";
+                }
+                query = query + " ORDER  BY comp ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modInfo.GetSetcomp = replaceNull(dataReader, "comp");
+                    modInfo.GetSetinfo_no = replaceNull(dataReader, "info_no");
+                    modInfo.GetSetinfo_type = replaceNull(dataReader, "info_type");
+                    modInfo.GetSetinfo_desc = replaceNull(dataReader, "info_description");
+                    modInfo.GetSetinfo_status = replaceNull(dataReader, "info_status");
+                    modInfo.GetSetcreatedby = replaceNull(dataReader, "createdby");
+                    modInfo.GetSetcreateddate = replaceNull(dataReader, "createddate");
+                    modInfo.GetSetmodifiedby = replaceNull(dataReader, "modifiedby");
+                    modInfo.GetSetmodifieddate = replaceNull(dataReader, "modifieddate");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getInfoComp: " + e.Message.ToString());
+        }
+        return modInfo;
+    }
+
+    public int insertInfoComp(String comp, String infono, String infotype, String infodesc, String status, String createdby)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO info_comp(comp, info_no, info_type, info_description, info_status, createdby, createddate) ";
+                query = query + " VALUES(?comp, ?info_no, ?info_type, ?info_description, ?info_status, ?createdby, now()) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?info_no", MySqlDbType.VarChar).Value = infono;
+                cmd.Parameters.Add("?info_type", MySqlDbType.VarChar).Value = infotype;
+                cmd.Parameters.Add("?info_description", MySqlDbType.VarChar).Value = infodesc;
+                cmd.Parameters.Add("?info_status", MySqlDbType.VarChar).Value = status;
+                cmd.Parameters.Add("?createdby", MySqlDbType.VarChar).Value = createdby;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+            success = 1;
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-insertInfoComp: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int updateInfoComp(String comp, String infono, String infotype, String infodesc, String userid, String status)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = @"
+                        UPDATE info_comp
+                        SET   info_type = ?param_info_type,  info_description = ?param_info_description, info_status = ?param_info_status,
+                              modifiedby = ?param_modifiedby, modifieddate = now()
+                        WHERE comp = ?param_comp
+                        AND info_no = ?param_info_no;
+                        ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?param_info_no", MySqlDbType.VarChar).Value = infono;
+                cmd.Parameters.Add("?param_info_type", MySqlDbType.VarChar).Value = infotype;
+                cmd.Parameters.Add("?param_info_description", MySqlDbType.VarChar).Value = infodesc;
+                cmd.Parameters.Add("?param_info_status", MySqlDbType.VarChar).Value = status;
+                cmd.Parameters.Add("?param_modifiedby", MySqlDbType.VarChar).Value = userid;
+                cmd.Parameters.Add("?param_comp", MySqlDbType.VarChar).Value = comp;
+                cmd.ExecuteNonQuery();
+                dbConnect.CloseConnection();
+                success = 1;
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-updateInfoComp: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    public int deleteInfoComp(String infono)
+    {
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+        int success = 0;
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = @"
+                        DELETE FROM info_comp
+                        WHERE   info_no = ?param_info_no
+                        ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?param_info_no", MySqlDbType.VarChar).Value = infono;
+                cmd.ExecuteNonQuery();
+                dbConnect.CloseConnection();
+                success = 1;
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-deleteInfoComp: " + e.Message.ToString());
+        }
+        return success;
+    }
+
+    #endregion/*** END FOR INFO COMP ***/
+
+    #region/*** BEGIN FOR SLIDER ***/
+
+    public ArrayList getSliderItemList(String comp, String itemno, String itemdesc, String itemcat)
+    {
+        ArrayList lsItemMod = new ArrayList();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.itemno, a.itemdesc, a.itemcat, a.itemtype, a.itemstatus ";
+                query = query + " from   item_slider a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  a.itemno = '" + itemno + "' ";
+                }
+                if (itemdesc.Trim().Length > 0)
+                {
+                    query = query + " and  upper(a.itemdesc) like '%" + itemdesc + "%' ";
+                }
+                if (itemcat.Trim().Length > 0)
+                {
+                    query = query + " and  a.itemcat = '" + itemcat + "' ";
+                }
+                query = query + " order by a.comp, a.itemno ";
+                //WriteToLogFile("MainController-getItemList [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    MainModel modItem = new MainModel();
+                    modItem.GetSetcomp = replaceNull(dataReader, "comp");
+                    modItem.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modItem.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modItem.GetSetitemcat = replaceNull(dataReader, "itemcat");
+                    modItem.GetSetitemtype = replaceNull(dataReader, "itemtype");
+                    modItem.GetSetitemstatus = replaceNull(dataReader, "itemstatus");
+                    lsItemMod.Add(modItem);
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getSliderItemList: " + e.Message.ToString());
+        }
+        return lsItemMod;
+    }
+
+    public String insertSliderItemMaster(MainModel oModItem)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " INSERT INTO item_slider (comp, itemno, itemdesc, itemcat, itemtype, itemstatus) ";
+                query = query + " VALUES (?comp, ?itemno, ?itemdesc, ?itemcat, ?itemtype, ?itemstatus) ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModItem.GetSetcomp;
+                cmd.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = oModItem.GetSetitemno;
+                cmd.Parameters.Add("?itemdesc", MySqlDbType.VarChar).Value = oModItem.GetSetitemdesc;
+                cmd.Parameters.Add("?itemcat", MySqlDbType.VarChar).Value = oModItem.GetSetitemcat;
+                cmd.Parameters.Add("?itemtype", MySqlDbType.VarChar).Value = oModItem.GetSetitemtype;
+                cmd.Parameters.Add("?itemstatus", MySqlDbType.VarChar).Value = oModItem.GetSetitemstatus;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-insertSliderItemMaster: " + e.Message.ToString());
+        }
         return result;
     }
 
-    #endregion 
-    /*** END FOR COUNTER ***/
+    public MainModel getSliderItemDetails(String comp, String itemno)
+    {
+        MainModel modItem = new MainModel();
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " SELECT a.comp, a.itemno, a.itemdesc, a.itemcat, a.itemtype, a.itemstatus ";
+                query = query + " from   item_slider a ";
+                query = query + " WHERE  a.comp is not NULL ";
+                if (comp.Trim().Length > 0)
+                {
+                    query = query + " and  a.comp = '" + comp + "' ";
+                }
+                if (itemno.Trim().Length > 0)
+                {
+                    query = query + " and  a.itemno = '" + itemno + "' ";
+                }
+                query = query + " order by a.comp, a.itemno ";
+                //WriteToLogFile("MainController-getItemDetails [SQL]: " + query);
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                MySqlDataReader dataReader = cmd.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    modItem.GetSetcomp = replaceNull(dataReader, "comp");
+                    modItem.GetSetitemno = replaceNull(dataReader, "itemno");
+                    modItem.GetSetitemdesc = replaceNull(dataReader, "itemdesc");
+                    modItem.GetSetitemcat = replaceNull(dataReader, "itemcat");
+                    modItem.GetSetitemtype = replaceNull(dataReader, "itemtype");
+                    modItem.GetSetitemstatus = replaceNull(dataReader, "itemstatus");
+                }
+                dataReader.Close();
+                dbConnect.CloseConnection();
+            }
+        }
+        catch (Exception e)
+        {
+            WriteToLogFile("MainController-getSliderItemDetails: " + e.Message.ToString());
+        }
+        return modItem;
+    }
+
+    public String updateSliderItemMaster(MainModel oModItem)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " UPDATE item_slider ";
+                query = query + " SET    itemdesc = ?itemdesc, itemcat = ?itemcat, itemtype = ?itemtype, itemstatus = ?itemstatus ";
+                query = query + " WHERE  comp = ?comp AND itemno = ?itemno ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = oModItem.GetSetcomp;
+                cmd.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = oModItem.GetSetitemno;
+                cmd.Parameters.Add("?itemdesc", MySqlDbType.VarChar).Value = oModItem.GetSetitemdesc;
+                cmd.Parameters.Add("?itemcat", MySqlDbType.VarChar).Value = oModItem.GetSetitemcat;
+                cmd.Parameters.Add("?itemtype", MySqlDbType.VarChar).Value = oModItem.GetSetitemtype;
+                cmd.Parameters.Add("?itemstatus", MySqlDbType.VarChar).Value = oModItem.GetSetitemstatus;
+                cmd.ExecuteNonQuery();
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-updateSliderItemMaster: " + e.Message.ToString());
+        }
+        return result;
+    }
+
+    public String deleteSlider(String comp, String itemno)
+    {
+        String result = "Y";
+        DBConnect dbConnect = new DBConnect(sErrorLog);
+        String query = "";
+
+        try
+        {
+            if (dbConnect.OpenConnection() == true)
+            {
+                query = "";
+                query = query + " DELETE FROM item_slider ";
+                query = query + " WHERE  itemno = ?itemno ";
+                query = query + " AND  comp = ?comp ";
+                MySqlCommand cmd = new MySqlCommand(query, dbConnect.connection);
+                cmd.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = itemno;
+                cmd.ExecuteNonQuery();
+
+                query = "";
+                query = query + " DELETE FROM item_image ";
+                query = query + " WHERE  itemno = ?itemno ";
+                query = query + " AND  comp = ?comp ";
+                MySqlCommand cmd1 = new MySqlCommand(query, dbConnect.connection);
+                cmd1.Parameters.Add("?comp", MySqlDbType.VarChar).Value = comp;
+                cmd1.Parameters.Add("?itemno", MySqlDbType.VarChar).Value = itemno;
+                cmd1.ExecuteNonQuery();
+
+                WriteToLogFile("MainController-deleteSlider: " + comp + ":" + itemno);
+            }
+            dbConnect.CloseConnection();
+        }
+        catch (Exception e)
+        {
+            result = "N";
+            WriteToLogFile("MainController-deleteSlider: " + e.Message.ToString());
+        }
+        return result;
+    }
+
+    #endregion/*** END FOR SLIDER ***/
+
     /*** BEGIN FOR GENERAL-USED ***/
     public string CheckOnline(string lastaccess)
     {
@@ -21184,6 +31901,20 @@ public class MainController
 
         return _result;
     } // replaceNull
+
+    public String RegExReplace(String inputstring, String replaceValue)
+    {
+
+        String pattern = @"[\r|\n|\t]";
+        //String pattern = @"\t\n\r";
+
+        // Specify your replace string value here.
+
+        String outString = Regex.Replace(inputstring, pattern, replaceValue);
+
+        return outString;
+
+    }
 
     public String replaceStr(String sStrValue, String sStrOld, String sStrNew)
     {
