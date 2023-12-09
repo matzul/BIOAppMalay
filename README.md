@@ -1,3 +1,13 @@
+# BIOAppMalay2.0
+
+Kod Pengaturcara terkini. Modul baharu adalah OPERASI & PENTADBIRAN, merangkumi sub-modul 1)Maklumat Organisasi; 2)Maklumat JawatanKuasa (Ahli Lembaga Pengarah); 3)Maklumat Kakitangan; 4)Sistem Kehadiran; 5) Sistem Pengurusan Cuti; 6) Sistem Pengurusan Gaji. Selain itu, terdapat sub-modul baharu bagi Modul PENDAPATAN & KEWANGAN, iaitu Sistem Perakaunan.
+
+Semua aktiviti, proses kerja dan transaksi bagi melengkapkan operasi serta pengurusan sesebuah agensi, syarikat, pertubuhan dan sebagainya telah lengkap, cuma perlu meneliti manual penggunaan sistem ini beserta dengan senibina diagram yang dilampirkan. Namum, untuk modul dan sub-module yang baharu tersebut, belum diwujudkan manual pengguna dan senibina diagram. Jika seseorang pengaturcara dapat meneliti pangkalan data yang telah dihubungkan dengan sistem ini, maka boleh mengetahuinya dengan lebih baik dan lengkap.
+
+Diharap sistem ini dapat membantu semua pihak dan menjadi jariah kepada pembangun.
+
+Amin.
+
 # BIOAppMalay
 Sistem Aplikasi Informasi &amp; Operasi  Perniagaan
 
